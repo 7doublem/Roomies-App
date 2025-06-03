@@ -1,4 +1,4 @@
-import {View, Text, Button, TextInput, Alert } from 'react-native';
+import { View, Text, Button, TextInput, Alert, TouchableOpacity, Image } from 'react-native';
 import React, { useState } from 'react';
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import * as Google from 'expo-auth-session/providers/google';
@@ -10,10 +10,10 @@ export default function SignInScreen({ navigation }: any) {
 
   // Google Authentication Setup
   const [request, response, promptAsync] = Google.useAuthRequest({
-    expoClientId: 'YOUR_EXPO_CLIENT_ID.apps.googleusercontent.com',
-    iosClientId: 'YOUR_IOS_CLIENT_ID.apps.googleusercontent.com',
-    androidClientId: 'YOUR_ANDROID_CLIENT_ID.apps.googleusercontent.com',
-    webClientId: 'YOUR_WEB_CLIENT_ID.apps.googleusercontent.com',
+    expoClientId: '434083306699-mk47mhaffjojfv65nr247h8vsi6nm7tc.apps.googleusercontent.com',
+    iosClientId: '434083306699-14r5k5v4l505ubgoohphidm03j1hi6ku.apps.googleusercontent.com',
+    androidClientId: '434083306699-032sff9k48cer4oajlqi036ufbo46ufu.apps.googleusercontent.com',
+    webClientId: '434083306699-mk47mhaffjojfv65nr247h8vsi6nm7tc.apps.googleusercontent.com',
   });
 
   React.useEffect(() => {
@@ -39,24 +39,96 @@ export default function SignInScreen({ navigation }: any) {
 
   return (
     <View style={{ padding: 16 }}>
-      <Text>Sign In</Text>
+      <Text style={{ fontSize: 28, fontWeight: 'bold', textAlign: 'center', marginBottom: 16 }}>Sign In</Text>
       <TextInput
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
-        style={{ borderWidth: 1, marginVertical: 8, padding: 8 }}
+        style={{ borderWidth: 1, marginVertical: 8, padding: 12, fontSize: 18, borderRadius: 8 }}
       />
       <TextInput
         placeholder="Password"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
-        style={{ borderWidth: 1, marginVertical: 8, padding: 8 }}
+        style={{ borderWidth: 1, marginVertical: 8, padding: 12, fontSize: 18, borderRadius: 8 }}
       />
-      <Button title="Sign In" onPress={handleSignIn} />
-      <Button title="Sign In with Google" onPress={() => promptAsync()} />
-      <Button title="Don't have an account? Sign Up" onPress={() => navigation.navigate('SignUp')} />
-    </View>
+
+      {/* Pill Sign In Button */}
+      <TouchableOpacity
+        onPress={handleSignIn}
+        activeOpacity={0.8}
+        style={{
+          alignSelf: 'center',
+          marginVertical: 12,
+          width: 320,
+          height: 60,
+          borderRadius: 30,
+          backgroundColor: '#96ceb4',
+          justifyContent: 'center',
+          alignItems: 'center',
+          shadowColor: '#000',
+          shadowOpacity: 0.1,
+          shadowOffset: { width: 0, height: 2 },
+          shadowRadius: 2,
+          elevation: 2,
+        }}
+      >
+        <Text style={{ color: '#111', fontWeight: 'bold', fontSize: 20 }}>Sign In</Text>
+      </TouchableOpacity>
+
+      {/* Google Sign-In Button */}
+        {/* Google Sign-In Button */}
+        <TouchableOpacity
+  onPress={() => promptAsync()}
+  activeOpacity={0.8}
+  style={{
+    alignSelf: 'center',
+    marginVertical: 12,
+    width: 320,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#ffeead',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 2,
+    elevation: 2,
+  }}
+>
+  <Image
+    source={require('../../assets/google-light-logo.png')}
+    style={{ width: 32, height: 32, marginRight: 16 }}
+    resizeMode="contain"
+  />
+  <Text style={{ color: '#111', fontWeight: 'bold', fontSize: 20 }}>
+    Sign In with Google
+  </Text>
+</TouchableOpacity>
+
+      {/* Pill Sign Up Button */}
+      <TouchableOpacity
+        onPress={() => navigation.navigate('SignUp')}
+        activeOpacity={0.8}
+        style={{
+          alignSelf: 'center',
+          marginVertical: 12,
+          width: 320,
+          height: 60,
+          borderRadius: 30,
+          backgroundColor: '#ffcc5c',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Text style={{ color: '#111', fontWeight: 'bold', fontSize: 20 }}>
+          Don't have an account? Sign Up
+        </Text>
+      </TouchableOpacity>
+      </View>
   );
 }
