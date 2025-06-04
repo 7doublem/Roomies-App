@@ -1,9 +1,10 @@
-import { View, Text, Button, TextInput, Alert, TouchableOpacity, Image } from 'react-native';
+import { Text, TextInput, Alert, TouchableOpacity, Image } from 'react-native';
 import React, { useState } from 'react';
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import * as Google from 'expo-auth-session/providers/google';
 import { auth } from '../../firebase/config';
-
+import GradientContainer from '../../components/GradientContainer';
+import { styles } from '../../components/style';
 export default function SignInScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -38,97 +39,51 @@ export default function SignInScreen({ navigation }: any) {
   };
 
   return (
-    <View style={{ padding: 16 }}>
-      <Text style={{ fontSize: 28, fontWeight: 'bold', textAlign: 'center', marginBottom: 16 }}>Sign In</Text>
+    <GradientContainer>
+      <Text style={styles.signIn_Text}>Sign In</Text>
       <TextInput
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
-        style={{ borderWidth: 1, marginVertical: 8, padding: 12, fontSize: 18, borderRadius: 8 }}
+        style={styles.signIn_Input}
       />
       <TextInput
         placeholder="Password"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
-        style={{ borderWidth: 1, marginVertical: 8, padding: 12, fontSize: 18, borderRadius: 8 }}
+        style={styles.signIn_Input}
       />
-
       {/* Pill Sign In Button */}
       <TouchableOpacity
         onPress={handleSignIn}
         activeOpacity={0.8}
-        style={{
-          alignSelf: 'center',
-          marginVertical: 12,
-          width: 320,
-          height: 60,
-          borderRadius: 30,
-          backgroundColor: '#96ceb4',
-          justifyContent: 'center',
-          alignItems: 'center',
-          shadowColor: '#000',
-          shadowOpacity: 0.1,
-          shadowOffset: { width: 0, height: 2 },
-          shadowRadius: 2,
-          elevation: 2,
-        }}
+        style={styles.signIn_Touchable}
       >
-        <Text style={{ color: '#111', fontWeight: 'bold', fontSize: 20 }}>Sign In</Text>
+        <Text style={styles.signIn_Touchable_Text}>Sign In</Text>
       </TouchableOpacity>
 
       {/* Google Sign-In Button */}
-        {/* Google Sign-In Button */}
-        <TouchableOpacity
-  onPress={() => promptAsync()}
-  activeOpacity={0.8}
-  style={{
-    alignSelf: 'center',
-    marginVertical: 12,
-    width: 320,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#ffeead',
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexDirection: 'row',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 2,
-    elevation: 2,
-  }}
->
-  <Image
-    source={require('../../assets/google-light-logo.png')}
-    style={{ width: 32, height: 32, marginRight: 16 }}
-    resizeMode="contain"
-  />
-  <Text style={{ color: '#111', fontWeight: 'bold', fontSize: 20 }}>
-    Sign In with Google
-  </Text>
-</TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => promptAsync()}
+        activeOpacity={0.8}
+        style={styles.signIn_Googlebutton}>
+        <Image
+          source={require('../../assets/google-light-logo.png')}
+          style={styles.signIn_Googlebutton_image}
+          resizeMode="contain"
+        />
+        <Text style={styles.signIn_Googlebutton_text}>Sign In with Google</Text>
+      </TouchableOpacity>
 
       {/* Pill Sign Up Button */}
       <TouchableOpacity
         onPress={() => navigation.navigate('SignUp')}
         activeOpacity={0.8}
-        style={{
-          alignSelf: 'center',
-          marginVertical: 12,
-          width: 320,
-          height: 60,
-          borderRadius: 30,
-          backgroundColor: '#ffcc5c',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <Text style={{ color: '#111', fontWeight: 'bold', fontSize: 20 }}>
-          Don't have an account? Sign Up
-        </Text>
+        style={styles.signIn_goBackButton}>
+        <Text style={styles.signIn_goBackButton_text}>Don't have an account? Sign Up</Text>
       </TouchableOpacity>
-      </View>
+    </GradientContainer>
   );
 }

@@ -2,11 +2,25 @@ import { View, Text, Button, TextInput, Alert, TouchableOpacity, Image } from 'r
 import React, { useState } from 'react';
 import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import * as Google from 'expo-auth-session/providers/google';
+import * as ImagePicker from 'expo-image-picker';
+import { Picker } from '@react-native-picker/picker';
 import { auth } from '../../firebase/config';
+import GradientContainer from '../../components/GradientContainer';
+import {styles} from '../../components/style'
+const avatarOptions = [
+  require('../../assets/bear.png'),
+  require('../../assets/deer.png'),
+  require('../../assets/turtle.png'),
+];
 
 export default function SignUpScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  // Avatar state
+  const [avatar, setAvatar] = useState(avatarOptions[0]);
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
+  const [pickerValue, setPickerValue] = useState('0');
 
   // Google Authentication Setup
   const [request, response, promptAsync] = Google.useAuthRequest({
@@ -37,74 +51,59 @@ export default function SignUpScreen({ navigation }: any) {
     }
   };
 
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setAvatarUri(result.assets[0].uri);
+      setPickerValue('custom');
+    }
+  };
+
   return (
-    <View style={{ padding: 16 }}>
-      <Text style={{ fontSize: 28, fontWeight: 'bold', textAlign: 'center', marginBottom: 16 }}>Sign Up</Text>
+    <GradientContainer>
+      <Text style={styles.signUp_text}>Sign Up</Text>
       <TextInput
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
-        style={{ borderWidth: 1, marginVertical: 8, padding: 12, fontSize: 18, borderRadius: 8 }}
+        style={styles.signUp_Input}
       />
       <TextInput
         placeholder="Password"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
-        style={{ borderWidth: 1, marginVertical: 8, padding: 12, fontSize: 18, borderRadius: 8 }}
+        style={styles.signUp_Input}
       />
 
       {/* Pill Sign Up Button */}
       <TouchableOpacity
         onPress={handleSignUp}
         activeOpacity={0.8}
-        style={{
-          alignSelf: 'center',
-          marginVertical: 12,
-          width: 320,
-          height: 60,
-          borderRadius: 30,
-          backgroundColor: '#ffcc5c',
-          justifyContent: 'center',
-          alignItems: 'center',
-          shadowColor: '#000',
-          shadowOpacity: 0.1,
-          shadowOffset: { width: 0, height: 2 },
-          shadowRadius: 2,
-          elevation: 2,
-        }}
+        style={styles.signUp_touchable}
       >
-        <Text style={{ color: '#111', fontWeight: 'bold', fontSize: 20 }}>Sign Up</Text>
+        <Text style={styles.signUp_touchable_text}>Sign Up</Text>
       </TouchableOpacity>
 
       {/* Google Sign Up Button */}
       <TouchableOpacity
         onPress={() => promptAsync()}
         activeOpacity={0.8}
-        style={{
-          alignSelf: 'center',
-          marginVertical: 12,
-          width: 320,
-          height: 60,
-          borderRadius: 30,
-          backgroundColor: '#ffeead',
-          justifyContent: 'center',
-          alignItems: 'center',
-          flexDirection: 'row',
-          shadowColor: '#000',
-          shadowOpacity: 0.1,
-          shadowOffset: { width: 0, height: 2 },
-          shadowRadius: 2,
-          elevation: 2,
-        }}
+        style={styles.signUp_googleButton}
       >
         <Image
           source={require('../../assets/google-light-logo.png')}
-          style={{ width: 32, height: 32, marginRight: 16 }}
+          style={styles.signUp_googleButton_image}
           resizeMode="contain"
         />
-        <Text style={{ color: '#111', fontWeight: 'bold', fontSize: 20 }}>
+        <Text style={styles.signUp_googleButton_text}>
           Sign Up with Google
         </Text>
       </TouchableOpacity>
@@ -112,21 +111,39 @@ export default function SignUpScreen({ navigation }: any) {
       <TouchableOpacity
         onPress={() => navigation.navigate('SignIn')}
         activeOpacity={0.8}
-        style={{
-          alignSelf: 'center',
-          marginVertical: 12,
-          width: 320,
-          height: 60,
-          borderRadius: 30,
-          backgroundColor: '#96ceb4',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
+        style={styles.signUp_signinButton}
       >
-        <Text style={{ color: '#111', fontWeight: 'bold', fontSize: 20 }}>
+        <Text style={styles.signUp_signinButton_text}>
           Already have an account? Sign In
         </Text>
       </TouchableOpacity>
-    </View>
+      <TouchableOpacity onPress={pickImage} style={styles.signUp_Avatar_Touchable}>
+        <Image
+          source={avatarUri ? { uri: avatarUri } : avatar}
+          style={styles.signUp_Avatar_Touchable_image}
+        />
+        <Text style={styles.signUp_Avatar_Touchable_text}>Tap to upload avatar</Text>
+      </TouchableOpacity>
+
+      {/* Avatar Picker */}
+      <Picker
+        selectedValue={pickerValue}
+        onValueChange={(itemValue, itemIndex) => {
+          setPickerValue(itemValue);
+          if (itemValue !== 'custom') {
+            setAvatar(avatarOptions[parseInt(itemValue)]);
+            setAvatarUri(null);
+          }
+        }}
+        style={styles.signUp_Input}
+        dropdownIconColor="#111"
+      >
+        <Picker.Item label="Choose a profile picture..." value="0" />
+        <Picker.Item label="Bear" value="0" />
+        <Picker.Item label="Deer" value="1" />
+        <Picker.Item label="Turtle" value="2" />
+        <Picker.Item label="Upload from device..." value="custom" />
+      </Picker>
+    </GradientContainer>
   );
 }
