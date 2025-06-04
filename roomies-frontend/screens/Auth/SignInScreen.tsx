@@ -1,8 +1,9 @@
-import { View, Text, Button, TextInput, Alert, TouchableOpacity, Image } from 'react-native';
+import { Text, TextInput, Alert, TouchableOpacity, Image } from 'react-native';
 import React, { useState } from 'react';
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import * as Google from 'expo-auth-session/providers/google';
 import { auth } from '../../firebase/config';
+import GradientContainer from '../../components/GradientContainer';
 
 export default function SignInScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
@@ -38,23 +39,22 @@ export default function SignInScreen({ navigation }: any) {
   };
 
   return (
-    <View style={{ padding: 16 }}>
-      <Text style={{ fontSize: 28, fontWeight: 'bold', textAlign: 'center', marginBottom: 16 }}>Sign In</Text>
+    <GradientContainer>
+      <Text style={styles.signIn_Text}>Sign In</Text>
       <TextInput
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
-        style={{ borderWidth: 1, marginVertical: 8, padding: 12, fontSize: 18, borderRadius: 8 }}
+        style={styles.signIn_Input}
       />
       <TextInput
         placeholder="Password"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
-        style={{ borderWidth: 1, marginVertical: 8, padding: 12, fontSize: 18, borderRadius: 8 }}
+        style={styles.signIn_Input}
       />
-
       {/* Pill Sign In Button */}
       <TouchableOpacity
         onPress={handleSignIn}
@@ -79,36 +79,35 @@ export default function SignInScreen({ navigation }: any) {
       </TouchableOpacity>
 
       {/* Google Sign-In Button */}
-        {/* Google Sign-In Button */}
-        <TouchableOpacity
-  onPress={() => promptAsync()}
-  activeOpacity={0.8}
-  style={{
-    alignSelf: 'center',
-    marginVertical: 12,
-    width: 320,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#ffeead',
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexDirection: 'row',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 2,
-    elevation: 2,
-  }}
->
-  <Image
-    source={require('../../assets/google-light-logo.png')}
-    style={{ width: 32, height: 32, marginRight: 16 }}
-    resizeMode="contain"
-  />
-  <Text style={{ color: '#111', fontWeight: 'bold', fontSize: 20 }}>
-    Sign In with Google
-  </Text>
-</TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => promptAsync()}
+        activeOpacity={0.8}
+        style={{
+          alignSelf: 'center',
+          marginVertical: 12,
+          width: 320,
+          height: 60,
+          borderRadius: 30,
+          backgroundColor: '#ffeead',
+          justifyContent: 'center',
+          alignItems: 'center',
+          flexDirection: 'row',
+          shadowColor: '#000',
+          shadowOpacity: 0.1,
+          shadowOffset: { width: 0, height: 2 },
+          shadowRadius: 2,
+          elevation: 2,
+        }}
+      >
+        <Image
+          source={require('../../assets/google-light-logo.png')}
+          style={{ width: 32, height: 32, marginRight: 16 }}
+          resizeMode="contain"
+        />
+        <Text style={{ color: '#111', fontWeight: 'bold', fontSize: 20 }}>
+          Sign In with Google
+        </Text>
+      </TouchableOpacity>
 
       {/* Pill Sign Up Button */}
       <TouchableOpacity
@@ -129,6 +128,6 @@ export default function SignInScreen({ navigation }: any) {
           Don't have an account? Sign Up
         </Text>
       </TouchableOpacity>
-      </View>
+    </GradientContainer>
   );
 }

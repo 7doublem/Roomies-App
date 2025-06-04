@@ -1,7 +1,7 @@
-import {View, Text, Button ,TextInput,TouchableOpacity, StyleSheet} from 'react-native';
+import {View, Text, Button ,TextInput,TouchableOpacity} from 'react-native';
 import React, { useState } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
-
+import {styles} from '../components/style'
 export default function WelcomeScreen({ navigation }: any) {
 
     const [username,setUsername]= useState("")
@@ -56,39 +56,3 @@ export default function WelcomeScreen({ navigation }: any) {
 
 
 
-const styles = StyleSheet.create({
-  gradient: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  text: {
-    color: '#111',
-    fontSize: 18,
-    marginVertical: 2,
-    textAlign: 'center',
-  },
-  inputContainer: {
-    width: '100%',
-    alignItems: 'center',
-    marginVertical: 8,
-  },
-  input: {
-    width: 200,
-    borderWidth: 1,
-    borderColor: '#111',
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 8,
-    color: '#111',
-    backgroundColor: 'rgba(255,255,255,0.7)',
-  },
-  button: {
-    marginVertical: 4,
-    width: 200,
-  },
-});
