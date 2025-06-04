@@ -3,11 +3,17 @@ import React, { useState } from 'react';
 export default function SetGroupScreen({ navigation }: any) {
     const [groupName,setGroupName]=useState("")
     const [adduserName,setAddUserName]=useState("")
+
+
+    const joinInHandler=()=>{
+        console.log("Join in")
+    }
+
     return (
         <View>
             <Text>Set up your group here</Text>
             {/* We add in form fields here */}
-           <TextInput  placeholder="Group ID"
+           <TextInput  placeholder="Name of Group"
                 value={groupName}
                 onChangeText={setGroupName}
                 autoCapitalize="none"
@@ -16,9 +22,9 @@ export default function SetGroupScreen({ navigation }: any) {
           
              <Text>Search user</Text>
             <View>
-                <TextInput  placeholder="Group ID"
-                value={groupId}
-                onChangeText={setGroupId}
+                <TextInput  placeholder="UserName"
+                value={adduserName}
+                onChangeText={setAddUserName}
                 autoCapitalize="none"
                 />
                 <TouchableOpacity activeOpacity={0.8} >
@@ -29,7 +35,7 @@ export default function SetGroupScreen({ navigation }: any) {
             <Text>or</Text>
 
             <TouchableOpacity>
-                <Button title="Create a group" onPress={createGroupHandler}/>
+                <Button title="Create Group" onPress={createGroupHandler}/>
             </TouchableOpacity>
             {/* We add in form fields here */}
              <Button title="Go to Group" onPress={() => navigation.navigate('Group')} />

@@ -2,11 +2,24 @@ import { View, Text, Button, TextInput, Alert, TouchableOpacity, Image } from 'r
 import React, { useState } from 'react';
 import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import * as Google from 'expo-auth-session/providers/google';
+import * as ImagePicker from 'expo-image-picker';
+import { Picker } from '@react-native-picker/picker';
 import { auth } from '../../firebase/config';
+
+const avatarOptions = [
+  require('../../assets/bear.png'),
+  require('../../assets/deer.png'),
+  require('../../assets/turtle.png'),
+];
 
 export default function SignUpScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  // Avatar state
+  const [avatar, setAvatar] = useState(avatarOptions[0]);
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
+  const [pickerValue, setPickerValue] = useState('0');
 
   // Google Authentication Setup
   const [request, response, promptAsync] = Google.useAuthRequest({
@@ -34,6 +47,20 @@ export default function SignUpScreen({ navigation }: any) {
       navigation.navigate('Welcome');
     } catch (error: any) {
       Alert.alert('Sign Up Error', error.message);
+    }
+  };
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setAvatarUri(result.assets[0].uri);
+      setPickerValue('custom');
     }
   };
 
@@ -127,6 +154,39 @@ export default function SignUpScreen({ navigation }: any) {
           Already have an account? Sign In
         </Text>
       </TouchableOpacity>
+      <TouchableOpacity onPress={pickImage} style={{ alignSelf: 'center', marginBottom: 16 }}>
+        <Image
+          source={avatarUri ? { uri: avatarUri } : avatar}
+          style={{
+            width: 100,
+            height: 100,
+            borderRadius: 50,
+            borderWidth: 2,
+            borderColor: '#96ceb4',
+            backgroundColor: '#fff',
+          }}
+        />
+        <Text style={{ textAlign: 'center', color: '#111', marginTop: 8 }}>Tap to upload avatar</Text>
+      </TouchableOpacity>
+
+      {/* Avatar Picker */}
+      <Picker
+        selectedValue={pickerValue}
+        onValueChange={(itemValue, itemIndex) => {
+          setPickerValue(itemValue);
+          if (itemValue !== 'custom') {
+            setAvatar(avatarOptions[parseInt(itemValue)]);
+            setAvatarUri(null);
+          }
+        }}
+        style={{ marginBottom: 16 }}
+      >
+        <Picker.Item label="Choose a profile picture..." value="0" />
+        <Picker.Item label="Avatar 1" value="0" />
+        <Picker.Item label="Avatar 2" value="1" />
+        <Picker.Item label="Avatar 3" value="2" />
+        <Picker.Item label="Upload from device..." value="custom" />
+      </Picker>
     </View>
   );
 }
