@@ -1,12 +1,12 @@
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Image } from 'react-native';
 import GradientContainer from '../components/GradientContainer';
 
 const users = [
-  { id: '1', name: 'Alice', points: 120 },
-  { id: '2', name: 'Bob', points: 110 },
-  { id: '3', name: 'Charlie', points: 100 },
-  { id: '4', name: 'David', points: 90 },
-  { id: '5', name: 'Eve', points: 80 },
+  { id: '1', name: 'Alice', points: 120, avatar: require('../assets/bear.png') },
+  { id: '2', name: 'Bob', points: 110, avatar: require('../assets/deer.png') },
+  { id: '3', name: 'Charlie', points: 100, avatar: require('../assets/turtle.png') },
+  { id: '4', name: 'David', points: 90, avatar: require('../assets/bear.png') },
+  { id: '5', name: 'Eve', points: 80, avatar: require('../assets/deer.png') },
 ];
 
 const medals = ['🥇', '🥈', '🥉'];
@@ -25,6 +25,11 @@ export default function LeaderboardScreen() {
         {podium.map((user, idx) => (
           <View key={user.id} style={[styles.podiumSpot, styles[`podium${idx}`]]}>
             <Text style={styles.medal}>{medals[idx]}</Text>
+            <Image
+              source={user.avatar}
+              style={styles.avatar}
+              resizeMode="cover"
+            />
             <Text style={styles.podiumName}>{user.name}</Text>
             <Text style={styles.podiumPoints}>{user.points} pts</Text>
           </View>
@@ -37,6 +42,11 @@ export default function LeaderboardScreen() {
         renderItem={({ item, index }) => (
           <View style={styles.listItem}>
             <Text style={styles.rank}>{index + 4}</Text>
+            <Image
+              source={item.avatar}
+              style={styles.avatarSmall}
+              resizeMode="cover"
+            />
             <Text style={styles.name}>{item.name}</Text>
             <Text style={styles.points}>{item.points} pts</Text>
           </View>
@@ -74,6 +84,22 @@ const styles = StyleSheet.create({
   podium1: { height: 110, backgroundColor: '#ffeead' }, // Silver
   podium2: { height: 90, backgroundColor: '#96ceb4' },  // Bronze
   medal: { fontSize: 32, marginBottom: 4 },
+  avatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 2,
+    borderColor: '#fff',
+    marginBottom: 4,
+  },
+  avatarSmall: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#fff',
+    marginRight: 8,
+  },
   podiumName: { color: '#111', fontWeight: 'bold', fontSize: 16 },
   podiumPoints: { color: '#111', fontSize: 14 },
   listItem: {

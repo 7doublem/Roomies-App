@@ -6,7 +6,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Picker } from '@react-native-picker/picker';
 import { auth } from '../../firebase/config';
 import GradientContainer from '../../components/GradientContainer';
-
+import {styles} from '../../components/style'
 const avatarOptions = [
   require('../../assets/bear.png'),
   require('../../assets/deer.png'),
