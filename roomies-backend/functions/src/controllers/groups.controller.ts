@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { getFirestore } from "firebase-admin/firestore";
-import { generateGroupCode } from "../Utils/GroupCodeGenerator";
+import { generateGroupCode } from "../utils/GroupCodeGenerator";
 
 type Group = {
   groupId: number;
@@ -38,14 +38,16 @@ export class GroupController {
     }
   }
 
-  static async addMemberToGroup(
+  //PATCH body:{"name": "Group A", "members": ["A5Bo7SlfAkhuQi6lKWw0"]}
+  static async addMemberToGroup( //adding, remove  
     req: Request,
     res: Response,
     next: NextFunction
   ) {
     try {
-      const groupId = req.params.groupId;
-      const { member } = req.body;
+      console.log("entered addMemberToGroup")
+      const  groupId = req.params.group_id;
+      const { member } = req.body;  //we can receive one or more user uids since its a update group
       const groupDoc = await getFirestore()
         .collection("groups")
         .doc(groupId)
@@ -68,20 +70,29 @@ export class GroupController {
     }
   }
 
-  static async updateGroupName(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) {
-    try {
-      const { name } = req.body;
-      const groupId = req.params.groupId;
-      await getFirestore().collection("groups").doc(groupId).update({ name });
-      res.status(200).send({ message: "Group name updated!" });
-    } catch (error) {
-      next(error);
-    }
-  }
+  // static async updateGroupName( //TODO not working 
+  //   req: Request,
+  //   res: Response,
+  //   next: NextFunction
+  // ) {
+  //   try {
+  //     console.log("entered here")
+  //     const { name } = req.body;
+  //     console.log(name)
+  //     const groupId = req.params.group_id;
+  //     console.log(groupId, "groupId")
+  //     const groupDoc = await getFirestore().collection("groups").where("groupId", "==", groupId).get();
+
+  //     const updateDoc = groupDoc.docs[0].ref
+
+  //     await updateDoc.update({name})
+  
+  //     //doc(groupId).update(name);
+  //     res.status(200).send({ message: "Group name updated!" });
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // }
 
   //patch /groups/join/:groupCode
   // body: { “member”: “A5Bo7SlfAkhuQi6lKWw0"}
@@ -107,7 +118,7 @@ export class GroupController {
         if (!currentMembers.includes(body.member)) {
           const newMembers = [...currentMembers, body.member];
           const updateSet = { members: newMembers };
-          getFirestore().collection("groups").doc(groupId).update(updateSet);
+          await getFirestore().collection("groups").doc(groupId).update(updateSet);
           res.send({ message: "User added to the group!" });
         } else {
           res.send({ message: "User is already a member!" });
