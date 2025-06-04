@@ -15,7 +15,7 @@ export class UserController {
       const db = getFirestore();
       const userDoc = await db.collection("users").get();
       const users = userDoc.docs.map((doc) => {
-        return { id: doc.id, ...doc.data() };
+        return { uid: doc.id, ...doc.data() };
       });
       res.status(200).send(users);
     } catch (error) {
@@ -24,7 +24,8 @@ export class UserController {
   }
   static async createUser(req: Request, res: Response, next: NextFunction) {
     try {
-      let user = req.body as User;
+      console.log("entered here")
+      const user = req.body as User;
       const userDoc = await getFirestore().collection("users").add(user);
       res.status(201).send({ message: `User ${userDoc.id} created!` });
     } catch (error) {
@@ -39,7 +40,7 @@ export class UserController {
         res.status(404).send({message: "User not found."})
         return
       }
-      res.status(200).send({ uid: userDoc.id, ...userDoc.data});
+      res.status(200).send({ uid: userDoc.id, ...userDoc.data()});
     } catch (error) {
       next(error);
     }

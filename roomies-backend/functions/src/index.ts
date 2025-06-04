@@ -4,6 +4,7 @@ import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import serviceAccount from "../firebaseServiceAccount.json";
 import cors from "cors";
+import { groupRoutes } from "./routes/groups.routes";
 
 const isEmulator = process.env.FUNCTIONS_EMULATOR === "true";
 
@@ -24,6 +25,8 @@ const app = express();
 app.use(cors({ origin: true }));
 app.use(express.json());
 app.use("/", userRoutes);
+app.use("/", groupRoutes);
 
-export default app;
-exports.roomiesapi = functions.https.onRequest(app);
+
+//export default app;
+export const roomiesapi = functions.https.onRequest(app);
