@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import MainScreen from 'screens/MainScreen';
 
 export const styles = StyleSheet.create({
   // Sign in Screen
@@ -208,5 +209,82 @@ export const styles = StyleSheet.create({
   button: {
     marginVertical: 4,
     width: 200,
+  },
+
+  //Main Screen
+  mainScreen_container: {},
+  mainScreen_container_Text: { fontSize: 28, fontWeight: 'bold', textAlign: 'center' },
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: '',
+    justifyContent: 'space-around',
+    paddingVertical: 10,
+  },
+  tabButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    // borderRadius: 20,
+    opacity: 0.5,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  activeTab: {
+    // backgroundColor: '#ff6f69',
+    borderBottomColor: 'black',
+    opacity: 1,
+  },
+  tabText: {
+    fontWeight: 'bold',
+    color: '#111',
+    fontSize: 17,
+  },
+
+  //Chore Card
+  card: {
+    backgroundColor: '#fff',
+    padding: 16,
+    marginVertical: 5,
+    marginHorizontal: 16,
+    borderRadius: 12,
+    elevation: 3,
+    position: 'relative',
+  },
+  rewardBadge: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: '#ff6f69',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 20,
+  },
+  rewardText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  choreName: {
+    fontSize: 19,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: '#111',
+  },
+  assignedTo: {
+    fontSize: 15,
+    marginBottom: 4,
+    color: '#555',
+  },
+  countdown: {
+    fontSize: 15,
+    color: '#888',
+  },
+  card_Done: {
+    backgroundColor: 'green',
+  },
+  card_Doing: {
+    backgroundColor: 'yellow',
+  },
+  card_Todo: {
+    backgroundColor: '#fff',
   },
 });

@@ -19,7 +19,7 @@ const Stack = createNativeStackNavigator();
 
 function AuthStack() {
   return (
-    <Stack.Navigator initialRouteName="SignIn" screenOptions={{ headerShown: false }}>
+    <Stack.Navigator initialRouteName="Welcome" screenOptions={{ headerShown: false }}>
       <Stack.Screen name="SignIn" component={SignInScreen} />
       <Stack.Screen name="SignUp" component={SignUpScreen} />
       <Stack.Screen name="Welcome" component={WelcomeScreen} />
@@ -109,9 +109,12 @@ function AppTabs() {
 }
 
 export default function AppNavigator() {
+  // const [isSignedIn, setIsSignedIn] = React.useState(false); 
+
   return (
     <NavigationContainer>
-      <AuthStack/>
+      {/* {isSignedIn ? <AppTabs /> : <AuthStack />} */}
+      <AppTabs/>
     </NavigationContainer>
   );
 }
