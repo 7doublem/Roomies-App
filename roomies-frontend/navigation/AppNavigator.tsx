@@ -116,7 +116,7 @@ export default function AppNavigator() {
   return (
     <NavigationContainer>
       {/* {isSignedIn ? <AppTabs /> : <AuthStack />} */}
-      <AppTabs/>
+      <AuthStack/>
     </NavigationContainer>
   );
 }
