@@ -173,41 +173,190 @@ export const styles = StyleSheet.create({
     marginTop: 8,
   },
   //Welcome Screen
-  gradient: {
+  welcomeContainer: {
     flex: 1,
-  },
-  container: {
-    flex: 1,
-    alignItems: 'center',
     justifyContent: 'center',
-    padding: 24,
+    alignItems: 'center',
   },
-  text: {
-    color: '#111',
-    fontSize: 18,
-    marginVertical: 2,
+
+  welcomeTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: 'black',
+    marginBottom: 10,
     textAlign: 'center',
   },
-  inputContainer: {
-    width: '100%',
+  welcomeUserNameText: { fontSize: 20, color: 'ff6f69', marginVertical: 10 },
+  welcomeText: {
+    fontSize: 16,
+    color: 'black',
+    textAlign: 'center',
+  },
+  welcomeJoinText: { fontSize: 22, fontWeight: 'bold', marginVertical: 10 },
+  welcomeInputContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 8,
+    marginTop: 20,
+    marginBottom: 10,
+    width: '100%',
   },
-  input: {
-    width: 200,
-    borderWidth: 1,
-    borderColor: '#111',
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 8,
-    color: '#111',
-    backgroundColor: 'rgba(255,255,255,0.7)',
+
+  welcomeInput: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    fontSize: 16,
+    color: '#333',
+    marginRight: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
-  button: {
-    marginVertical: 4,
-    width: 200,
-    alignSelf: 'center',
+
+  welcomeJoinInButton: {
+    backgroundColor: 'rgb(255, 111, 105)',
+    overflow: 'hidden',
+    elevation: 3,
+    paddingVertical: 12,
+    paddingHorizontal: 5,
+    borderRadius: 10,
   },
+  welcomeJoinInButtontext: {
+    borderRadius: 10,
+    fontSize: 16,
+    color: 'white',
+    fontWeight: 'bold',
+  },
+
+  welcomeCreateGroupButton: {
+    backgroundColor: 'rgb(55 183 222)',
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginVertical: 10,
+    elevation: 3,
+    overflow: 'hidden',
+  },
+  welcomeCreateBtnText: { borderRadius: 10, fontSize: 16, color: 'white', fontWeight: 'bold' },
+
+  //Set Group
+  SetGroup_container: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 50,
+  },
+
+  SetGroup_title: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+    color: 'black',
+  },
+
+  SetGroup_input: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    fontSize: 16,
+    marginBottom: 15,
+    color: '#000',
+  },
+
+  SetGroup_Userinput: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    fontSize: 16,
+    marginBottom: 15,
+    color: '#000',
+    flex: 1,
+  },
+
+  SetGroup_SearchText: {
+    fontSize: 16,
+    color: 'black',
+    marginBottom: 5,
+    fontWeight: '500',
+  },
+
+  SetGroup_addUserContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 20,
+  },
+
+  SetGroup_PlusIcon: { marginTop: -15, color: 'rgb(255, 111, 105) ' },
+  SetGroup_userText: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '500',
+  },
+
+  SetGroup_userList: {
+    flex: 1,
+    marginBottom: 20,
+  },
+  SetGroup_userCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    marginBottom: 10,
+  },
+  SetGroup_buttonWrapper: {
+    position: 'absolute',
+    bottom: 30,
+    left: 20,
+    right: 20,
+  },
+
+  SetGroup_createGroupbtn: {
+    backgroundColor: 'rgb(105 177 249)',
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 4,
+  },
+
+  SetGroup_createGroupbtn_text: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: 'white',
+  },
+  SetGroup_JoinGroupbtn: {
+    backgroundColor: 'rgb(255, 111, 105)',
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 4,
+    marginVertical: 10,
+  },
+
+  SetGroup_JoinGroupbtn_text: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: 'white',
+  },
+
 
   //Main Screen
   mainScreen_container: {},
