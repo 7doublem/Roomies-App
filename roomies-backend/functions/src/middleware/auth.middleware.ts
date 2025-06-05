@@ -1,25 +1,29 @@
-import { Request, Response, NextFunction } from "express";
-import * as admin from "firebase-admin";
+import {Request, Response, NextFunction} from "express";
+import {getAuth} from "firebase-admin/auth";
 
-export async function authenticate(req: Request, res: Response, next: NextFunction): Promise<void> {
+export const authenticateUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    res.status(401).json({ message: "Unauthorized: Missing or invalid token" });
+    res.status(401).json({message: "Unauthorised"});
     return;
   }
 
-  const idToken = authHeader.split("Bearer ")[1];
+  const token = authHeader.split(" ")[1];
 
   try {
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
-    (req as any).user = decodedToken;
+    const decodedToken = await getAuth().verifyIdToken(token);
+
+    req.user = {uid: decodedToken.uid};
+
     next();
     return;
   } catch (error) {
-    console.error("Token verification failed:", error);
-    res.status(401).json({ message: "Unauthorized: Invalid token" });
+    res.status(401).json({message: "Unauthorised"});
     return;
   }
-  return;
-}
+};

@@ -1,9 +1,14 @@
-import { Router } from "express";
-import { UserController } from "../controllers/users.controller";
-//import { authenticate } from "../middleware/auth.middleware";
+import {Router} from "express";
+import {userController} from "../controllers/users.controller";
+import {authenticateUser} from "../middleware/auth.middleware";
 
 export const userRoutes = Router();
 
-userRoutes.get("/users", UserController.getAllUser);
-userRoutes.post("/users", UserController.createUser);
-userRoutes.get("/users/:uid", UserController.getUserByUid);
+// GET /users - used for app administration
+userRoutes.get("/", userController.getAllUsers);
+
+// POST /users - for users to sign up to app
+userRoutes.post("/", userController.createUser);
+
+// GET /users/currentUser - for signed up user to read/write their profile
+userRoutes.get("/currentUser", authenticateUser, userController.getCurrentUser);

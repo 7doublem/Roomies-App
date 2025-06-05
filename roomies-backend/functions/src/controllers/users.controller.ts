@@ -1,61 +1,89 @@
-import { Request, Response, NextFunction } from "express";
-import { getFirestore } from "firebase-admin/firestore";
+import {Request, Response, NextFunction} from "express";
+import {getFirestore} from "firebase-admin/firestore";
+import {getAuth} from "firebase-admin/auth";
 
-type User = {
-  uid: string;
-  username: string;
-  email: string;
-  user_avatar_url: string;
-  rewards_points: number;
-};
-
-export class UserController {
-  static async getAllUser(req: Request, res: Response, next: NextFunction) {
+export class userController {
+  // GET /users - used for app administration
+  static async getAllUsers(req: Request, res: Response, next: NextFunction) {
     try {
-      const db = getFirestore();
-      const userDoc = await db.collection("users").get();
+      const userDoc = await getFirestore().collection("users").get();
       const users = userDoc.docs.map((doc) => {
-        return { uid: doc.id, ...doc.data() };
+        return {uid: doc.id, ...doc.data()};
       });
-      res.status(200).send(users);
+      res.status(200).json(users);
     } catch (error) {
+      console.error(error);
       next(error);
+      return;
     }
   }
+
+  // POST /users - user signs up
   static async createUser(req: Request, res: Response, next: NextFunction) {
     try {
-      console.log("entered here")
-      const user = req.body as User;
-      const userDoc = await getFirestore().collection("users").add(user);
-      res.status(201).send({ message: `User ${userDoc.id} created!` });
+      const {username, email, password, avatarUrl} = req.body;
+
+      if (!username || !email || !password) {
+        res.status(400).json({message: "Missing required fields"});
+        return;
+      }
+
+      // Validate photoURL if present
+      const validPhotoURL = typeof avatarUrl === "string" && avatarUrl.startsWith("http") ?
+        avatarUrl :
+        undefined;
+
+      // create user in firebase auth
+      const authUser = await getAuth().createUser({
+        email,
+        password,
+        displayName: username,
+        photoURL: validPhotoURL,
+      });
+
+      // save user profile in firestore
+      const userDoc = {
+        username,
+        email,
+        avatarUrl: validPhotoURL || null,
+        rewardPoints: 0,
+        groupId: null,
+      };
+
+      await getFirestore().collection("users").doc(authUser.uid).set(userDoc);
+
+      res
+        .status(201)
+        .json({uid: authUser.uid, message: "User created successfully"});
+      return;
     } catch (error) {
+      console.error(error);
       next(error);
     }
   }
-  static async getUserByUid(req: Request, res: Response, next: NextFunction) {
+
+  // GET /users/currentUser - signed up user views their profile
+  static async getCurrentUser(req: Request, res: Response, next: NextFunction) {
     try {
-      const uid = req.params.uid
-      const userDoc = await getFirestore().collection("users").doc(uid).get();
-      if (!userDoc.exists){
-        res.status(404).send({message: "User not found."})
-        return
+      const uid = req.user?.uid;
+
+      if (!uid) {
+        res.status(401).json({message: "Unauthorised"});
+        return;
       }
-      res.status(200).send({ uid: userDoc.id, ...userDoc.data()});
+
+      const userDoc = await getFirestore().collection("users").doc(uid).get();
+
+      if (!userDoc.exists) {
+        res.status(404).json({message: "User not found"});
+        return;
+      }
+
+      res.status(200).json({uid, ...userDoc.data()});
+      return;
     } catch (error) {
+      console.error(error);
       next(error);
     }
   }
 }
-
-//temporary code to seed db and check firestore emulator
-// const testUserRef = db.collection("users").doc("testuser");
-// const doc = await testUserRef.get();
-
-// if (!doc.exists) {
-//     await testUserRef.set({
-//         name: "test user",
-//         user_avatar_url: "https://example.com/avatar.png",
-//         rewards_points: 0,
-//     })
-//     console.log("seed test user inside controller")
-// }

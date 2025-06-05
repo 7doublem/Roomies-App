@@ -1,10 +1,22 @@
-import { Router } from "express";
-import { GroupController } from "../controllers/groups.controller";
+import {Router} from "express";
+import {groupController} from "../controllers/groups.controller";
+import {authenticateUser} from "../middleware/auth.middleware";
 
 export const groupRoutes = Router();
 
-groupRoutes.post("/groups", GroupController.createGroup);
-groupRoutes.patch("/groups/:group_id/update-name", GroupController.updateGroupName);
-groupRoutes.patch("/groups/:group_id/add-member", GroupController.addMemberToGroup);
-groupRoutes.get("/groups", GroupController.getGroups);
-groupRoutes.patch("/groups/join/:groupCode", GroupController.addGroupMemberbyJoin);
+
+// GET /groups - used for app administration
+groupRoutes.get("/", groupController.getAllGroups);
+
+// POST /groups - for users to create a group
+groupRoutes.post("/", authenticateUser, groupController.createGroup);
+
+// PATCH /groups/join - users can join group by the group code
+groupRoutes.patch("/join", authenticateUser, groupController.addGroupMemberbyJoin);
+
+// PATCH /groups/:group_id - users can update the group name
+groupRoutes.patch("/:group_id", authenticateUser, groupController.updateGroupName);
+
+// PATCH /groups/:group_id/members - users can add member to the group
+groupRoutes.patch("/:group_id/members", authenticateUser, groupController.addMemberToGroup);
+
