@@ -2,7 +2,7 @@ import { View, Text, Button, ScrollView, TextInput, TouchableOpacity } from 'rea
 import { styles } from 'components/style';
 import GradientContainer from '../components/GradientContainer';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import CommentSection from 'components/CommentSection';
+import CommentSection from '../components/CommentSection';
 
 // Define props with TypeScript
 
