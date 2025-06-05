@@ -6,7 +6,7 @@ export default function SocialScreen({ navigation }: any) {
   return (
     <GradientContainer>
       <View style={{ flex: 1 }}>
-        <Text style={styles.title} >Social</Text>
+        <Text style={styles.title} >Update a Task</Text>
       </View>
     </GradientContainer>
   );

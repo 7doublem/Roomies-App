@@ -209,6 +209,7 @@ export const styles = StyleSheet.create({
   button: {
     marginVertical: 4,
     width: 200,
+    alignSelf: 'center',
   },
 
   //Main Screen
@@ -287,4 +288,28 @@ export const styles = StyleSheet.create({
   card_Todo: {
     backgroundColor: '#fff',
   },
-});
+
+  //UserCard 
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#111',
+    textAlign: 'center',
+    marginVertical: 16,
+  },
+  
+  userName: {
+    fontSize: 19,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: '#111',
+  },
+  avatarSmall: {
+  width: 28,
+  height: 28,
+  borderRadius: 14,
+  marginRight: 8,
+  },
+
+
+  });
