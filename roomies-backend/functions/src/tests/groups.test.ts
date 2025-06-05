@@ -8,17 +8,32 @@ describe("Group Routes", () => {
   let token: string;
   let uid: string;
 
+  let tokenAlice: string;
+  let uidAlice: string;
+
   beforeAll(async () => {
     server = app.listen(5003);
     const result = await createUserAndGetToken("adminuser@example.com");
     token = result.idToken;
     uid = result.uid;
 
+    const resultAlice = await createUserAndGetToken("alice@example.com");
+    tokenAlice = resultAlice.idToken;
+    uidAlice = resultAlice.uid;
+
     await getFirestore().collection("users").doc(uid).set({
       username: "adminuser",
       email: "adminuser@example.com",
       avatarUrl: null,
       rewardPoints: 0,
+      groupId: null,
+    });
+
+    await getFirestore().collection("users").doc(uidAlice).set({
+      username: "Alice",
+      email: "alice@example.com",
+      avatarUrl: null,
+      rewardPoints: 100,
       groupId: null,
     });
   });
@@ -287,6 +302,42 @@ describe("Group Routes", () => {
 
       expect(res.status).toBe(200);
       expect(res.body.message).toBe("Members added successfully");
+    });
+  });
+
+  describe("GET /groups/:group_id/members", () => {
+    let groupId: string;
+
+    beforeEach(async () => {
+      const docRef = await getFirestore()
+        .collection("groups")
+        .add({
+          name: "Group to get all members",
+          groupCode: "JOIN123",
+          members: [uidAlice, uid],
+          admins: [uidAlice],
+          createdBy: uidAlice,
+        });
+      groupId = docRef.id;
+    });
+
+    it("should return 404 and get all members from a group", async () => {
+      const res = await request(app)
+        .get("/groups/projectThatDoesNotExist/members")
+        .set("Authorization", `Bearer ${tokenAlice}`);
+      expect(res.status).toBe(404);
+      expect(res.body.message).toBe("Group not found");
+    });
+
+    it("should return 200 and get all members from a group", async () => {
+      const res = await request(app)
+        .get(`/groups/${groupId}/members`)
+        .set("Authorization", `Bearer ${tokenAlice}`);
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBe(2);
+      expect(res.body[0]).toHaveProperty("uid");
+      expect(res.body[0].rewardPoints).toBe(100);
     });
   });
 });
