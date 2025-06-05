@@ -1,37 +1,109 @@
-// import request from "supertest";
-// //import app from "../index"; 
+import request from "supertest";
+import {app} from "../app";
+import {createUserAndGetToken} from "./test.utils/utils";
+import * as admin from "firebase-admin";
+import {getFirestore} from "firebase-admin/firestore";
 
-// const BASE_URL = "/users"
-// const testUserToken = "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJlbWFpbCI6InRlc3R1c2VyQGV4YW1wbGUuY29tIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJhdXRoX3RpbWUiOjE3NDg4OTg2MzAsInVzZXJfaWQiOiJRTmxoTFZlQnA1SGw2R2FmQWtsYkU5NThnZHN1IiwiZmlyZWJhc2UiOnsiaWRlbnRpdGllcyI6eyJlbWFpbCI6WyJ0ZXN0dXNlckBleGFtcGxlLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6InBhc3N3b3JkIn0sImlhdCI6MTc0ODg5ODYzMCwiZXhwIjoxNzQ4OTAyMjMwLCJhdWQiOiJyb29taWVzLWFwcC0zMjM2MiIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS9yb29taWVzLWFwcC0zMjM2MiIsInN1YiI6IlFObGhMVmVCcDVIbDZHYWZBa2xiRTk1OGdkc3UifQ."; 
+describe("User Routes", () => {
+  let server: ReturnType<typeof app.listen>;
 
-// describe("Users API", () => {
-//   it("GET /users → 200 and returns users", async () => {
-//     const res = await request(app)
-//       .get(BASE_URL)
-//       .set("Authorization", `Bearer ${testUserToken}`);
+  beforeAll((done) => {
+    server = app.listen(5002, done);
+  });
 
-//     expect(res.status).toBe(200);
-//     expect(Array.isArray(res.body)).toBe(true);
-//   });
+  afterAll((done) => {
+    server.close(done);
+  });
 
-//   it("POST /users → 201 and returns new user", async () => {
-//     const newUser = {
-//       id: "jest_test_user",
-//       name: "Jest User",
-//       user_avatar_url: "https://example.com/avatar.png",
-//     };
+  afterEach(async () => {
+    const db = getFirestore();
+    const users = await db.collection("users").listDocuments();
+    for (const doc of users) await doc.delete();
 
-//     const res = await request(app)
-//       .post(BASE_URL)
-//       .set("Authorization", `Bearer ${testUserToken}`)
-//       .send(newUser);
+    const list = await admin.auth().listUsers();
+    for (const user of list.users) {
+      await admin.auth().deleteUser(user.uid);
+    }
+  });
 
-//     expect(res.status).toBe(201);
-//     expect(res.body).toMatchObject(newUser);
-//   });
+  describe("POST /users", () => {
+    it("should create a new user successfully", async () => {
+      const res = await request(app).post("/users").send({
+        username: "testuser",
+        email: "testuser@example.com",
+        password: "password123",
+      });
 
-//   it("GET /users → 401 with no token", async () => {
-//     const res = await request(app).get(BASE_URL);
-//     expect(res.status).toBe(401);
-//   });
-// });
+      expect(res.status).toBe(201);
+      expect(res.body).toHaveProperty("uid");
+      expect(res.body.message).toBe("User created successfully");
+    });
+
+    it("should fail if required fields are missing", async () => {
+      const res = await request(app).post("/users").send({
+        email: "wrongemail@email.com",
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.message).toBe("Missing required fields");
+    });
+  });
+
+  describe("GET /users", () => {
+    it("should return a 200 and list of users", async () => {
+      await request(app).post("/users").send({
+        username: "testuser",
+        email: "testuser@example.com",
+        password: "password123",
+      });
+
+      const res = await request(app).get("/users");
+
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBe(1);
+      expect(res.body[0]).toHaveProperty("uid");
+    });
+  });
+
+  describe("GET /users/currentUser", () => {
+    it("should return current user profile", async () => {
+      const {idToken, uid} = await createUserAndGetToken(
+        "testprofile@example.com"
+      );
+
+      await getFirestore().collection("users").doc(uid).set({
+        username: "profileuser",
+        email: "testprofile@example.com",
+        avatarUrl: null,
+        rewardPoints: 0,
+        groupId: null,
+      });
+
+      const res = await request(app)
+        .get("/users/currentUser")
+        .set("Authorization", `Bearer ${idToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.uid).toBe(uid);
+      expect(res.body.username).toBe("profileuser");
+    });
+
+    it("should return 401 if user not authenticated", async () => {
+      const res = await request(app).get("/users/currentUser");
+      expect(res.status).toBe(401);
+      expect(res.body.message).toBe("Unauthorised");
+    });
+
+    it("should return 404 if user doc is missing", async () => {
+      const {idToken} = await createUserAndGetToken("nouserdoc@example.com");
+
+      const res = await request(app)
+        .get("/users/currentUser")
+        .set("Authorization", `Bearer ${idToken}`);
+
+      expect(res.status).toBe(404);
+      expect(res.body.message).toBe("User not found");
+    });
+  });
+});
