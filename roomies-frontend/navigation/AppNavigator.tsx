@@ -13,7 +13,7 @@ import MainScreen from '../screens/MainScreen';
 import SocialScreen from '../screens/SocialScreen';
 import SetGroupScreen from '../screens/Group/SetGroupScreen';
 import UpdateTaskScreen from '../screens/UpdateTaskScreen'
-
+import TaskDetailScreen from 'screens/TaskDetailScreen';
 const Tab = createBottomTabNavigator();
 
 const Stack = createNativeStackNavigator();
@@ -33,6 +33,7 @@ function MainStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Main" component={MainScreen} />
+      <Stack.Screen name="TaskDetail" component={TaskDetailScreen} />
     </Stack.Navigator>
   );
 }
@@ -70,7 +71,7 @@ function SocialStack() {
 
 function AppTabs() {
   return (
-<Tab.Navigator
+  <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarIcon: ({ focused, size, color}) => {
@@ -115,7 +116,7 @@ export default function AppNavigator() {
   return (
     <NavigationContainer>
       {/* {isSignedIn ? <AppTabs /> : <AuthStack />} */}
-      <AuthStack/>
+      <AppTabs/>
     </NavigationContainer>
   );
 }

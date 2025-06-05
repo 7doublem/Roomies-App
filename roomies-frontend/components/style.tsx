@@ -240,54 +240,124 @@ export const styles = StyleSheet.create({
     fontSize: 17,
   },
 
-  //Chore Card
-  card: {
-    backgroundColor: '#fff',
-    padding: 16,
-    marginVertical: 5,
-    marginHorizontal: 16,
-    borderRadius: 12,
-    elevation: 3,
-    position: 'relative',
-  },
-  rewardBadge: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    backgroundColor: '#ff6f69',
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 20,
-  },
-  rewardText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-  choreName: {
-    fontSize: 19,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    color: '#111',
-  },
-  assignedTo: {
-    fontSize: 15,
-    marginBottom: 4,
-    color: '#555',
-  },
-  countdown: {
-    fontSize: 15,
-    color: '#888',
-  },
-  card_Done: {
-    backgroundColor: 'green',
-  },
-  card_Doing: {
-    backgroundColor: 'yellow',
-  },
-  card_Todo: {
-    backgroundColor: '#fff',
-  },
+ //Chore Card
+ card: {
+  backgroundColor: '#fff',
+  padding: 16,
+  marginVertical: 5,
+  marginHorizontal: 16,
+  borderRadius: 12,
+  elevation: 3,
+  position: 'relative',
+},
+rewardBadge: {
+  position: 'absolute',
+  top: 10,
+  right: 10,
+  backgroundColor: '#ff6f69',
+  paddingVertical: 4,
+  paddingHorizontal: 8,
+  borderRadius: 20,
+},
+rewardText: {
+  color: 'white',
+  fontWeight: 'bold',
+  fontSize: 14,
+},
+choreName: {
+  fontSize: 19,
+  fontWeight: 'bold',
+  marginBottom: 8,
+  color: '#111',
+},
+assignedTo: {
+  fontSize: 15,
+  marginBottom: 4,
+  color: '#555',
+},
+countdown: {
+  marginVertical: 5,
+  fontSize: 15,
+  color: '#888',
+},
+startdate: {
+  marginVertical: 5,
+  fontSize: 15,
+  color: '#888',
+},
+card_Done: {
+  backgroundColor: 'green',
+},
+card_Doing: {
+  backgroundColor: 'yellow',
+},
+card_Todo: {
+  backgroundColor: '#fff',
+},
+
+//Task Detail Screen
+taskDetail_Screen_text: { fontSize: 28, fontWeight: 'bold', textAlign: 'center' },
+editBtn: { alignItems: 'flex-end' },
+
+//Comment Section
+commentSection: {
+  marginTop: 20,
+},
+commentTitle: {
+  fontWeight: 'bold',
+  marginBottom: 10,
+  fontSize: 23,
+  alignSelf: 'center',
+},
+commentContainer: {
+  flex: 1,
+  padding: 10,
+},
+commentBox: {
+  backgroundColor: 'rgb(242 255 231)',
+  padding: 10,
+  marginBottom: 10,
+  borderRadius: 8,
+},
+CommentBoxUser: {
+  fontWeight: 'bold',
+  marginBottom: 4,
+},
+CommentBoxUserText: {},
+
+// Submit Comment
+
+CommentInputWrapper: {
+  flexDirection: 'row',
+  gap: 10,
+  alignItems: 'center',
+},
+CommentInput: {
+  flex: 1,
+  borderWidth: 1,
+  backgroundColor: 'white',
+  borderColor: 'white',
+  paddingHorizontal: 10,
+  paddingVertical: 8,
+  borderRadius: 8,
+},
+CommentInputFocused: {
+  backgroundColor: 'white',
+},
+CommentSubmitButton: {
+  backgroundColor: 'rgb(255, 111, 105)',
+  paddingVertical: 12,
+  paddingHorizontal: 25,
+  borderRadius: 6,
+  alignItems: 'center',
+},
+CommentSubmitButtonText: {
+  backgroundColor: 'rgb(255, 111, 105)',
+  borderRadius: 10,
+  fontSize: 16,
+  color: 'white',
+  fontWeight: 'bold',
+},
 
   //UserCard 
   title: {

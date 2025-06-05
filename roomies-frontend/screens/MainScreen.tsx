@@ -6,7 +6,8 @@ import { styles } from 'components/style';
 import TodoScreen from './TabComponents/TodoScreen';
 import DoingScreen from './TabComponents/DoingScreen';
 import DoneScreen from './TabComponents/DoneScreen';
-const Tab = createMaterialTopTabNavigator();
+import { Ionicons } from '@expo/vector-icons';
+
 export default function MainScreen({ navigation }: any) {
   const [activeTab, setActiveTab] = useState('todo');
 
@@ -27,6 +28,7 @@ export default function MainScreen({ navigation }: any) {
       <View style={{ flex: 1 }}>
         <Text style={styles.mainScreen_container_Text}>My Chores</Text>
         {/* Tabs */}
+
         <View style={styles.tabContainer}>
           <TouchableOpacity
             style={[styles.tabButton, activeTab === 'todo' && styles.activeTab]}
@@ -44,6 +46,20 @@ export default function MainScreen({ navigation }: any) {
             <Text style={styles.tabText}>Done</Text>
           </TouchableOpacity>
         </View>
+        {activeTab === 'todo' ? (
+          <View style={styles.mainScreen_IconView}>
+            <TouchableOpacity>
+              <Ionicons
+                style={styles.mainScreen_IconView_IonIcon}
+                name="add-circle-outline"
+                size={24}
+                color="black"
+              />
+            </TouchableOpacity>
+          </View>
+        ) : (
+          ''
+        )}
 
         {/* Dynamic Component */}
         <View style={{ flex: 1 }}>{renderTabContent()}</View>
