@@ -2,36 +2,58 @@ import * as admin from "firebase-admin";
 import serviceAccount from "../../firebaseServiceAccount.json";
 import {CollectionReference, getFirestore} from "firebase-admin/firestore";
 import {getAuth} from "firebase-admin/auth";
+import { generateGroupCode } from "../utils/GroupCodeGenerator";
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
 });
 
+const users = ["Alice", "Paul", "Harry", "Noah"]
+
+// created a new_user and create a new group using the new_user data
 async function createAuthedUser(userCollection: CollectionReference, userData: any) {
-  // TODO check user exists
+    // TODO check user exists
+    const authUser = await getAuth().createUser({
+        email: userData.email,
+        displayName: userData.username,
+        password: "123456",
+        photoURL: userData.avatarUrl,
+    });
 
-  const authUser = await getAuth().createUser({
-    email: userData.email,
-    displayName: userData.username,
-    password: userData.password,
-    photoURL: userData.avatarUrl,
-  });
-
+    console.log(authUser.uid, "authUser.uid")
   await userCollection.doc(authUser.uid).set(userData);
+  return authUser.uid;
 }
 
 (async function seed() {
-  const userCollection = getFirestore().collection("users");
-  // const groupCollection = getFirestore().collection("groups");
+  for (const name of users) {
+    const userCollection = getFirestore().collection("users");
+    const userData = {
+      username: name,
+      email: `${name}@example.com`,
+      avatarUrl: "https://example.com/avatar.png",
+      rewardPoints: 100,
+      groupId: null,
+    };
 
-  const userData = {
-    username: "Alice",
-    password: "123456",
-    email: "Alice+1@gmail.com",
-    avatarUrl: "https://example.com/avatar.png",
-    rewardsPoints: 10,
+    const uid = await createAuthedUser(userCollection, userData);
+    console.log((await userCollection.get()).docs);
+
+    const groupCollection = getFirestore().collection("groups");
+    const newCode = generateGroupCode()
+
+    const GroupData = {
+      name: `${name}'s Group`,
+      members: [uid],
+      admins: [uid],
+      createdBy: uid,
+      groupCode: newCode,
+    };
+
+    await groupCollection.add(GroupData);
+    console.log((await groupCollection.get()).docs);
   };
-
-  await createAuthedUser(userCollection, userData);
-  console.log((await userCollection.get()).docs);
 })();
+
+
+
