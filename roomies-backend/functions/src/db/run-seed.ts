@@ -1,7 +1,7 @@
 import * as admin from "firebase-admin";
 import serviceAccount from "../../firebaseServiceAccount.json";
-import { CollectionReference, getFirestore } from "firebase-admin/firestore";
-import { getAuth } from "firebase-admin/auth";
+import {CollectionReference, getFirestore} from "firebase-admin/firestore";
+import {getAuth} from "firebase-admin/auth";
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
@@ -22,7 +22,7 @@ async function createAuthedUser(userCollection: CollectionReference, userData: a
 
 (async function seed() {
   const userCollection = getFirestore().collection("users");
-// const groupCollection = getFirestore().collection("groups");
+  // const groupCollection = getFirestore().collection("groups");
 
   const userData = {
     username: "Alice",
