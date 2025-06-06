@@ -10,7 +10,7 @@ import GroupScreen from '../screens/Group/GroupScreen';
 import AddChoreScreen from '../screens/AddChoreScreen';
 import LeaderboardScreen from '../screens/LeaderboardScreen';
 import MainScreen from '../screens/MainScreen';
-import SocialScreen from '../screens/SocialScreen';
+import UserScreen from '../screens/UserScreen';
 import SetGroupScreen from '../screens/Group/SetGroupScreen';
 import UpdateChoreScreen from '../screens/UpdateChoreScreen'
 import ChoreDetailScreen from 'screens/ChoreDetailScreen';
@@ -62,10 +62,10 @@ function LeaderboardStack() {
   );
 }
 
-function SocialStack() {
+function UserStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Social" component={SocialScreen} />
+      <Stack.Screen name="User" component={UserScreen} />
     </Stack.Navigator>
   );
 }
@@ -91,8 +91,8 @@ function AppTabs() {
             case 'LeaderboardTab':
               iconName = focused ? 'trophy' : 'trophy-outline';
               break;
-            case 'SocialTab':
-              iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
+            case 'UserTab':
+              iconName = focused ? 'person' : 'person-outline';
               break;
           }
 
@@ -106,7 +106,7 @@ function AppTabs() {
         <Tab.Screen name="GroupTab" component={GroupStack} options={{ title: 'Group' }} />
         <Tab.Screen name="AddChoreTab" component={AddChoreStack} options={{ title: 'Add Chore' }} />
         <Tab.Screen name="LeaderboardTab" component={LeaderboardStack} options={{ title: 'Leaderboard' }} />
-        <Tab.Screen name="SocialTab" component={SocialStack} options={{ title: 'Social' }} />
+        <Tab.Screen name="UserTab" component={UserStack} options={{ title: 'User' }} />
       </Tab.Navigator>
   );
 }
@@ -117,7 +117,7 @@ export default function AppNavigator() {
   return (
     <NavigationContainer>
       {/* {isSignedIn ? <AppTabs /> : <AuthStack />} */}
-      <AuthStack/>
+      <AppTabs/>
     </NavigationContainer>
   );
 }
