@@ -25,7 +25,7 @@ describe("Group Routes", () => {
       username: "adminuser",
       email: "adminuser@example.com",
       avatarUrl: null,
-      rewardPoints: 0,
+      rewardPoints: 300,
       groupId: null,
     });
 
@@ -337,7 +337,7 @@ describe("Group Routes", () => {
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBe(2);
       expect(res.body[0]).toHaveProperty("uid");
-      expect(res.body[0].rewardPoints).toBe(100);
+      expect(res.body[0].rewardPoints).toBe(300);
     });
   });
 });

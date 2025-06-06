@@ -21,4 +21,4 @@ groupRoutes.patch("/:group_id", authenticateUser, groupController.updateGroupNam
 groupRoutes.patch("/:group_id/members", authenticateUser, groupController.addMemberToGroup);
 
 // GET /groups/:group_id/users - users can see the leaderboard screen
-groupRoutes.get("/:group_id/members", authenticateUser, groupController.getUsersByGroup);
+groupRoutes.get("/:group_id/members", authenticateUser, groupController.getUsersByGroupId);

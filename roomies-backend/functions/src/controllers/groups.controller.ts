@@ -244,7 +244,7 @@ export class groupController {
   }
 
   // GET /groups/:group_id/members - get all members from a specific group
-  static async getUsersByGroup(req: Request, res: Response, next: NextFunction) {
+  static async getUsersByGroupId(req: Request, res: Response, next: NextFunction) {
     try {
       const groupId = req.params.group_id;
       let users = [];
