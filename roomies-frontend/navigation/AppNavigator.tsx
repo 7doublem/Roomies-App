@@ -12,7 +12,8 @@ import LeaderboardScreen from '../screens/LeaderboardScreen';
 import MainScreen from '../screens/MainScreen';
 import SocialScreen from '../screens/SocialScreen';
 import SetGroupScreen from '../screens/Group/SetGroupScreen';
-
+import UpdateTaskScreen from '../screens/UpdateTaskScreen'
+import TaskDetailScreen from 'screens/TaskDetailScreen';
 const Tab = createBottomTabNavigator();
 
 const Stack = createNativeStackNavigator();
@@ -30,14 +31,15 @@ function AuthStack() {
 
 function MainStack() {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Main" component={MainScreen} />
+      <Stack.Screen name="TaskDetail" component={TaskDetailScreen} />
     </Stack.Navigator>
   );
 }
 function GroupStack() {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Group" component={GroupScreen} />
     </Stack.Navigator>
   );
@@ -53,7 +55,7 @@ function AddTaskStack() {
 
 function LeaderboardStack() {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Leaderboard" component={LeaderboardScreen} />
     </Stack.Navigator>
   );
@@ -61,7 +63,7 @@ function LeaderboardStack() {
 
 function SocialStack() {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Social" component={SocialScreen} />
     </Stack.Navigator>
   );
@@ -69,7 +71,7 @@ function SocialStack() {
 
 function AppTabs() {
   return (
-<Tab.Navigator
+  <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarIcon: ({ focused, size, color}) => {
@@ -114,7 +116,7 @@ export default function AppNavigator() {
   return (
     <NavigationContainer>
       {/* {isSignedIn ? <AppTabs /> : <AuthStack />} */}
-      <AppTabs/>
+      <AuthStack/>
     </NavigationContainer>
   );
 }

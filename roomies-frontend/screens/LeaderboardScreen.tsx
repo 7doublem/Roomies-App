@@ -18,7 +18,7 @@ const users = [
   { id: '4', name: 'David', points: 90, avatar: require('../assets/bear.png') },
   { id: '5', name: 'Eve', points: 80, avatar: require('../assets/deer.png') },
   { id: '6', name: 'Suhaim', points: 70, avatar: require('../assets/deer.png') },
-  { id: '7', name: 'Wendy', points: 50, avatar: require('../assets/deer.png') }
+  { id: '7', name: 'Wendy', points: 150, avatar: require('../assets/deer.png') }
 ];
 
 const { width } = Dimensions.get('window');
@@ -96,7 +96,7 @@ export default function LeaderboardScreen() {
     <GradientContainer>
       <Text style={styles.title}>Leaderboard</Text>
       <View style={styles.chartRow}>
-        {sortedUsers.map((user, idx) => (
+        {sortedUsers.slice(0, 5).map((user, idx) => (
           <AnimatedBar
             key={user.id}
             user={user}
