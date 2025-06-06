@@ -1,17 +1,42 @@
 import React from 'react';
-import { ScrollView } from 'react-native';
+import { ScrollView, TouchableOpacity } from 'react-native';
 import ChoresCard from './ChoresCard';
 
-export default function DoingScreen() {
+type Chore = {
+  id: number;
+  status: string;
+  chore: string;
+  assignedTo: string;
+  countdown: string;
+  reward: number;
+};
+
+type Props = {
+  chores: Chore[];
+  onDropToDone: (id: number) => void;
+};
+
+export default function DoingScreen({ chores, onDropToDone }: Props) {
   return (
     <ScrollView>
-      <ChoresCard
-        status="doing"
-        chore="Vacuum the living room"
-        assignedTo="Liam"
-        countdown="5h 10m"
-        reward={40}
-      />
+      {chores.map((chore) => (
+        <TouchableOpacity
+          key={chore.id}
+          onLongPress={() => {
+            // Simulate drag-to-done: on long press, move to done
+            onDropToDone(chore.id);
+          }}
+          delayLongPress={400}
+        >
+          <ChoresCard
+            status={chore.status}
+            chore={chore.chore}
+            assignedTo={chore.assignedTo}
+            countdown={chore.countdown}
+            reward={chore.reward}
+          />
+        </TouchableOpacity>
+      ))}
     </ScrollView>
   );
 }
