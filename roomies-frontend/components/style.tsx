@@ -514,7 +514,7 @@ CommentSubmitButtonText: {
   fontWeight: 'bold',
 },
 
-  //UserCard 
+  //UserCard styling
   title: {
     fontSize: 28,
     fontWeight: 'bold',
@@ -530,11 +530,36 @@ CommentSubmitButtonText: {
     color: '#111',
   },
   avatarSmall: {
-  width: 28,
-  height: 28,
-  borderRadius: 14,
-  marginRight: 8,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    marginRight: 8,
   },
 
+  //UserScreen styling
+  avatarLarge: {
+    width: 220,
+    height: 220,
+    borderRadius: 80,
+    marginBottom: 20
+  },
 
+  userProfileContainer: {
+    flexGrow: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    paddingTop:40,
+    paddingVertical: 40,
+  },
+
+  pointsContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+  }, 
+
+  pointsSubtitle: {
+    fontSize: 22,
+    color: '#eee',
+    marginVertical: 4,
+  }
   });
