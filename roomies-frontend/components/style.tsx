@@ -180,10 +180,10 @@ export const styles = StyleSheet.create({
   },
 
   welcomeTitle: {
-    fontSize: 28,
+    fontSize: 45,
     fontWeight: 'bold',
     color: 'black',
-    marginBottom: 10,
+    marginBottom: 50,
     textAlign: 'center',
   },
   welcomeUserNameText: { fontSize: 20, color: 'ff6f69', marginVertical: 10 },
@@ -227,21 +227,30 @@ export const styles = StyleSheet.create({
   },
   welcomeJoinInButtontext: {
     borderRadius: 10,
-    fontSize: 16,
+    fontSize: 18,
     color: 'white',
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
 
   welcomeCreateGroupButton: {
-    backgroundColor: 'rgb(55 183 222)',
+    backgroundColor: 'rgb(105 177 249)',
     borderRadius: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    marginVertical: 10,
-    elevation: 3,
-    overflow: 'hidden',
+    paddingVertical: 12,
+    alignItems: 'center',
+    width: 320,
+    alignSelf: 'center', 
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 4,
   },
-  welcomeCreateBtnText: { borderRadius: 10, fontSize: 16, color: 'white', fontWeight: 'bold' },
+  welcomeCreateBtnText: {
+    borderRadius: 10,
+    fontSize: 18,
+    color: 'white',
+    fontWeight: 'bold'
+  },
 
   //Set Group
   SetGroup_container: {

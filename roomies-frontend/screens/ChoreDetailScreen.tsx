@@ -1,18 +1,20 @@
-import { View, Text, Button, ScrollView, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text,  TouchableOpacity } from 'react-native';
 import { styles } from 'components/style';
 import GradientContainer from '../components/GradientContainer';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import CommentSection from '../components/CommentSection';
 
-// Define props with TypeScript
 
-export default function TaskDetailScreen() {
+export default function ChoreDetailScreen({ navigation }: any) {
   return (
     <GradientContainer>
       <View style={{ flex: 1 }}>
-        <Text style={styles.taskDetail_Screen_text}>Task Details</Text>
+        <Text style={styles.taskDetail_Screen_text}>Chore Details</Text>
 
-        <TouchableOpacity style={styles.editBtn}>
+        <TouchableOpacity
+          style={styles.editBtn}
+          onPress={() => navigation.navigate('UpdateChoreScreen')}
+        >
           <MaterialIcons name="mode-edit" size={24} color="black" />
         </TouchableOpacity>
 

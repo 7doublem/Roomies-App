@@ -7,20 +7,20 @@ import SignInScreen from '../screens/Auth/SignInScreen';
 import SignUpScreen from '../screens/Auth/SignUpScreen';
 import WelcomeScreen from '../screens/WelcomeScreen';
 import GroupScreen from '../screens/Group/GroupScreen';
-import AddTaskScreen from '../screens/AddTaskScreen';
+import AddChoreScreen from '../screens/AddChoreScreen';
 import LeaderboardScreen from '../screens/LeaderboardScreen';
 import MainScreen from '../screens/MainScreen';
 import SocialScreen from '../screens/SocialScreen';
 import SetGroupScreen from '../screens/Group/SetGroupScreen';
-import UpdateTaskScreen from '../screens/UpdateTaskScreen'
-import TaskDetailScreen from 'screens/TaskDetailScreen';
+import UpdateChoreScreen from '../screens/UpdateChoreScreen'
+import ChoreDetailScreen from 'screens/ChoreDetailScreen';
 const Tab = createBottomTabNavigator();
 
 const Stack = createNativeStackNavigator();
 
 function AuthStack() {
   return (
-    <Stack.Navigator initialRouteName="SignIn" screenOptions={{ headerShown: false }}>
+    <Stack.Navigator initialRouteName="Welcome" screenOptions={{ headerShown: false }}>
       <Stack.Screen name="SignIn" component={SignInScreen} />
       <Stack.Screen name="SignUp" component={SignUpScreen} />
       <Stack.Screen name="Welcome" component={WelcomeScreen} />
@@ -33,7 +33,8 @@ function MainStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Main" component={MainScreen} />
-      <Stack.Screen name="TaskDetail" component={TaskDetailScreen} />
+      <Stack.Screen name="ChoreDetail" component={ChoreDetailScreen} />
+      <Stack.Screen name="UpdateChoreScreen" component={UpdateChoreScreen} />
     </Stack.Navigator>
   );
 }
@@ -45,10 +46,10 @@ function GroupStack() {
   );
 }
 
-function AddTaskStack() {
+function AddChoreStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="AddTask" component={AddTaskScreen} />
+      <Stack.Screen name="AddChore" component={AddChoreScreen} />
     </Stack.Navigator>
   );
 }
@@ -84,7 +85,7 @@ function AppTabs() {
             case 'GroupTab':
               iconName = focused ? 'people' : 'people-outline';
               break;
-            case 'AddTaskTab':
+            case 'AddChoreTab':
               iconName = focused ? 'add-circle' : 'add-circle-outline';
               break;
             case 'LeaderboardTab':
@@ -103,7 +104,7 @@ function AppTabs() {
     >
         <Tab.Screen name="MainTab" component={MainStack} options={{ title: 'Main' }} />
         <Tab.Screen name="GroupTab" component={GroupStack} options={{ title: 'Group' }} />
-        <Tab.Screen name="AddTaskTab" component={AddTaskStack} options={{ title: 'Add Task' }} />
+        <Tab.Screen name="AddChoreTab" component={AddChoreStack} options={{ title: 'Add Chore' }} />
         <Tab.Screen name="LeaderboardTab" component={LeaderboardStack} options={{ title: 'Leaderboard' }} />
         <Tab.Screen name="SocialTab" component={SocialStack} options={{ title: 'Social' }} />
       </Tab.Navigator>
@@ -116,7 +117,7 @@ export default function AppNavigator() {
   return (
     <NavigationContainer>
       {/* {isSignedIn ? <AppTabs /> : <AuthStack />} */}
-      <AppTabs/>
+      <AuthStack/>
     </NavigationContainer>
   );
 }

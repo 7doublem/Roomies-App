@@ -19,9 +19,8 @@ export default function WelcomeScreen({ navigation }: any) {
     <GradientContainer>
       <View style={styles.welcomeContainer}>
         <Text style={styles.welcomeTitle}>Welcome to Roomies</Text>
-        <Text style={styles.welcomeUserNameText}>UserName</Text>
-        <Text style={styles.welcomeText}>The app that will make</Text>
-        <Text style={styles.welcomeText}>Your tasks look funny!</Text>
+        {/* <Text style={styles.welcomeUserNameText}>/username</Text> */}
+        <Text style={styles.welcomeText}>Track chores. Have fun. Stay happy.</Text>
         <Text style={styles.welcomeJoinText}>Join Group by ID</Text>
         <View style={styles.welcomeInputContainer}>
           <TextInput
@@ -45,8 +44,6 @@ export default function WelcomeScreen({ navigation }: any) {
         <TouchableOpacity onPress={createGroupHandler} style={styles.welcomeCreateGroupButton}>
           <Text style={styles.welcomeCreateBtnText}>Create a group</Text>
         </TouchableOpacity>
-        {/* We add in form fields here */}
-        <Button title="Go to Main" onPress={() => navigation.navigate('Main')} color="#111" />
       </View>
     </GradientContainer>
   );

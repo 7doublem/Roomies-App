@@ -45,7 +45,7 @@ export default function TodoScreen() {
   }, []);
 
   const choreDetailHandler = () => {
-    navigation.navigate('TaskDetail');
+    navigation.navigate('ChoreDetail');
   };
 
   return (
