@@ -46,21 +46,6 @@ export default function MainScreen({ navigation }: any) {
             <Text style={styles.tabText}>Done</Text>
           </TouchableOpacity>
         </View>
-        {activeTab === 'todo' ? (
-          <View style={styles.mainScreen_IconView}>
-            <TouchableOpacity>
-              <Ionicons
-                style={styles.mainScreen_IconView_IonIcon}
-                name="add-circle-outline"
-                size={24}
-                color="black"
-              />
-            </TouchableOpacity>
-          </View>
-        ) : (
-          ''
-        )}
-
         {/* Dynamic Component */}
         <View style={{ flex: 1 }}>{renderTabContent()}</View>
       </View>
