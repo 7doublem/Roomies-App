@@ -1,9 +1,9 @@
 import request from "supertest";
 import {app} from "../app";
-import {createUserAndGetToken} from "./test.utils/utils";
+import {createUserAndGetToken, deleteUsers} from "./test.utils/utils";
 import {getFirestore} from "firebase-admin/firestore";
 
-describe("Group Routes", () => {
+describe("Group Tests", () => {
   let server: ReturnType<typeof app.listen>;
   let token: string;
   let uid: string;
@@ -11,8 +11,23 @@ describe("Group Routes", () => {
   let tokenAlice: string;
   let uidAlice: string;
 
+  async function deleteData() {
+    await deleteUsers([uid, uidAlice]);
+
+    const users = await getFirestore().collection("users").listDocuments();
+    for (const doc of users) await doc.delete();
+
+    const groups = await getFirestore().collection("groups").listDocuments();
+    for (const doc of groups) await doc.delete();
+  }
+
   beforeAll(async () => {
     server = app.listen(5003);
+  });
+
+  beforeEach(async () => {
+    await deleteData();
+
     const result = await createUserAndGetToken("adminuser@example.com");
     token = result.idToken;
     uid = result.uid;
@@ -38,13 +53,12 @@ describe("Group Routes", () => {
     });
   });
 
-  afterAll((done) => {
-    server.close(done);
+  afterEach(async () => {
+    await deleteData();
   });
 
-  afterEach(async () => {
-    const groups = await getFirestore().collection("groups").listDocuments();
-    for (const doc of groups) await doc.delete();
+  afterAll((done) => {
+    server.close(done);
   });
 
   describe("GET /groups", () => {
@@ -321,7 +335,7 @@ describe("Group Routes", () => {
       groupId = docRef.id;
     });
 
-    it("should return 404 and get all members from a group", async () => {
+    it("should return 404 and get all members related to a group", async () => {
       const res = await request(app)
         .get("/groups/projectThatDoesNotExist/members")
         .set("Authorization", `Bearer ${tokenAlice}`);
@@ -329,7 +343,7 @@ describe("Group Routes", () => {
       expect(res.body.message).toBe("Group not found");
     });
 
-    it("should return 200 and get all members from a group", async () => {
+    it("should return 200 and get all members related to a group", async () => {
       const res = await request(app)
         .get(`/groups/${groupId}/members`)
         .set("Authorization", `Bearer ${tokenAlice}`);

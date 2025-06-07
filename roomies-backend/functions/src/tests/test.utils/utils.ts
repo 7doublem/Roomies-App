@@ -25,3 +25,7 @@ export const createUserAndGetToken = async (
     idToken: signInResponse.body.idToken,
   };
 };
+
+export const deleteUsers = async (uids: string[]) => {
+  await admin.auth().deleteUsers(uids.filter((id) => id)); // filter when id exists
+};
