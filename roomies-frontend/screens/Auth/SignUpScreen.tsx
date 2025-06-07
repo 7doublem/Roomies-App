@@ -1,12 +1,19 @@
-import { View, Text, Button, TextInput, Alert, TouchableOpacity, Image } from 'react-native';
-import React, { useState } from 'react';
-import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
-import * as Google from 'expo-auth-session/providers/google';
+import { View, Text, TextInput, Alert, TouchableOpacity, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import * as ImagePicker from 'expo-image-picker';
 import { Picker } from '@react-native-picker/picker';
 import { auth } from '../../firebase/config';
 import GradientContainer from '../../components/GradientContainer';
-import {styles} from '../../components/style'
+import { styles } from '../../components/style';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+  interpolateColor,
+} from 'react-native-reanimated';
+
 const avatarOptions = [
   require('../../assets/bear.png'),
   require('../../assets/deer.png'),
@@ -16,38 +23,80 @@ const avatarOptions = [
 export default function SignUpScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
-  // Avatar state
+  const [name, setName] = useState('');
   const [avatar, setAvatar] = useState(avatarOptions[0]);
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [pickerValue, setPickerValue] = useState('0');
+  const [error, setError] = useState<string | null>(null);
 
-  // Google Authentication Setup
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    expoClientId: '434083306699-mk47mhaffjojfv65nr247h8vsi6nm7tc.apps.googleusercontent.com',
-    iosClientId: '434083306699-14r5k5v4l505ubgoohphidm03j1hi6ku.apps.googleusercontent.com',
-    androidClientId: '434083306699-032sff9k48cer4oajlqi036ufbo46ufu.apps.googleusercontent.com',
-    webClientId: '434083306699-mk47mhaffjojfv65nr247h8vsi6nm7tc.apps.googleusercontent.com',
-  });
+  // --- Animated Button ---
+  const buttonScale = useSharedValue(1);
+  const animatedButtonStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: buttonScale.value }],
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  }));
 
-  React.useEffect(() => {
-    if (response?.type === 'success') {
-      const { id_token } = response.params;
-      const credential = GoogleAuthProvider.credential(id_token);
-      signInWithCredential(auth, credential)
-        .then(() => navigation.navigate('Welcome'))
-        .catch((error) => {
-          Alert.alert('Google Sign-Up Error', error.message);
-        });
-    }
-  }, [response]);
+  const handlePressIn = () => {
+    buttonScale.value = withSpring(0.96);
+  };
+  const handlePressOut = () => {
+    buttonScale.value = withSpring(1);
+  };
+
+  // --- Animated Input Borders ---
+  const emailBorder = useSharedValue(0);
+  const passwordBorder = useSharedValue(0);
+
+  const animatedEmailStyle = useAnimatedStyle(() => ({
+    borderColor: interpolateColor(
+      emailBorder.value,
+      [0, 1],
+      ['#ccc', '#ffcc5c']
+    ),
+    borderWidth: 2,
+    borderRadius: 8,
+    marginBottom: 16,
+    backgroundColor: '#fff',
+  }));
+
+  const animatedPasswordStyle = useAnimatedStyle(() => ({
+    borderColor: interpolateColor(
+      passwordBorder.value,
+      [0, 1],
+      ['#ccc', '#ffcc5c']
+    ),
+    borderWidth: 2,
+    borderRadius: 8,
+    marginBottom: 16,
+    backgroundColor: '#fff',
+  }));
+
+  // --- Fade-in Animation ---
+  const fade = useSharedValue(0);
+  const fadeStyle = useAnimatedStyle(() => ({
+    opacity: fade.value,
+  }));
+
+  useEffect(() => {
+    fade.value = withTiming(1, { duration: 600 });
+  }, []);
 
   const handleSignUp = async () => {
+    setError(null);
+    if (!name.trim()) {
+      setError('Name is required.');
+      return;
+    }
     try {
       await createUserWithEmailAndPassword(auth, email, password);
+      // You may want to save the name to Firestore or user profile here
       navigation.navigate('Welcome');
     } catch (error: any) {
-      Alert.alert('Sign Up Error', error.message);
+      setError(error.message);
     }
   };
 
@@ -67,83 +116,112 @@ export default function SignUpScreen({ navigation }: any) {
 
   return (
     <GradientContainer>
-      <Text style={styles.signUp_text}>Sign Up</Text>
-      <TextInput
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        style={styles.signUp_Input}
-      />
-      <TextInput
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        style={styles.signUp_Input}
-      />
-
-      {/* Pill Sign Up Button */}
-      <TouchableOpacity
-        onPress={handleSignUp}
-        activeOpacity={0.8}
-        style={styles.signUp_touchable}
-      >
-        <Text style={styles.signUp_touchable_text}>Sign Up</Text>
-      </TouchableOpacity>
-
-      {/* Google Sign Up Button */}
-      <TouchableOpacity
-        onPress={() => promptAsync()}
-        activeOpacity={0.8}
-        style={styles.signUp_googleButton}
-      >
+      <Animated.View style={fadeStyle}>
+        {/* Logo */}
         <Image
-          source={require('../../assets/google-light-logo.png')}
-          style={styles.signUp_googleButton_image}
+          source={require('../../assets/logo.png')}
+          style={{ width: 140, height: 140, alignSelf: 'center', marginBottom: 16 }}
           resizeMode="contain"
         />
-        <Text style={styles.signUp_googleButton_text}>
-          Sign Up with Google
-        </Text>
-      </TouchableOpacity>
+        <Text style={styles.signUp_text}>Sign Up</Text>
 
-      <TouchableOpacity
-        onPress={() => navigation.navigate('SignIn')}
-        activeOpacity={0.8}
-        style={styles.signUp_signinButton}
-      >
-        <Text style={styles.signUp_signinButton_text}>
-          Already have an account? Sign In
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={pickImage} style={styles.signUp_Avatar_Touchable}>
-        <Image
-          source={avatarUri ? { uri: avatarUri } : avatar}
-          style={styles.signUp_Avatar_Touchable_image}
-        />
-        <Text style={styles.signUp_Avatar_Touchable_text}>Tap to upload avatar</Text>
-      </TouchableOpacity>
+        {/* Error Message */}
+        {error && (
+          <View style={{ marginBottom: 12, alignItems: 'center' }}>
+            <Text style={{ color: '#e74c3c', fontSize: 14 }}>{error}</Text>
+          </View>
+        )}
 
-      {/* Avatar Picker */}
-      <Picker
-        selectedValue={pickerValue}
-        onValueChange={(itemValue, itemIndex) => {
-          setPickerValue(itemValue);
-          if (itemValue !== 'custom') {
-            setAvatar(avatarOptions[parseInt(itemValue)]);
-            setAvatarUri(null);
-          }
-        }}
-        style={styles.signUp_Input}
-        dropdownIconColor="#111"
-      >
-        <Picker.Item label="Choose a profile picture..." value="0" />
-        <Picker.Item label="Bear" value="0" />
-        <Picker.Item label="Deer" value="1" />
-        <Picker.Item label="Turtle" value="2" />
-        <Picker.Item label="Upload from device..." value="custom" />
-      </Picker>
+        {/* Name Input */}
+        <Animated.View style={animatedEmailStyle}>
+          <TextInput
+            placeholder="Name"
+            value={name}
+            onChangeText={setName}
+            autoCapitalize="words"
+            style={[styles.signUp_Input, { borderWidth: 0, marginBottom: 0 }]}
+            placeholderTextColor="#888"
+          />
+        </Animated.View>
+
+        {/* Email Input */}
+        <Animated.View style={animatedEmailStyle}>
+          <TextInput
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            style={[styles.signUp_Input, { borderWidth: 0, marginBottom: 0 }]}
+            onFocus={() => { emailBorder.value = withTiming(1); }}
+            onBlur={() => { emailBorder.value = withTiming(0); }}
+            placeholderTextColor="#888"
+          />
+        </Animated.View>
+
+        {/* Password Input */}
+        <Animated.View style={animatedPasswordStyle}>
+          <TextInput
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            style={[styles.signUp_Input, { borderWidth: 0, marginBottom: 0 }]}
+            onFocus={() => { passwordBorder.value = withTiming(1); }}
+            onBlur={() => { passwordBorder.value = withTiming(0); }}
+            placeholderTextColor="#888"
+          />
+        </Animated.View>
+
+        {/* Avatar Picker */}
+        <TouchableOpacity onPress={pickImage} style={styles.signUp_Avatar_Touchable}>
+          <Image
+            source={avatarUri ? { uri: avatarUri } : avatar}
+            style={styles.signUp_Avatar_Touchable_image}
+          />
+          <Text style={styles.signUp_Avatar_Touchable_text}>Tap to upload avatar</Text>
+        </TouchableOpacity>
+        <Picker
+          selectedValue={pickerValue}
+          onValueChange={(itemValue, itemIndex) => {
+            setPickerValue(itemValue);
+            if (itemValue !== 'custom') {
+              setAvatar(avatarOptions[parseInt(itemValue)]);
+              setAvatarUri(null);
+            }
+          }}
+          style={styles.signUp_Input}
+          dropdownIconColor="#111"
+        >
+          <Picker.Item label="Bear" value="0" />
+          <Picker.Item label="Deer" value="1" />
+          <Picker.Item label="Turtle" value="2" />
+          <Picker.Item label="Upload from device..." value="custom" />
+        </Picker>
+
+        {/* Pill Sign Up Button */}
+        <Animated.View style={animatedButtonStyle}>
+          <TouchableOpacity
+            onPress={handleSignUp}
+            activeOpacity={0.8}
+            style={styles.signUp_touchable}
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}
+          >
+            <Text style={styles.signUp_touchable_text}>Sign Up</Text>
+          </TouchableOpacity>
+        </Animated.View>
+
+        {/* Pill Sign In Button */}
+        <TouchableOpacity
+          onPress={() => navigation.navigate('SignIn')}
+          activeOpacity={0.8}
+          style={styles.signUp_signinButton}
+        >
+          <Text style={styles.signUp_signinButton_text}>
+            Already have an account? Sign In
+          </Text>
+        </TouchableOpacity>
+      </Animated.View>
     </GradientContainer>
   );
 }

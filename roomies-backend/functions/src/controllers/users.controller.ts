@@ -2,6 +2,14 @@ import {Request, Response, NextFunction} from "express";
 import {getFirestore} from "firebase-admin/firestore";
 import {getAuth} from "firebase-admin/auth";
 
+export type User = {
+  username: string,
+  email: string,
+  avatarUrl: string | null,
+  rewardPoints: number,
+  groupId: null,
+};
+
 export class userController {
   // GET /users - used for app administration
   static async getAllUsers(req: Request, res: Response, next: NextFunction) {
@@ -42,7 +50,7 @@ export class userController {
       });
 
       // save user profile in firestore
-      const userDoc = {
+      const userDoc: User = {
         username,
         email,
         avatarUrl: validPhotoURL || null,

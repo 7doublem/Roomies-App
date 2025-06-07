@@ -6,38 +6,35 @@ export const styles = StyleSheet.create({
   signIn_Container: {
     padding: 16,
   },
+  signIn_Touchable: {
+    backgroundColor: '#4f8cff',
+    paddingVertical: 14,
+    borderRadius: 25,
+    alignItems: 'center',
+    marginVertical: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  signIn_Touchable_Text: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+  signIn_Input: {
+    fontSize: 16,
+    padding: 12,
+    color: '#222',
+    backgroundColor: 'transparent',
+  },
   signIn_Text: {
     fontSize: 28,
     fontWeight: 'bold',
+    color: '#222',
     textAlign: 'center',
-    marginBottom: 16,
-  },
-  signIn_Input: {
-    borderWidth: 1,
-    marginVertical: 8,
-    padding: 12,
-    fontSize: 18,
-    borderRadius: 8,
-  },
-  signIn_Touchable: {
-    alignSelf: 'center',
-    marginVertical: 12,
-    width: 320,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#96ceb4',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  signIn_Touchable_Text: {
-    color: '#111',
-    fontWeight: 'bold',
-    fontSize: 20,
+    marginBottom: 20,
   },
   signIn_Googlebutton: {
     alignSelf: 'center',
@@ -176,40 +173,199 @@ export const styles = StyleSheet.create({
     marginTop: 8,
   },
   //Welcome Screen
-  gradient: {
+  welcomeContainer: {
     flex: 1,
-  },
-  container: {
-    flex: 1,
-    alignItems: 'center',
     justifyContent: 'center',
-    padding: 24,
+    alignItems: 'center',
   },
-  text: {
-    color: '#111',
-    fontSize: 18,
-    marginVertical: 2,
+
+  welcomeTitle: {
+    fontSize: 45,
+    fontWeight: 'bold',
+    color: 'black',
+    marginBottom: 50,
     textAlign: 'center',
   },
-  inputContainer: {
-    width: '100%',
+  welcomeUserNameText: { fontSize: 20, color: 'ff6f69', marginVertical: 10 },
+  welcomeText: {
+    fontSize: 16,
+    color: 'black',
+    textAlign: 'center',
+  },
+  welcomeJoinText: { fontSize: 22, fontWeight: 'bold', marginVertical: 10 },
+  welcomeInputContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 8,
+    marginTop: 20,
+    marginBottom: 10,
+    width: '100%',
   },
-  input: {
-    width: 200,
-    borderWidth: 1,
-    borderColor: '#111',
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 8,
-    color: '#111',
-    backgroundColor: 'rgba(255,255,255,0.7)',
+
+  welcomeInput: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    fontSize: 16,
+    color: '#333',
+    marginRight: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
-  button: {
-    marginVertical: 4,
-    width: 200,
+
+  welcomeJoinInButton: {
+    backgroundColor: 'rgb(255, 111, 105)',
+    overflow: 'hidden',
+    elevation: 3,
+    paddingVertical: 12,
+    paddingHorizontal: 5,
+    borderRadius: 10,
   },
+  welcomeJoinInButtontext: {
+    borderRadius: 10,
+    fontSize: 18,
+    color: 'white',
+    fontWeight: '600',
+  },
+
+  welcomeCreateGroupButton: {
+    backgroundColor: 'rgb(105 177 249)',
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+    width: 320,
+    alignSelf: 'center', 
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 4,
+  },
+  welcomeCreateBtnText: {
+    borderRadius: 10,
+    fontSize: 18,
+    color: 'white',
+    fontWeight: 'bold'
+  },
+
+  //Set Group
+  SetGroup_container: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 50,
+  },
+
+  SetGroup_title: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+    color: 'black',
+  },
+
+  SetGroup_input: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    fontSize: 16,
+    marginBottom: 15,
+    color: '#000',
+  },
+
+  SetGroup_Userinput: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    fontSize: 16,
+    marginBottom: 15,
+    color: '#000',
+    flex: 1,
+  },
+
+  SetGroup_SearchText: {
+    fontSize: 16,
+    color: 'black',
+    marginBottom: 5,
+    fontWeight: '500',
+  },
+
+  SetGroup_addUserContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 20,
+  },
+
+  SetGroup_PlusIcon: { marginTop: -15, color: 'rgb(255, 111, 105) ' },
+  SetGroup_userText: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '500',
+  },
+
+  SetGroup_userList: {
+    flex: 1,
+    marginBottom: 20,
+  },
+  SetGroup_userCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    marginBottom: 10,
+  },
+  SetGroup_buttonWrapper: {
+    position: 'absolute',
+    bottom: 30,
+    left: 20,
+    right: 20,
+  },
+
+  SetGroup_createGroupbtn: {
+    backgroundColor: 'rgb(105 177 249)',
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 4,
+  },
+
+  SetGroup_createGroupbtn_text: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: 'white',
+  },
+  SetGroup_JoinGroupbtn: {
+    backgroundColor: 'rgb(255, 111, 105)',
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 4,
+    marginVertical: 10,
+  },
+
+  SetGroup_JoinGroupbtn_text: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: 'white',
+  },
+
 
   //Main Screen
   mainScreen_container: {},
@@ -239,52 +395,171 @@ export const styles = StyleSheet.create({
     fontSize: 17,
   },
 
-  //Chore Card
-  card: {
-    backgroundColor: '#fff',
-    padding: 16,
-    marginVertical: 5,
-    marginHorizontal: 16,
-    borderRadius: 12,
-    elevation: 3,
-    position: 'relative',
-  },
-  rewardBadge: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    backgroundColor: '#ff6f69',
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 20,
-  },
-  rewardText: {
-    color: '#fff',
+ //Chore Card
+ card: {
+  backgroundColor: '#fff',
+  padding: 16,
+  marginVertical: 5,
+  marginHorizontal: 16,
+  borderRadius: 12,
+  elevation: 3,
+  position: 'relative',
+},
+rewardBadge: {
+  position: 'absolute',
+  top: 10,
+  right: 10,
+  backgroundColor: '#ff6f69',
+  paddingVertical: 4,
+  paddingHorizontal: 8,
+  borderRadius: 20,
+},
+rewardText: {
+  color: 'white',
+  fontWeight: 'bold',
+  fontSize: 14,
+},
+choreName: {
+  fontSize: 19,
+  fontWeight: 'bold',
+  marginBottom: 8,
+  color: '#111',
+},
+assignedTo: {
+  fontSize: 15,
+  marginBottom: 4,
+  color: '#555',
+},
+countdown: {
+  marginVertical: 5,
+  fontSize: 15,
+  color: '#888',
+},
+startdate: {
+  marginVertical: 5,
+  fontSize: 15,
+  color: '#888',
+},
+card_Done: {
+  backgroundColor: 'green',
+},
+card_Doing: {
+  backgroundColor: 'yellow',
+},
+card_Todo: {
+  backgroundColor: '#fff',
+},
+
+//Task Detail Screen
+taskDetail_Screen_text: { fontSize: 28, fontWeight: 'bold', textAlign: 'center' },
+editBtn: { alignItems: 'flex-end' },
+
+//Comment Section
+commentSection: {
+  marginTop: 20,
+},
+commentTitle: {
+  fontWeight: 'bold',
+  marginBottom: 10,
+  fontSize: 23,
+  alignSelf: 'center',
+},
+commentContainer: {
+  flex: 1,
+  padding: 10,
+},
+commentBox: {
+  backgroundColor: 'rgb(242 255 231)',
+  padding: 10,
+  marginBottom: 10,
+  borderRadius: 8,
+},
+CommentBoxUser: {
+  fontWeight: 'bold',
+  marginBottom: 4,
+},
+CommentBoxUserText: {},
+
+// Submit Comment
+
+CommentInputWrapper: {
+  flexDirection: 'row',
+  gap: 10,
+  alignItems: 'center',
+},
+CommentInput: {
+  flex: 1,
+  borderWidth: 1,
+  backgroundColor: 'white',
+  borderColor: 'white',
+  paddingHorizontal: 10,
+  paddingVertical: 8,
+  borderRadius: 8,
+},
+CommentInputFocused: {
+  backgroundColor: 'white',
+},
+CommentSubmitButton: {
+  backgroundColor: 'rgb(255, 111, 105)',
+  paddingVertical: 12,
+  paddingHorizontal: 25,
+  borderRadius: 6,
+  alignItems: 'center',
+},
+CommentSubmitButtonText: {
+  backgroundColor: 'rgb(255, 111, 105)',
+  borderRadius: 10,
+  fontSize: 16,
+  color: 'white',
+  fontWeight: 'bold',
+},
+
+  //UserCard styling
+  title: {
+    fontSize: 28,
     fontWeight: 'bold',
-    fontSize: 14,
+    color: '#111',
+    textAlign: 'center',
+    marginVertical: 16,
   },
-  choreName: {
+  
+  userName: {
     fontSize: 19,
     fontWeight: 'bold',
     marginBottom: 8,
     color: '#111',
   },
-  assignedTo: {
-    fontSize: 15,
-    marginBottom: 4,
-    color: '#555',
+  avatarSmall: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    marginRight: 8,
   },
-  countdown: {
-    fontSize: 15,
-    color: '#888',
+
+  //UserScreen styling
+  avatarLarge: {
+    width: 220,
+    height: 220,
+    borderRadius: 80,
+    marginBottom: 20
   },
-  card_Done: {
-    backgroundColor: 'green',
+
+  userProfileContainer: {
+    flexGrow: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    paddingTop:40,
+    paddingVertical: 40,
   },
-  card_Doing: {
-    backgroundColor: 'yellow',
-  },
-  card_Todo: {
-    backgroundColor: '#fff',
-  },
-});
+
+  pointsContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+  }, 
+
+  pointsSubtitle: {
+    fontSize: 22,
+    color: '#eee',
+    marginVertical: 4,
+  }
+  });

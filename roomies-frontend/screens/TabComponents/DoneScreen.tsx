@@ -2,16 +2,32 @@ import React from 'react';
 import { ScrollView } from 'react-native';
 import ChoresCard from './ChoresCard';
 
-export default function DoneScreen() {
+type Chore = {
+  id: number;
+  status: string;
+  chore: string;
+  assignedTo: string;
+  countdown: string;
+  reward: number;
+};
+
+type Props = {
+  chores: Chore[];
+};
+
+export default function DoneScreen({ chores }: Props) {
   return (
     <ScrollView>
-      <ChoresCard
-        status="done"
-        chore="Wash the dishes"
-        assignedTo="John"
-        countdown="1d 20m 30s"
-        reward={50}
-      />
+      {chores.map((chore) => (
+        <ChoresCard
+          key={chore.id}
+          status={chore.status}
+          chore={chore.chore}
+          assignedTo={chore.assignedTo}
+          countdown={chore.countdown}
+          reward={chore.reward}
+        />
+      ))}
     </ScrollView>
   );
 }

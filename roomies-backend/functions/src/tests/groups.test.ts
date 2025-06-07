@@ -1,35 +1,64 @@
 import request from "supertest";
 import {app} from "../app";
-import {createUserAndGetToken} from "./test.utils/utils";
+import {createUserAndGetToken, deleteUsers} from "./test.utils/utils";
 import {getFirestore} from "firebase-admin/firestore";
 
-describe("Group Routes", () => {
+describe("Group Tests", () => {
   let server: ReturnType<typeof app.listen>;
   let token: string;
   let uid: string;
 
+  let tokenAlice: string;
+  let uidAlice: string;
+
+  async function deleteData() {
+    await deleteUsers([uid, uidAlice]);
+
+    const users = await getFirestore().collection("users").listDocuments();
+    for (const doc of users) await doc.delete();
+
+    const groups = await getFirestore().collection("groups").listDocuments();
+    for (const doc of groups) await doc.delete();
+  }
+
   beforeAll(async () => {
     server = app.listen(5003);
+  });
+
+  beforeEach(async () => {
+    await deleteData();
+
     const result = await createUserAndGetToken("adminuser@example.com");
     token = result.idToken;
     uid = result.uid;
+
+    const resultAlice = await createUserAndGetToken("alice@example.com");
+    tokenAlice = resultAlice.idToken;
+    uidAlice = resultAlice.uid;
 
     await getFirestore().collection("users").doc(uid).set({
       username: "adminuser",
       email: "adminuser@example.com",
       avatarUrl: null,
-      rewardPoints: 0,
+      rewardPoints: 300,
+      groupId: null,
+    });
+
+    await getFirestore().collection("users").doc(uidAlice).set({
+      username: "Alice",
+      email: "alice@example.com",
+      avatarUrl: null,
+      rewardPoints: 100,
       groupId: null,
     });
   });
 
-  afterAll((done) => {
-    server.close(done);
+  afterEach(async () => {
+    await deleteData();
   });
 
-  afterEach(async () => {
-    const groups = await getFirestore().collection("groups").listDocuments();
-    for (const doc of groups) await doc.delete();
+  afterAll((done) => {
+    server.close(done);
   });
 
   describe("GET /groups", () => {
@@ -287,6 +316,42 @@ describe("Group Routes", () => {
 
       expect(res.status).toBe(200);
       expect(res.body.message).toBe("Members added successfully");
+    });
+  });
+
+  describe("GET /groups/:group_id/members", () => {
+    let groupId: string;
+
+    beforeEach(async () => {
+      const docRef = await getFirestore()
+        .collection("groups")
+        .add({
+          name: "Group to get all members",
+          groupCode: "JOIN123",
+          members: [uidAlice, uid],
+          admins: [uidAlice],
+          createdBy: uidAlice,
+        });
+      groupId = docRef.id;
+    });
+
+    it("should return 404 and get all members related to a group", async () => {
+      const res = await request(app)
+        .get("/groups/projectThatDoesNotExist/members")
+        .set("Authorization", `Bearer ${tokenAlice}`);
+      expect(res.status).toBe(404);
+      expect(res.body.message).toBe("Group not found");
+    });
+
+    it("should return 200 and get all members related to a group", async () => {
+      const res = await request(app)
+        .get(`/groups/${groupId}/members`)
+        .set("Authorization", `Bearer ${tokenAlice}`);
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBe(2);
+      expect(res.body[0]).toHaveProperty("uid");
+      expect(res.body[0].rewardPoints).toBe(300);
     });
   });
 });

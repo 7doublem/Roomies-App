@@ -242,4 +242,36 @@ export class groupController {
       next(error);
     }
   }
+
+  // GET /groups/:group_id/members - get all members from a specific group
+  static async getUsersByGroupId(req: Request, res: Response, next: NextFunction) {
+    try {
+      const groupId = req.params.group_id;
+      let users = [];
+      const groupDoc = await getFirestore().collection("groups").doc(groupId).get();
+
+      if (!groupDoc.exists) {
+        res.status(404).json({message: "Group not found"});
+        return;
+      }
+
+      const members = groupDoc.data()?.members || [];
+      const userDocs = await Promise.all(
+        members.map(async (uid: string) => {
+          const userDoc = await getFirestore().collection("users").doc(uid).get();
+          return userDoc;
+        })
+      );
+
+      users = userDocs
+        .filter((userDoc) => userDoc.exists)
+        .map((userDoc) => ({uid: userDoc.id, ...userDoc.data()}))
+        .sort((a, b) => (b.rewardPoints as number) - (a.rewardPoints as number));
+
+      res.status(200).json(users);
+    } catch (error) {
+      console.error(error);
+      next(error);
+    }
+  }
 }
