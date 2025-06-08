@@ -26,6 +26,6 @@ export const createUserAndGetToken = async (
   };
 };
 
-export const deleteUsers = async (uids: string[]) => {
-  await admin.auth().deleteUsers(uids.filter((id) => id)); // filter when id exists
+export const deleteUsersAuth = (uids: string[]) => {
+  return admin.auth().deleteUsers(uids.filter((id) => id)); // filter when id exists
 };
