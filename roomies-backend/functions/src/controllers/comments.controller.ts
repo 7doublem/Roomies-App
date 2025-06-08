@@ -3,20 +3,20 @@ import {getFirestore, Timestamp} from "firebase-admin/firestore";
 
 type Comment = {
   // commentId:string,
-  taskId: string,
+  choreId: string,
   commentBody: string,
   createdAt: number,
   createdBy: string, // uid but show name for the front....
 };
 
 export class commentController {
-  // confirm the right router
-  // POST /comment/task/:task_id - creator of comments for a task
+  // POST /chores/:chore_id/comments - creator of comments for a chore
   static async createComment(req: Request, res: Response, next: NextFunction) {
     try {
       const {commentBody} = req.body;
       const creatorUid = req.user?.uid;
-      const taskId = req.params.task_id;
+      const groupId = req.params.group_id;
+      const choreId = req.params.chore_id;
 
       if (!creatorUid) {
         res.status(401).json({message: "Unauthorised"});
@@ -28,23 +28,31 @@ export class commentController {
         return;
       }
 
-      const taskRef = getFirestore().collection("tasks").doc(taskId);
-      const taskDoc = await taskRef.get();
+      const groupRef = await getFirestore().collection("groups").doc(groupId);
+      const groupDoc = await groupRef.get();
 
-      if (!taskDoc.exists) {
-        res.status(404).json({message: "Task not found"});
+      if (!groupDoc.exists) {
+        res.status(404).send({message: "Group not found"});
+        return;
+      }
+
+      const choreRef = groupRef.collection("chores").doc(choreId);
+      const choreDoc = await choreRef.get();
+
+      if (!choreDoc.exists) {
+        res.status(404).json({message: "Chore not found"});
         return;
       }
 
       const newComment: Comment = {
         // commentId:string, //generated
-        taskId,
+        choreId: choreId,
         commentBody,
         createdAt: Timestamp.now().seconds,
         createdBy: creatorUid, // uid but show name for the front....
       };
 
-      const commentRef = await getFirestore().collection("comments").add(newComment);
+      const commentRef = await choreRef.collection("comments").add(newComment);
       res.status(201).json({commentId: commentRef.id, ...newComment});
       return;
     } catch (error) {
@@ -53,22 +61,30 @@ export class commentController {
     }
   }
 
-  // confirm the right router
-  // GET /comment/task/:task_id - get all comments related to an specific task
-  static async getAllCommentsByTaskId(req: Request, res: Response, next: NextFunction) {
+  // GET /chores/:chore_id/comments - get all comments related to an specific chore
+  static async getAllCommentsByChoreId(req: Request, res: Response, next: NextFunction) {
     try {
-      const taskId = req.params.task_id;
+      const groupId = req.params.group_id;
+      const choreId = req.params.chore_id;
 
-      const taskRef = await getFirestore().collection("tasks").doc(taskId);
-      const taskDoc = await taskRef.get();
+      const groupRef = await getFirestore().collection("groups").doc(groupId);
+      const groupDoc = await groupRef.get();
 
-      if (!taskDoc.exists) {
-        res.status(404).json({message: "Task not found"});
+      if (!groupDoc.exists) {
+        res.status(404).send({message: "Group not found"});
         return;
       }
 
-      const commentDoc = await getFirestore().collection("comments").where("taskId", "==", taskId).get();
-      const comments = commentDoc.docs.map((doc) => {
+      const choreRef = groupRef.collection("chores").doc(choreId);
+      const choreDoc = await choreRef.get();
+
+      if (!choreDoc.exists) {
+        res.status(404).json({message: "Chore not found"});
+        return;
+      }
+
+      const commentDocs = await choreRef.collection("comments").get();
+      const comments = commentDocs.docs.map((doc) => {
         return {
           commentId: doc.id,
           ...doc.data(),

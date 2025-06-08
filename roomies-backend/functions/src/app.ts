@@ -1,6 +1,6 @@
 import express from "express";
 import {userRoutes} from "./routes/users.routes";
-import {taskRoutes} from "./routes/tasks.routes";
+import {choreRoutes} from "./routes/chores.routes";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import serviceAccount from "../firebaseServiceAccount.json";
@@ -28,9 +28,9 @@ export const app = express();
 
 app.use(cors({origin: true}));
 app.use(express.json());
-app.use("/users", userRoutes);
-app.use("/groups", groupRoutes);
-app.use("/groups", taskRoutes);
-app.use("/comments", commentRoutes);
+app.use(userRoutes);
+app.use(groupRoutes);
+app.use(choreRoutes);
+app.use(commentRoutes);
 
 export const roomiesapi = functions.https.onRequest(app);

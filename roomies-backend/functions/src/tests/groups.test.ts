@@ -1,6 +1,6 @@
 import request from "supertest";
 import {app} from "../app";
-import {createUserAndGetToken, deleteUsers} from "./test.utils/utils";
+import {createUserAndGetToken, deleteUsersAuth} from "./test.utils/utils";
 import {getFirestore} from "firebase-admin/firestore";
 
 describe("Group Tests", () => {
@@ -12,7 +12,7 @@ describe("Group Tests", () => {
   let uidAlice: string;
 
   async function deleteData() {
-    await deleteUsers([uid, uidAlice]);
+    await deleteUsersAuth([uid, uidAlice]);
 
     const users = await getFirestore().collection("users").listDocuments();
     for (const doc of users) await doc.delete();
@@ -229,6 +229,8 @@ describe("Group Tests", () => {
 
       expect(res.status).toBe(403);
       expect(res.body.message).toBe("Forbidden");
+
+      await deleteUsersAuth([newUid]);
     });
 
     it("should return 404 if group does not exist", async () => {
@@ -306,6 +308,8 @@ describe("Group Tests", () => {
 
       expect(res.status).toBe(403);
       expect(res.body.message).toBe("Forbidden");
+
+      await deleteUsersAuth([newUid]);
     });
 
     it("should return 200 and add member", async () => {
