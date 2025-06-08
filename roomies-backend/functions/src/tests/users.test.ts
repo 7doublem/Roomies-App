@@ -52,14 +52,14 @@ describe("User Routes", () => {
           email: "testuser2@example.com",
           password: "password123",
         });
-        
+
       expect(res.status).toBe(201);
       expect(res.body).toHaveProperty("uid");
       expect(res.body.message).toBe("User created successfully");
 
       await deleteUsersAuth([res.body.uid]);
     });
-      
+
     it("should fail if required fields are missing", async () => {
       const res = await request(app)
         .post("/users")

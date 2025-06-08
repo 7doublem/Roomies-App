@@ -22,7 +22,6 @@ describe("Comments Tests", () => {
 
     const groups = await getFirestore().collection("groups").listDocuments(); // it should delete chores together
     for (const doc of groups) await doc.delete();
-
   }
 
   beforeAll(async () => {
