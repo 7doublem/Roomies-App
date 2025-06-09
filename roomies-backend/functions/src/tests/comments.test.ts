@@ -1,8 +1,8 @@
 import request from "supertest";
-import {app} from "../app";
-import {createUserAndGetToken, deleteUsersAuth} from "./test.utils/utils";
-import {DocumentReference, getFirestore} from "firebase-admin/firestore";
-import {generateGroupCode} from "../utils/GroupCodeGenerator";
+import { app } from "../app";
+import { createUserAndGetToken, deleteUsersAuth } from "./test.utils/utils";
+import { DocumentReference, getFirestore } from "firebase-admin/firestore";
+import { generateGroupCode } from "../utils/GroupCodeGenerator";
 
 describe("Comments Tests", () => {
   let server: ReturnType<typeof app.listen>;
@@ -55,24 +55,30 @@ describe("Comments Tests", () => {
       groupId: null,
     });
 
-    groupA = await getFirestore().collection("groups").add({
-      name: "Group Admin",
-      members: [uid, uidAlice],
-      admins: [uid],
-      createdBy: uid,
-      groupCode: generateGroupCode(),
-    });
+    groupA = await getFirestore()
+      .collection("groups")
+      .add({
+        name: "Group Admin",
+        members: [uid, uidAlice],
+        admins: [uid],
+        createdBy: uid,
+        groupCode: generateGroupCode(),
+      });
 
-    choreA = await getFirestore().collection("groups").doc(groupA.id).collection("chores").add({
-      name: "Wash the dishes",
-      description: "Use fairy original washing up",
-      rewardPoints: 246,
-      startDate: 1754648400, // 8/jun/2025 13:00
-      dueDate: 1754821200, // 10/jun/2025 13:00
-      assignedTo: uidAlice,
-      status: "todo",
-      createdBy: uid,
-    });
+    choreA = await getFirestore()
+      .collection("groups")
+      .doc(groupA.id)
+      .collection("chores")
+      .add({
+        name: "Wash the dishes",
+        description: "Use fairy original washing up",
+        rewardPoints: 246,
+        startDate: 1754648400, // 8/jun/2025 13:00
+        dueDate: 1754821200, // 10/jun/2025 13:00
+        assignedTo: uidAlice,
+        status: "todo",
+        createdBy: uid,
+      });
   });
 
   afterEach(async () => {
@@ -83,7 +89,8 @@ describe("Comments Tests", () => {
     server.close(done);
   });
 
-  describe("POST /groups/:group_id/chores/:chore_id/comments", () => { // confirm the right router
+  describe("POST /groups/:group_id/chores/:chore_id/comments", () => {
+    // confirm the right router
     it("should return 401 if user is not authenticated", async () => {
       const newComment = {
         commentBody: "Don't forget to wash gold porcelain glasses by hand",
@@ -139,10 +146,12 @@ describe("Comments Tests", () => {
     });
   });
 
-  describe("GET /groups/:group_id/chores/:chore_id/comments", () => { // confirm the right router
+  describe("GET /groups/:group_id/chores/:chore_id/comments", () => {
+    // confirm the right router
     it("should return 401 if user is not authenticated", async () => {
-      const res = await request(app)
-        .get(`/groups/${groupA.id}/chores/${choreA.id}/comments`);
+      const res = await request(app).get(
+        `/groups/${groupA.id}/chores/${choreA.id}/comments`
+      );
       expect(res.status).toBe(401);
       expect(res.body.message).toBe("Unauthorised");
     });
@@ -179,7 +188,6 @@ describe("Comments Tests", () => {
         createdBy: uidAlice,
         createdAt: 123356,
       });
-
       const res = await request(app)
         .get(`/groups/${groupA.id}/chores/${choreA.id}/comments`)
         .set("Authorization", `Bearer ${tokenAlice}`);
@@ -196,6 +204,81 @@ describe("Comments Tests", () => {
           createdBy: expect.any(String),
         });
       });
+    });
+  });
+
+  describe("DELETE /groups/:group_id/chores/:chore_id/comment/:comment_id", () => {
+    it("204 - Comment is successfully deleted", async () => {
+      const newComment = {
+        commentBody: "Don't forget to wash gold porcelain glasses by hand",
+      };
+      const commentRes = await request(app)
+        .post(`/groups/${groupA.id}/chores/${choreA.id}/comments`)
+        .set("Authorization", `Bearer ${token}`)
+        .send(newComment);
+      const comment = commentRes.body;
+      const deleteRes = await request(app)
+        .delete(
+          `/groups/${groupA.id}/chores/${choreA.id}/comments/${comment.commentId}`
+        )
+        .set("Authorization", `Bearer ${token}`);
+      expect(deleteRes.status).toBe(204);
+      const checkRes = await request(app)
+        .get(`/groups/${groupA.id}/chores/${choreA.id}/comments`)
+        .set("Authorization", `Bearer ${token}`);
+      expect(checkRes.status).toBe(200);
+      expect(checkRes.body).toEqual([]);
+      expect(Array.isArray(checkRes.body)).toBe(true);
+    });
+    it("404 - Fails when group is invalid", async () => {
+      const newComment = {
+        commentBody: "Don't forget to wash gold porcelain glasses by hand",
+      };
+      const commentRes = await request(app)
+        .post(`/groups/${groupA.id}/chores/${choreA.id}/comments`)
+        .set("Authorization", `Bearer ${token}`)
+        .send(newComment);
+      const comment = commentRes.body;
+      const deleteRes = await request(app)
+        .delete(
+          `/groups/FAIL/chores/${choreA.id}/comments/${comment.commentId}`
+        )
+        .set("Authorization", `Bearer ${token}`);
+      expect(deleteRes.status).toBe(404);
+      expect(deleteRes.body.message).toBe("Group not found")
+    });
+    it("404 - Fails when chore is invalid", async () => {
+      const newComment = {
+        commentBody: "Don't forget to wash gold porcelain glasses by hand",
+      };
+      const commentRes = await request(app)
+        .post(`/groups/${groupA.id}/chores/${choreA.id}/comments`)
+        .set("Authorization", `Bearer ${token}`)
+        .send(newComment);
+      const comment = commentRes.body;
+      const deleteRes = await request(app)
+        .delete(
+          `/groups/${groupA.id}/chores/FAIL/comments/${comment.commentId}`
+        )
+        .set("Authorization", `Bearer ${token}`);
+      expect(deleteRes.status).toBe(404);
+      expect(deleteRes.body.message).toBe("Chore not found")
+    });
+    it("404 - Fails when comment is invalid", async () => {
+      const newComment = {
+        commentBody: "Don't forget to wash gold porcelain glasses by hand",
+      };
+      await request(app)
+        .post(`/groups/${groupA.id}/chores/${choreA.id}/comments`)
+        .set("Authorization", `Bearer ${token}`)
+        .send(newComment);
+      const deleteRes = await request(app)
+        .delete(
+          `/groups/${groupA.id}/chores/${choreA.id}/comments/FAIL`
+        )
+        .set("Authorization", `Bearer ${token}`);
+      expect(deleteRes.status).toBe(404);
+      expect(deleteRes.body.message).toBe("Comment not found")
     });
   });
 });
