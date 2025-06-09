@@ -600,5 +600,89 @@ addChoreScreen_label: {
   color: '#555',
   marginBottom: 6,
   marginTop: 10,
+  },
+// Group Screen
+groupScreen_container: { flex: 1, paddingHorizontal: 20 },
+groupSection_text: {
+  fontSize: 16,
+  fontWeight: '600',
+  marginBottom: 12,
+  color: '#555',
+},
+
+inputContainer: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  marginBottom: 20,
+},
+
+textInput: {
+  flex: 1,
+  height: 44,
+  borderColor: '#ccc',
+  borderWidth: 1,
+  borderRadius: 10,
+  paddingHorizontal: 15,
+  backgroundColor: 'white',
+  fontSize: 16,
+  color: '#333',
+},
+
+addButton: {
+  marginLeft: 12,
+  borderRadius: 15,
+  backgroundColor: 'white',
+  justifyContent: 'center',
+  alignItems: 'center',
+  elevation: 4,
+},
+
+userCardContainer: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  backgroundColor: '#fff',
+  borderRadius: 12,
+  paddingVertical: 12,
+  paddingHorizontal: 16,
+  marginBottom: 12,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.1,
+  shadowRadius: 3,
+  elevation: 3,
+},
+
+userInfoContainer: {
+  flexDirection: 'row',
+  alignItems: 'center',
+},
+
+avatar: {
+  width: 48,
+  height: 48,
+  borderRadius: 24,
+  marginRight: 12,
+},
+
+userTextContainer: {
+  flexDirection: 'column',
+},
+
+GroupScreen_userName: {
+  fontSize: 18,
+  fontWeight: '600',
+  color: '#222',
+},
+
+userPoints: {
+  fontSize: 14,
+  color: '#666',
+  marginTop: 4,
+},
+
+deleteButton: {
+  padding: 6,
+  borderRadius: 20,
 },
     });

@@ -19,7 +19,7 @@ export async function apiFetch(
 }
 
  // Retrieves the current user's Firebase authentication token.
-async function getAuthToken(): Promise<string> {
+export async function getAuthToken(): Promise<string> {
   const user = auth.currentUser;
   if (!user) throw new Error('User not authenticated');
   return await getIdToken(user);
