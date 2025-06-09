@@ -41,6 +41,15 @@ export class userController {
         avatarUrl :
         undefined;
 
+      const existingUser = await getFirestore().collection("users")
+        .where("username", "==", username)
+        .get();
+      
+      if (!existingUser.empty) {
+        res.status(400).json({message: "Username is already being used"});
+        return;
+      }
+
       // create user in firebase auth
       const authUser = await getAuth().createUser({
         email,

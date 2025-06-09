@@ -71,7 +71,7 @@ export class ChoreController {
 
       // const choreRef = await getFirestore().collection("chores").add(newChore);
       const choreRef = await groupRef.collection("chores").add(newChore);
-      res.status(201).send({id: choreRef.id, ...newChore});
+      res.status(201).send({choreId: choreRef.id, ...newChore});
       return;
     } catch (error) {
       console.error(error);
@@ -166,7 +166,7 @@ export class ChoreController {
       const newChoreRef = groupRef.collection("chores").doc(choreId);
       const newChoreDoc = await newChoreRef.get();
 
-      res.status(201).send({id: choreRef.id, ...newChoreDoc.data()});
+      res.status(201).send({choreId: choreRef.id, ...newChoreDoc.data()});
       return;
     } catch (error) {
       console.error(error);

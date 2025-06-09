@@ -2,16 +2,17 @@ import {Request, Response, NextFunction} from "express";
 import {getFirestore} from "firebase-admin/firestore";
 import {generateGroupCode} from "../utils/GroupCodeGenerator";
 
-type Group = {
+export type Group = {
+  //groupId: string; //generated
   name: string;
-  groupCode: string;
   members: string[];
   admins: string[];
   createdBy: string;
+  groupCode: string;
 };
 
 export class groupController {
-  // GET /groups
+  // GET /groups - get all groups
   static async getAllGroups(req: Request, res: Response, next: NextFunction) {
     try {
       const groupDoc = await getFirestore().collection("groups").get();
@@ -32,30 +33,34 @@ export class groupController {
   // POST /groups - creator of group is group admin, can add multiple members by username
   static async createGroup(req: Request, res: Response, next: NextFunction) {
     try {
-      const {name, usernames} = req.body;
+
+
+      const {name, members} = req.body;
       const creatorUid = req.user?.uid;
 
       if (!creatorUid) {
         res.status(401).json({message: "Unauthorised"});
         return;
       }
+
       if (!name) {
         res.status(400).json({message: "Group name is required"});
         return;
       }
 
       let memberUids: string[] = [];
-      if (Array.isArray(usernames) && usernames.length > 0) {
+      if (Array.isArray(members) && members.length > 0) {
         const userDocs = await getFirestore()
           .collection("users")
-          .where("username", "in", usernames)
+          .where("username", "in", members)
           .get();
-
+          
         memberUids = userDocs.docs.map((doc) => doc.id);
-        const foundUsernames = userDocs.docs.map((doc) => doc.data().username);
-        const notFound = usernames.filter((u) => !foundUsernames.includes(u));
+
+        const foundUsernames = userDocs.docs.map((doc) => doc.data()?.username);
+        const notFound = members.filter((u) => !foundUsernames.includes(u));
         if (notFound.length) {
-          console.warn("Usernames not found:", notFound);
+          console.warn("Members not found:", notFound);
         }
       }
 
@@ -88,10 +93,10 @@ export class groupController {
 
       const newGroup: Group = {
         name,
-        groupCode,
         members: memberUids,
         admins,
         createdBy: creatorUid,
+        groupCode,
       };
 
       const docRef = await getFirestore().collection("groups").add(newGroup);
@@ -142,7 +147,11 @@ export class groupController {
       }
 
       await groupDoc.ref.update({members: [...group.members, uid]});
-      res.status(200).json({message: "Successfully joined group"});
+
+      const updatedGroupDoc = await getFirestore().collection("groups").doc(groupDoc.id).get()
+      //await getFirestore().collection("groups").doc(groupDoc.id).get()
+      res.status(200).json({groupId: groupDoc.id, ...updatedGroupDoc.data()});
+      //res.status(200).json({message: "Successfully joined group"});
       return;
     } catch (error) {
       console.error(error);
@@ -192,6 +201,7 @@ export class groupController {
       next(error);
     }
   }
+  
   // PATCH /groups/:group_id/members - only admins can add new user by username
   static async addMemberToGroup(
     req: Request,
@@ -201,16 +211,28 @@ export class groupController {
     try {
       const uid = req.user?.uid;
       const groupId = req.params.group_id;
-      const {usernames} = req.body;
+      const {members} = req.body;
 
       if (!uid) {
         res.status(401).json({message: "Unauthorized"});
         return;
       }
-      if (!Array.isArray(usernames) || usernames.length === 0) {
-        res.status(400).json({message: "Username(s) required"});
+      if (!Array.isArray(members) || members.length === 0) {
+        res.status(400).json({message: "Member(s) required"});
         return;
       }
+
+      const userDoc = await getFirestore()
+        .collection("users")
+        .doc(uid)
+        .get();
+
+      if (!userDoc.exists) {
+        res.status(400).json({message: "Could not find details of requestor"});
+        return;
+      }
+
+      const username = userDoc.data()?.username
 
       const groupRef = getFirestore().collection("groups").doc(groupId);
       const groupDoc = await groupRef.get();
@@ -221,14 +243,14 @@ export class groupController {
       }
 
       const group = groupDoc.data() as Group;
-      if (!group.admins.includes(uid)) {
+      if (!group.admins.includes(username)) {
         res.status(403).json({message: "Forbidden"});
         return;
       }
 
       const userDocs = await getFirestore()
         .collection("users")
-        .where("username", "in", usernames)
+        .where("members", "in", members)
         .get();
       const newUids = userDocs.docs.map((doc) => doc.id);
       const currentMembers = new Set(group.members);
@@ -247,7 +269,6 @@ export class groupController {
   static async getUsersByGroupId(req: Request, res: Response, next: NextFunction) {
     try {
       const groupId = req.params.group_id;
-      let users = [];
       const groupDoc = await getFirestore().collection("groups").doc(groupId).get();
 
       if (!groupDoc.exists) {
@@ -256,6 +277,16 @@ export class groupController {
       }
 
       const members = groupDoc.data()?.members || [];
+
+      // const userDocs = await getFirestore().collection("users")
+      //   .where("username", "in", members)
+      //   .where("username", "in", members)
+      //   .get();
+      //     const users = userDocs.docs
+      // .filter((userDoc) => userDoc.exists)
+      // .map((userDoc) => ({uid: userDoc.id, ...userDoc.data()} as any as User))
+      // .sort((a, b) => (b.rewardPoints as number) - (a.rewardPoints as number));
+
       const userDocs = await Promise.all(
         members.map(async (uid: string) => {
           const userDoc = await getFirestore().collection("users").doc(uid).get();
@@ -263,10 +294,11 @@ export class groupController {
         })
       );
 
-      users = userDocs
+      let users = userDocs
         .filter((userDoc) => userDoc.exists)
         .map((userDoc) => ({uid: userDoc.id, ...userDoc.data()}))
         .sort((a, b) => (b.rewardPoints as number) - (a.rewardPoints as number));
+
 
       res.status(200).json(users);
     } catch (error) {

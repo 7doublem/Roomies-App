@@ -199,7 +199,7 @@ describe("Chore Tests", () => {
       expect(chore.name).toContain("Chore to test");
       expect(chore).toMatchObject({
         // groupId: expect.any(String),
-        id: expect.any(String),
+        choreId: expect.any(String),
         name: expect.any(String),
         description: expect.any(String),
         rewardPoints: expect.any(Number),
@@ -407,7 +407,7 @@ describe("Chore Tests", () => {
       const chore = res.body;
       expect(chore).toMatchObject({
         // groupId: groupA.id,
-        id: choreA.id,
+        choreId: choreA.id,
         name: "Chore to test updated",
         description: "updated", // optional
         rewardPoints: 87,
@@ -452,7 +452,7 @@ describe("Chore Tests", () => {
       const chore = res.body;
       expect(chore).toMatchObject({
         // groupId: groupA.id,
-        id: choreA.id,
+        choreId: choreA.id,
         name: "Chore to test updated",
         description: "updated", // optional
         rewardPoints: 87,
@@ -486,7 +486,6 @@ describe("Chore Tests", () => {
         dueDate: 1754821200, // 10/jun/2025 13:00
         assignedTo: uidAlice,
         status: "doing",
-        createdBy: uid,
       };
 
       const res = await request(app)
@@ -498,7 +497,7 @@ describe("Chore Tests", () => {
       console.log(chore, "patch chore");
       expect(chore).toMatchObject({
         // groupId: groupA.id,
-        id: choreA.id,
+        choreId: choreA.id,
         name: "Chore to test updated",
         description: "updated", // optional
         rewardPoints: 87,

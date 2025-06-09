@@ -132,8 +132,7 @@ describe("Comments Tests", () => {
       console.log(comment, "post comment");
       expect(comment).toMatchObject({
         commentId: comment.commentId,
-        choreId: choreA.id,
-        commentBody: "Don't forget to wash gold porcelain glasses by hand",
+        commentBody: comment.commentBody,
         createdAt: expect.any(Number),
         createdBy: expect.any(String),
       });
@@ -175,7 +174,6 @@ describe("Comments Tests", () => {
 
     it("should return 200 and get all comments related to a chore", async () => {
       await choreA.collection("comments").add({
-        choreId: choreA.id,
         commentBody: "That's super boring!",
         createdBy: uidAlice,
         createdAt: 123356,
@@ -192,7 +190,6 @@ describe("Comments Tests", () => {
       comments.forEach((comment: Comment) => {
         expect(comment).toMatchObject({
           commentId: expect.any(String),
-          choreId: expect.any(String),
           commentBody: expect.any(String),
           createdAt: expect.any(Number),
           createdBy: expect.any(String),

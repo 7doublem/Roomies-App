@@ -6,7 +6,7 @@ export const groupRoutes = Router();
 
 
 // GET /groups - used for app administration
-groupRoutes.get("/groups", groupController.getAllGroups);
+groupRoutes.get("/groups", authenticateUser, groupController.getAllGroups);
 
 // POST /groups - for users to create a group
 groupRoutes.post("/groups", authenticateUser, groupController.createGroup);

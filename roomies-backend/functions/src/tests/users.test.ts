@@ -48,8 +48,8 @@ describe("User Routes", () => {
       const res = await request(app)
         .post("/users")
         .send({
-          username: "testuser",
-          email: "testuser2@example.com",
+          username: "testuser1",
+          email: "testuser1@example.com",
           password: "password123",
         });
 

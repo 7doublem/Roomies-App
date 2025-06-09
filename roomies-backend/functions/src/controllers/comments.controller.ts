@@ -3,7 +3,7 @@ import {getFirestore, Timestamp} from "firebase-admin/firestore";
 
 type Comment = {
   // commentId:string,
-  choreId: string,
+  //choreId: string, //its nested
   commentBody: string,
   createdAt: number,
   createdBy: string, // uid but show name for the front....
@@ -46,7 +46,6 @@ export class commentController {
 
       const newComment: Comment = {
         // commentId:string, //generated
-        choreId: choreId,
         commentBody,
         createdAt: Timestamp.now().seconds,
         createdBy: creatorUid, // uid but show name for the front....
