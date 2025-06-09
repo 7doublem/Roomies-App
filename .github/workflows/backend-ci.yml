@@ -37,6 +37,8 @@ jobs:
         run: npm run lint
 
       - name: Run tests using Firebase Emulators
+        env:
+          FUNCTIONS_EMULATOR: "true"
         run: |
           firebase emulators:exec --only firestore,auth --project "$FIREBASE_PROJECT_ID" -- \
           bash -c "sleep 15 && npm test"
