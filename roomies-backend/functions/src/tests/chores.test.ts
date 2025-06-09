@@ -21,7 +21,7 @@ describe("Chore Tests", () => {
     const users = await getFirestore().collection("users").listDocuments();
     for (const doc of users) await doc.delete();
 
-    const groups = await getFirestore().collection("groups").listDocuments();
+    const groups = await getFirestore().collection("groups").listDocuments(); // it should delete chores together
     for (const doc of groups) await doc.delete();
   }
 
@@ -213,14 +213,14 @@ describe("Chore Tests", () => {
   });
 
   describe("GET /groups/:group_id/chores", () => {
-    it("should return 401 when group does not exist", async () => {
+    it("should return 401 if user is not authenticated", async () => {
       const res = await request(app)
         .get(`/groups/${groupA.id}/chores`);
       expect(res.status).toBe(401);
       expect(res.body.message).toBe("Unauthorised");
     });
 
-    it("should return 404 when group does not exist", async () => {
+    it("should return 404 if group does not exist", async () => {
       const res = await request(app)
         .get("/groups/choreNotFound/chores")
         .set("Authorization", `Bearer ${token}`);
