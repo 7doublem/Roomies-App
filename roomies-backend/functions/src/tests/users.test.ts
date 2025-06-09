@@ -32,7 +32,6 @@ describe("User Routes", () => {
       email: "testuser@example.com",
       avatarUrl: null,
       rewardPoints: 300,
-      groupId: null,
     });
   });
 

@@ -7,7 +7,7 @@ export type User = {
   email: string;
   avatarUrl: string | null;
   rewardPoints: number;
-  groupId: null;
+  //groupId: null;
 };
 
 export class userController {
@@ -65,7 +65,7 @@ export class userController {
         email,
         avatarUrl: validPhotoURL || null,
         rewardPoints: 0,
-        groupId: null,
+        //groupId: null,
       };
 
       await getFirestore().collection("users").doc(authUser.uid).set(userDoc);

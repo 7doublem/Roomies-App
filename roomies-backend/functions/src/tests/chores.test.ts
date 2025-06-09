@@ -44,7 +44,6 @@ describe("Chore Tests", () => {
       email: "adminuser@example.com",
       avatarUrl: null,
       rewardPoints: 300,
-      groupId: null,
     });
 
     await getFirestore().collection("users").doc(uidAlice).set({
@@ -52,7 +51,6 @@ describe("Chore Tests", () => {
       email: "alice@example.com",
       avatarUrl: null,
       rewardPoints: 100,
-      groupId: null,
     });
 
     groupA = await getFirestore().collection("groups").add({
@@ -75,7 +73,6 @@ describe("Chore Tests", () => {
   describe("POST /groups/:group_id/chores", () => {
     it("should return 401 if user is not authenticated", async () => {
       const newChore = {
-        // groupId: groupA.id,
         name: "Chore to test",
         description: "", // optional
         rewardPoints: 87,
@@ -95,7 +92,6 @@ describe("Chore Tests", () => {
 
     it("should return 400 if no obligatory fields are provided - name", async () => {
       const newChore = {
-        // groupId: groupA.id, // it should be a subcollection
         description: "", // optional
         rewardPoints: 87,
         startDate: 1754648400, // 8/jun/2025 13:00
@@ -115,7 +111,6 @@ describe("Chore Tests", () => {
 
     it("should return 400 if no obligatory fields provided - dueDate", async () => {
       const newChore = {
-        // groupId: groupA.id,
         name: "Chore to test",
         description: "", // optional
         rewardPoints: 87,
@@ -136,7 +131,6 @@ describe("Chore Tests", () => {
 
     it("should return 400 if status is not valid", async () => {
       const newChore = {
-        // groupId: groupA.id, // it should be a subcollection
         name: "Clean the bathroom",
         description: "", // optional
         rewardPoints: 87,
@@ -157,7 +151,6 @@ describe("Chore Tests", () => {
 
     it("should return 404 if group does not exist", async () => {
       const newChore = {
-        // groupId: groupA.id,
         name: "Chore to test",
         description: "Let's testing", // optional
         rewardPoints: 87,
@@ -165,7 +158,6 @@ describe("Chore Tests", () => {
         dueDate: 1754821200, // 10/jun/2025 13:00
         assignedTo: uidAlice,
         status: "todo",
-        // createdBy: uid,
       };
       const res = await request(app)
         .post("/groups/groupNotFound/chores")
@@ -177,7 +169,6 @@ describe("Chore Tests", () => {
 
     it("should return 201 and create a chore", async () => {
       const newChore = {
-        // groupId: groupA.id,
         name: "Chore to test",
         // description: "Let's testing", //optional
         rewardPoints: 87,
@@ -195,7 +186,6 @@ describe("Chore Tests", () => {
       const chore = res.body;
       expect(chore.name).toContain("Chore to test");
       expect(chore).toMatchObject({
-        // groupId: expect.any(String),
         choreId: expect.any(String),
         name: expect.any(String),
         description: expect.any(String),
@@ -236,7 +226,6 @@ describe("Chore Tests", () => {
 
     it("should return 200 and an array of chores", async () => {
       await getFirestore().collection("groups").doc(groupA.id).collection("chores").add({
-        // groupId: groupA.id,
         name: "Chore to test",
         description: "", // optional
         rewardPoints: 87,
@@ -256,7 +245,6 @@ describe("Chore Tests", () => {
       expect(Array.isArray(chores)).toBe(true);
       chores.forEach((chore: Chore) => {
         expect(chore).toMatchObject({
-          // groupId: expect.any(String),
           name: expect.any(String),
           description: expect.any(String),
           rewardPoints: expect.any(Number),
@@ -273,7 +261,6 @@ describe("Chore Tests", () => {
   describe("PATCH /groups/:group_id/chores/:chore_id", () => {
     it("should return 401 if user is not authenticated", async () => {
       const choreA = await getFirestore().collection("groups").doc(groupA.id).collection("chores").add({
-        // groupId: groupA.id,
         name: "Chore to test",
         description: "", // optional
         rewardPoints: 87,
@@ -285,7 +272,6 @@ describe("Chore Tests", () => {
       });
 
       const updatedChore = {
-        // groupId: groupA.id,
         name: "Chore to test updated",
         description: "updated", // optional
         rewardPoints: 87,
@@ -305,7 +291,6 @@ describe("Chore Tests", () => {
 
     it("should return 400 if status is not valid", async () => {
       const choreA = await getFirestore().collection("groups").doc(groupA.id).collection("chores").add({
-        // groupId: groupA.id,
         name: "Chore to test",
         description: "", // optional
         rewardPoints: 87,
@@ -317,7 +302,6 @@ describe("Chore Tests", () => {
       });
 
       const updatedChore = {
-        // groupId: groupA.id,
         name: "Chore to test updated",
         description: "updated", // optional
         rewardPoints: 87,
@@ -338,7 +322,6 @@ describe("Chore Tests", () => {
 
     it("should return 404 if group does not exist", async () => {
       const choreA = await getFirestore().collection("groups").doc(groupA.id).collection("chores").add({
-        // groupId: groupA.id,
         name: "Chore to test",
         description: "", // optional
         rewardPoints: 87,
@@ -350,7 +333,6 @@ describe("Chore Tests", () => {
       });
 
       const updatedChore = {
-        // groupId: groupA.id,
         name: "Chore to test updated",
         description: "updated", // optional
         rewardPoints: 87,
@@ -371,7 +353,6 @@ describe("Chore Tests", () => {
 
     it("should return 200 and update a chore, ignoring invalid fields", async () => {
       const choreA = await getFirestore().collection("groups").doc(groupA.id).collection("chores").add({
-        // groupId: groupA.id,
         name: "Chore to test",
         description: "", // optional
         rewardPoints: 87,
@@ -383,7 +364,6 @@ describe("Chore Tests", () => {
       });
 
       const updatedChore = {
-        // groupId: groupA.id,
         id: "ZpQwcGLzKq9DqgNn9HL",
         name: "Chore to test updated",
         description: "updated", // optional
@@ -402,7 +382,6 @@ describe("Chore Tests", () => {
       expect(res.status).toBe(201);
       const chore = res.body;
       expect(chore).toMatchObject({
-        // groupId: groupA.id,
         choreId: choreA.id,
         name: "Chore to test updated",
         description: "updated", // optional
@@ -417,7 +396,6 @@ describe("Chore Tests", () => {
 
     it("should return 201 but createdBy must be ignored", async () => {
       const choreA = await getFirestore().collection("groups").doc(groupA.id).collection("chores").add({
-        // groupId: groupA.id,
         name: "Chore to test",
         description: "", // optional
         rewardPoints: 87,
@@ -429,7 +407,6 @@ describe("Chore Tests", () => {
       });
 
       const updatedChore = {
-        // groupId: groupA.id,
         name: "Chore to test updated",
         description: "updated", // optional
         rewardPoints: 87,
@@ -447,7 +424,6 @@ describe("Chore Tests", () => {
       expect(res.status).toBe(201);
       const chore = res.body;
       expect(chore).toMatchObject({
-        // groupId: groupA.id,
         choreId: choreA.id,
         name: "Chore to test updated",
         description: "updated", // optional
@@ -462,7 +438,6 @@ describe("Chore Tests", () => {
 
     it("should return 201 and update a chore", async () => {
       const choreA = await getFirestore().collection("groups").doc(groupA.id).collection("chores").add({
-        // groupId: groupA.id,
         name: "Chore to test",
         description: "", // optional
         rewardPoints: 87,
@@ -474,7 +449,6 @@ describe("Chore Tests", () => {
       });
 
       const updatedChore = {
-        // groupId: groupA.id,
         name: "Chore to test updated",
         description: "updated", // optional
         rewardPoints: 87,
@@ -491,7 +465,6 @@ describe("Chore Tests", () => {
       expect(res.status).toBe(201);
       const chore = res.body;
       expect(chore).toMatchObject({
-        // groupId: groupA.id,
         choreId: choreA.id,
         name: "Chore to test updated",
         description: "updated", // optional

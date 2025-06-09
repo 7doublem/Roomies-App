@@ -43,7 +43,6 @@ describe("Comments Tests", () => {
       email: "adminuser@example.com",
       avatarUrl: null,
       rewardPoints: 300,
-      groupId: null,
     });
 
     await getFirestore().collection("users").doc(uidAlice).set({
@@ -51,7 +50,6 @@ describe("Comments Tests", () => {
       email: "alice@example.com",
       avatarUrl: null,
       rewardPoints: 100,
-      groupId: null,
     });
 
     groupA = await getFirestore()
