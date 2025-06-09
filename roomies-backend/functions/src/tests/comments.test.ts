@@ -1,8 +1,8 @@
 import request from "supertest";
-import { app } from "../app";
-import { createUserAndGetToken, deleteUsersAuth } from "./test.utils/utils";
-import { DocumentReference, getFirestore } from "firebase-admin/firestore";
-import { generateGroupCode } from "../utils/GroupCodeGenerator";
+import {app} from "../app";
+import {createUserAndGetToken, deleteUsersAuth} from "./test.utils/utils";
+import {DocumentReference, getFirestore} from "firebase-admin/firestore";
+import {generateGroupCode} from "../utils/GroupCodeGenerator";
 
 describe("Comments Tests", () => {
   let server: ReturnType<typeof app.listen>;
@@ -213,7 +213,7 @@ describe("Comments Tests", () => {
         .post(`/groups/${groupA.id}/chores/${choreA.id}/comments`)
         .set("Authorization", `Bearer ${token}`)
         .send(newComment);
-      
+
       const comment = commentRes.body;
       const deleteRes = await request(app)
         .delete(
@@ -246,7 +246,7 @@ describe("Comments Tests", () => {
         )
         .set("Authorization", `Bearer ${token}`);
       expect(deleteRes.status).toBe(404);
-      expect(deleteRes.body.message).toBe("Group not found")
+      expect(deleteRes.body.message).toBe("Group not found");
     });
     it("404 - Fails when chore is invalid", async () => {
       const newComment = {
@@ -263,7 +263,7 @@ describe("Comments Tests", () => {
         )
         .set("Authorization", `Bearer ${token}`);
       expect(deleteRes.status).toBe(404);
-      expect(deleteRes.body.message).toBe("Chore not found")
+      expect(deleteRes.body.message).toBe("Chore not found");
     });
     it("404 - Fails when comment is invalid", async () => {
       const newComment = {
@@ -279,7 +279,7 @@ describe("Comments Tests", () => {
         )
         .set("Authorization", `Bearer ${token}`);
       expect(deleteRes.status).toBe(404);
-      expect(deleteRes.body.message).toBe("Comment not found")
+      expect(deleteRes.body.message).toBe("Comment not found");
     });
   });
 });

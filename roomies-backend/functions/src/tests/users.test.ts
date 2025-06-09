@@ -1,7 +1,8 @@
 import request from "supertest";
-import { app } from "../app";
-import { createUserAndGetToken, deleteUsersAuth } from "./test.utils/utils";
-import { getFirestore } from "firebase-admin/firestore";
+import {app} from "../app";
+import {createUserAndGetToken, deleteUsersAuth} from "./test.utils/utils";
+import {getFirestore} from "firebase-admin/firestore";
+import {User} from "../controllers/users.controller";
 
 describe("User Routes", () => {
   let server: ReturnType<typeof app.listen>;
@@ -45,7 +46,6 @@ describe("User Routes", () => {
 
   describe("POST /users", () => {
     it("should create a new user successfully", async () => {
-
       const res = await request(app)
         .post("/users")
         .send({
@@ -53,13 +53,6 @@ describe("User Routes", () => {
           email: "testuser1@example.com",
           password: "password123",
         });
-
-      // const res = await request(app).post("/users").send({
-      //   username: "testuser",
-      //   email: "testuser2@example.com",
-      //   password: "password123",
-      // });
-
 
       expect(res.status).toBe(201);
       expect(res.body).toHaveProperty("uid");
@@ -149,6 +142,7 @@ describe("User Routes", () => {
       const res = await request(app)
         .get("/users/search")
         .set("Authorization", `Bearer ${token}`);
+
       expect(res.status).toBe(400);
       expect(res.body.message).toBe("Username is required");
     });
@@ -159,7 +153,7 @@ describe("User Routes", () => {
         .set("Authorization", `Bearer ${token}`);
 
       expect(res.status).toBe(200);
-      const usernames = res.body.users.map((u: any) => u.username);
+      const usernames = res.body.users.map((u: User) => u.username);
       expect(usernames).toEqual(expect.arrayContaining(["middle"]));
     });
 

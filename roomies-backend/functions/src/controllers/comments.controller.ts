@@ -1,36 +1,29 @@
-import { Request, Response, NextFunction } from "express";
-import { getFirestore, Timestamp } from "firebase-admin/firestore";
+import {Request, Response, NextFunction} from "express";
+import {getFirestore, Timestamp} from "firebase-admin/firestore";
 type Comment = {
   // commentId:string,
-
-  //choreId: string, //its nested
+  // choreId: string, //its nested
   commentBody: string,
   createdAt: number,
-  createdBy: string, 
-
-  // choreId: string;
-  // commentBody: string;
-  // createdAt: number;
-  // createdBy: string;
-
+  createdBy: string,
 };
 
 export class commentController {
   // POST /chores/:chore_id/comments - creator of comments for a chore
   static async createComment(req: Request, res: Response, next: NextFunction) {
     try {
-      const { commentBody } = req.body;
+      const {commentBody} = req.body;
       const creatorUid = req.user?.uid;
       const groupId = req.params.group_id;
       const choreId = req.params.chore_id;
 
       if (!creatorUid) {
-        res.status(401).json({ message: "Unauthorised" });
+        res.status(401).json({message: "Unauthorised"});
         return;
       }
 
       if (!commentBody) {
-        res.status(400).json({ message: "Commment's body is required" });
+        res.status(400).json({message: "Commment's body is required"});
         return;
       }
 
@@ -38,7 +31,7 @@ export class commentController {
       const groupDoc = await groupRef.get();
 
       if (!groupDoc.exists) {
-        res.status(404).send({ message: "Group not found" });
+        res.status(404).send({message: "Group not found"});
         return;
       }
 
@@ -46,19 +39,18 @@ export class commentController {
       const choreDoc = await choreRef.get();
 
       if (!choreDoc.exists) {
-        res.status(404).json({ message: "Chore not found" });
+        res.status(404).json({message: "Chore not found"});
         return;
       }
 
       const newComment: Comment = {
-        // commentId:string, //generated
         commentBody,
         createdAt: Timestamp.now().seconds,
-        createdBy: creatorUid, // uid but show name for the front....
+        createdBy: creatorUid,
       };
 
       const commentRef = await choreRef.collection("comments").add(newComment);
-      res.status(201).json({ commentId: commentRef.id, ...newComment });
+      res.status(201).json({commentId: commentRef.id, ...newComment});
       return;
     } catch (error) {
       next(error);
@@ -79,7 +71,7 @@ export class commentController {
       const groupDoc = await groupRef.get();
 
       if (!groupDoc.exists) {
-        res.status(404).send({ message: "Group not found" });
+        res.status(404).send({message: "Group not found"});
         return;
       }
 
@@ -87,7 +79,7 @@ export class commentController {
       const choreDoc = await choreRef.get();
 
       if (!choreDoc.exists) {
-        res.status(404).json({ message: "Chore not found" });
+        res.status(404).json({message: "Chore not found"});
         return;
       }
 
@@ -119,7 +111,7 @@ export class commentController {
       const groupDoc = await groupRef.get();
 
       if (!groupDoc.exists) {
-        res.status(404).send({ message: "Group not found" });
+        res.status(404).send({message: "Group not found"});
         return;
       }
 
@@ -127,7 +119,7 @@ export class commentController {
       const choreDoc = await choreRef.get();
 
       if (!choreDoc.exists) {
-        res.status(404).json({ message: "Chore not found" });
+        res.status(404).json({message: "Chore not found"});
         return;
       }
 
@@ -135,7 +127,7 @@ export class commentController {
       const commentDoc = await commentRef.get();
 
       if (!commentDoc.exists) {
-        res.status(404).json({ message: "Comment not found" });
+        res.status(404).json({message: "Comment not found"});
         return;
       }
 
@@ -168,7 +160,7 @@ export class commentController {
       const groupDoc = await groupRef.get();
 
       if (!groupDoc.exists) {
-        res.status(404).send({ message: "Group not found" });
+        res.status(404).send({message: "Group not found"});
         return;
       }
 
@@ -176,7 +168,7 @@ export class commentController {
       const choreDoc = await choreRef.get();
 
       if (!choreDoc.exists) {
-        res.status(404).json({ message: "Chore not found" });
+        res.status(404).json({message: "Chore not found"});
         return;
       }
 
@@ -184,12 +176,12 @@ export class commentController {
       const commentDoc = await commentRef.get();
 
       if (!commentDoc.exists) {
-        res.status(404).json({ message: "Comment not found" });
+        res.status(404).json({message: "Comment not found"});
         return;
       }
 
       await commentRef.delete();
-      res.status(204).send()
+      res.status(204).send();
       return;
     } catch (error) {
       next(error);

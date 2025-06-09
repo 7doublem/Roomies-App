@@ -2,8 +2,8 @@ import request from "supertest";
 import {app} from "../app";
 import {createUserAndGetToken, deleteUsersAuth} from "./test.utils/utils";
 import {getFirestore} from "firebase-admin/firestore";
-import { generateGroupCode } from "../utils/GroupCodeGenerator";
-import { Group } from "../controllers/groups.controller";
+import {generateGroupCode} from "../utils/GroupCodeGenerator";
+import {Group} from "../controllers/groups.controller";
 
 describe("Group Tests", () => {
   let server: ReturnType<typeof app.listen>;
@@ -12,9 +12,6 @@ describe("Group Tests", () => {
 
   let tokenAlice: string;
   let uidAlice: string;
-
-  // let alice: DocumentReference;
-  // let adminuser: DocumentReference;
 
   async function deleteData() {
     await deleteUsersAuth([uid, uidAlice]);
@@ -41,7 +38,6 @@ describe("Group Tests", () => {
     tokenAlice = resultAlice.idToken;
     uidAlice = resultAlice.uid;
 
-    //adminuser = await getFirestore().collection("users").doc(uid).set({
     await getFirestore().collection("users").doc(uid).set({
       username: "adminuser",
       email: "adminuser@example.com",
@@ -49,7 +45,6 @@ describe("Group Tests", () => {
       rewardPoints: 300,
     });
 
-    //alice = await getFirestore().collection("users").doc(uidAlice).set({
     await getFirestore().collection("users").doc(uidAlice).set({
       username: "Alice",
       email: "alice@example.com",
@@ -67,10 +62,9 @@ describe("Group Tests", () => {
   });
 
   describe("GET /groups", () => {
-
     it("should return 401 if user is not authenticated", async () => {
       const res = await request(app)
-        .get(`/groups`);
+        .get("/groups");
       expect(res.status).toBe(401);
       expect(res.body.message).toBe("Unauthorised");
     });
@@ -78,7 +72,7 @@ describe("Group Tests", () => {
     it("should return 200 and empty array", async () => {
       const res = await request(app)
         .get("/groups")
-        .set("Authorization", `Bearer ${token}`)
+        .set("Authorization", `Bearer ${token}`);
       expect(res.status).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
     });
@@ -93,11 +87,10 @@ describe("Group Tests", () => {
       });
 
       const res = await request(app)
-        .get(`/groups`)
+        .get("/groups")
         .set("Authorization", `Bearer ${token}`);
       expect(res.status).toBe(200);
       const groups = res.body;
-      console.log(groups, "get groups");
       expect(groups).toHaveLength(1);
       expect(Array.isArray(groups)).toBe(true);
       groups.forEach((group: Group) => {
@@ -129,7 +122,7 @@ describe("Group Tests", () => {
       expect(res.body.message).toBe("Group name is required");
     });
 
-    it("should return 201 and create a group", async () => { //uid as a not found member
+    it("should return 201 and create a group", async () => { // uid as a not found member
       const newGroup = {
         name: "Group Admin",
         members: ["adminuser", "Alice"],
@@ -141,15 +134,14 @@ describe("Group Tests", () => {
         .send(newGroup);
       expect(res.status).toBe(201);
       const group = res.body;
-      console.log(group, "post group");
       expect(group).toMatchObject({
-          groupId: expect.any(String),
-          name: group.name,
-          members: [uid, uidAlice],
-          admins: [uid],
-          createdBy: uid,
-          groupCode: expect.any(String),
-        });
+        groupId: expect.any(String),
+        name: group.name,
+        members: [uid, uidAlice],
+        admins: [uid],
+        createdBy: uid,
+        groupCode: expect.any(String),
+      });
     });
   });
 
@@ -176,7 +168,7 @@ describe("Group Tests", () => {
 
     it("should return 401 if unauthenticated", async () => {
       const res = await request(app).patch("/groups/join")
-      .send({groupCode});
+        .send({groupCode});
       expect(res.status).toBe(401);
       expect(res.body.message).toBe("Unauthorised");
     });
@@ -213,7 +205,6 @@ describe("Group Tests", () => {
 
       expect(res.status).toBe(200);
       expect(res.body.message).toBe("Already a member");
-
     });
 
     it("should return 200 and join group", async () => {
@@ -224,15 +215,14 @@ describe("Group Tests", () => {
 
       expect(res.status).toBe(200);
       const group = res.body;
-      console.log(group, "patch group");
       expect(group).toMatchObject({
-          groupId: expect.any(String),
-          name: group.name,
-          members: [uid, uidAlice],
-          admins: group.admins,
-          createdBy: uid,
-          groupCode: expect.any(String),
-        });
+        groupId: expect.any(String),
+        name: group.name,
+        members: [uid, uidAlice],
+        admins: group.admins,
+        createdBy: uid,
+        groupCode: expect.any(String),
+      });
     });
   });
 
@@ -423,7 +413,6 @@ describe("Group Tests", () => {
       expect(res.body[0]).toHaveProperty("uid");
       expect(res.body[0].rewardPoints).toBe(300);
       const groups = res.body;
-      console.log(groups, "get all users by group");
       groups.forEach((group: Comment) => {
         expect(group).toMatchObject({
           uid: expect.any(String),

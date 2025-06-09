@@ -185,7 +185,6 @@ describe("Chore Tests", () => {
         dueDate: 1754821200, // 10/jun/2025 13:00
         assignedTo: uidAlice,
         status: "todo",
-        // createdBy: uid,
       };
 
       const res = await request(app)

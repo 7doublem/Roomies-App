@@ -3,7 +3,7 @@ import {getFirestore} from "firebase-admin/firestore";
 import {generateGroupCode} from "../utils/GroupCodeGenerator";
 
 export type Group = {
-  //groupId: string; //generated
+  // groupId: string; //generated
   name: string;
   members: string[];
   admins: string[];
@@ -33,8 +33,6 @@ export class groupController {
   // POST /groups - creator of group is group admin, can add multiple members by username
   static async createGroup(req: Request, res: Response, next: NextFunction) {
     try {
-
-
       const {name, members} = req.body;
       const creatorUid = req.user?.uid;
 
@@ -54,7 +52,7 @@ export class groupController {
           .collection("users")
           .where("username", "in", members)
           .get();
-          
+
         memberUids = userDocs.docs.map((doc) => doc.id);
 
         const foundUsernames = userDocs.docs.map((doc) => doc.data()?.username);
@@ -147,11 +145,9 @@ export class groupController {
       }
 
       await groupDoc.ref.update({members: [...group.members, uid]});
+      const updatedGroupDoc = await getFirestore().collection("groups").doc(groupDoc.id).get();
 
-      const updatedGroupDoc = await getFirestore().collection("groups").doc(groupDoc.id).get()
-      //await getFirestore().collection("groups").doc(groupDoc.id).get()
       res.status(200).json({groupId: groupDoc.id, ...updatedGroupDoc.data()});
-      //res.status(200).json({message: "Successfully joined group"});
       return;
     } catch (error) {
       console.error(error);
@@ -201,7 +197,7 @@ export class groupController {
       next(error);
     }
   }
-  
+
   // PATCH /groups/:group_id/members - only admins can add new user by username
   static async addMemberToGroup(
     req: Request,
@@ -232,7 +228,7 @@ export class groupController {
         return;
       }
 
-      const username = userDoc.data()?.username
+      const username = userDoc.data()?.username;
 
       const groupRef = getFirestore().collection("groups").doc(groupId);
       const groupDoc = await groupRef.get();
@@ -277,16 +273,6 @@ export class groupController {
       }
 
       const members = groupDoc.data()?.members || [];
-
-      // const userDocs = await getFirestore().collection("users")
-      //   .where("username", "in", members)
-      //   .where("username", "in", members)
-      //   .get();
-      //     const users = userDocs.docs
-      // .filter((userDoc) => userDoc.exists)
-      // .map((userDoc) => ({uid: userDoc.id, ...userDoc.data()} as any as User))
-      // .sort((a, b) => (b.rewardPoints as number) - (a.rewardPoints as number));
-
       const userDocs = await Promise.all(
         members.map(async (uid: string) => {
           const userDoc = await getFirestore().collection("users").doc(uid).get();
@@ -294,7 +280,7 @@ export class groupController {
         })
       );
 
-      let users = userDocs
+      const users = userDocs
         .filter((userDoc) => userDoc.exists)
         .map((userDoc) => ({uid: userDoc.id, ...userDoc.data()}))
         .sort((a, b) => (b.rewardPoints as number) - (a.rewardPoints as number));
