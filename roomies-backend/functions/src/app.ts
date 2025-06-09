@@ -14,8 +14,8 @@ const isEmulator = process.env.FUNCTIONS_EMULATOR === "true" || process.env.FIRE
 
 if (!admin.apps.length) {
   if (isEmulator) {
-    process.env.FIRESTORE_EMULATOR_HOST ||= "localhost:8080";
-    process.env.FIREBASE_AUTH_EMULATOR_HOST ||= "localhost:9099";
+    process.env.FIRESTORE_EMULATOR_HOST ||= "127.0.0.1:8080";
+    process.env.FIREBASE_AUTH_EMULATOR_HOST ||= "127.0.0.1:9099";
     console.log("Using Firestore and Auth Emulators");
 
     admin.initializeApp({projectId: "roomies-app-32362"});
