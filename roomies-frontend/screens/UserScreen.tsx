@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { View, Text, Image, Button, TouchableOpacity } from 'react-native';
 import GradientContainer from 'components/GradientContainer';
 import { styles } from 'components/style'
@@ -19,6 +19,10 @@ export default function UserScreen({ navigation }: any) {
     console.log("Log me out");
   }
 
+  function DeleteUserHandler() {
+    console.log("Delete user profile")
+  }
+
   return (
     <GradientContainer>
       <View style={{ flex: 1 }}>
@@ -26,14 +30,19 @@ export default function UserScreen({ navigation }: any) {
         <Image source={profileUser.avatar} style={styles.avatarLarge} />
         <Text style={styles.title} >{profileUser.name}</Text>
               <PointsCard
-                weeklyPoints={profileUser.weeklyPoints}
                 totalPoints={profileUser.totalPoints}
               />
         </ScrollView>
+        <View style={{ paddingHorizontal: 20, marginBottom: 30, gap: 10 }}>
+        <TouchableOpacity onPress={DeleteUserHandler} style={styles.userScreenDeleteButton}>
+            <Text style={styles.userScreenDeleteBtnText}>Delete my user profile</Text>
+        </TouchableOpacity>
         <TouchableOpacity onPress={LogOutHandler} style={styles.welcomeCreateGroupButton}>
             <Text style={styles.welcomeCreateBtnText}>Log out</Text>
         </TouchableOpacity>
+        </View>
       </View>
     </GradientContainer>
   );
 }
+

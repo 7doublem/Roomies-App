@@ -4,11 +4,10 @@ import { View, Text, Image } from 'react-native';
 
 type PointsCardProps = {
   totalPoints: number;
-  weeklyPoints: any;
 };
 
 export default function PointsCard({
-  totalPoints, weeklyPoints
+  totalPoints
 }: PointsCardProps) {
 
   return (
@@ -16,7 +15,6 @@ export default function PointsCard({
 
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
         <Text style={styles.userName}>Total Points: {totalPoints}</Text>
-        <Text style={styles.userName}>Weekly Points: {weeklyPoints}</Text>
         </View>
     </View>
   );

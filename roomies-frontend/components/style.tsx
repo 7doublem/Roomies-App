@@ -561,5 +561,44 @@ CommentSubmitButtonText: {
     fontSize: 22,
     color: '#eee',
     marginVertical: 4,
-  }
-  });
+  },
+  
+  //delete button on UserScreen
+  userScreenDeleteButton: {
+    backgroundColor: 'rgb(255, 0, 0)',
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+    width: 320,
+    alignSelf: 'center', 
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 4,
+  },
+  userScreenDeleteBtnText: {
+    borderRadius: 10,
+    fontSize: 18,
+    color: 'white',
+    fontWeight: 'bold'
+  },
+ /// Add task Screen
+ input: {
+  height: 48,
+  borderColor: '#ccc',
+  borderWidth: 1,
+  borderRadius: 8,
+  paddingHorizontal: 12,
+  fontSize: 16,
+  color: '#333',
+  backgroundColor: '#fff',
+},
+addChoreScreen_label: {
+  fontSize: 16,
+  fontWeight: '600',
+  color: '#555',
+  marginBottom: 6,
+  marginTop: 10,
+},
+    });
