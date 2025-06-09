@@ -1,14 +1,11 @@
-# exit on first fail
+#!/bin/sh
 set -e
-
-# go into backend repo 
 cd roomies-backend/functions
 
-# starts emulators and tests in parallel, then lint to make sure there are no deployment errors
-npx concurrently \
- --kill-others-on-fail \
-  --success "all" \
-  "npm run test-dev" \
-  "sleep 10 && npm test" \
-  "npm run lint"
+npm run build
 
+firebase emulators:exec --only firestore,auth \
+  --import=./seed \
+  --export-on-exit \
+  --project roomies-app-32362 -- \
+  "npm test && npm run lint"
