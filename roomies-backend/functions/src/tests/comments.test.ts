@@ -130,31 +130,23 @@ describe("Comments Tests", () => {
       expect(res.status).toBe(201);
       const comment = res.body;
       console.log(comment, "post comment");
-      expect(comment.commentBody).toContain("Don't forget to wash gold porcelain glasses by hand");
       expect(comment).toMatchObject({
-          commentId: expect.any(String),
-          choreId: expect.any(String),
-          commentBody: expect.any(String),
-          createdAt: expect.any(Number),
-          createdBy: expect.any(String),
-        });
-      expect(comment).toMatchObject({
-          commentId: comment.commentId,
-          choreId: choreA.id,
-          commentBody: "Don't forget to wash gold porcelain glasses by hand",
-          createdAt: expect.any(Number),
-          createdBy: expect.any(String),
-        });
+        commentId: comment.commentId,
+        choreId: choreA.id,
+        commentBody: "Don't forget to wash gold porcelain glasses by hand",
+        createdAt: expect.any(Number),
+        createdBy: expect.any(String),
+      });
     });
   });
 
   describe("GET /groups/:group_id/chores/:chore_id/comments", () => { // confirm the right router
     it("should return 401 if user is not authenticated", async () => {
-        const res = await request(app)
-        .get(`/groups/${groupA.id}/chores/${choreA.id}/comments`)
-        expect(res.status).toBe(401);
-        expect(res.body.message).toBe("Unauthorised");
-      });
+      const res = await request(app)
+        .get(`/groups/${groupA.id}/chores/${choreA.id}/comments`);
+      expect(res.status).toBe(401);
+      expect(res.body.message).toBe("Unauthorised");
+    });
 
     it("should return 404 if group does not exist", async () => {
       const res = await request(app)
@@ -196,7 +188,7 @@ describe("Comments Tests", () => {
       expect(res.body).toHaveLength(1);
       expect(Array.isArray(res.body)).toBe(true);
       const comments = res.body;
-      console.log(comments, "get comments")
+      console.log(comments, "get comments");
       comments.forEach((comment: Comment) => {
         expect(comment).toMatchObject({
           commentId: expect.any(String),
