@@ -34,7 +34,6 @@ async function createAuthedUser(userCollection: CollectionReference, userData: U
       email: `${name}@example.com`,
       avatarUrl: "https://example.com/avatar.png",
       rewardPoints: 100,
-      groupId: null,
     };
 
     const uid = await createAuthedUser(userCollection, userData);
