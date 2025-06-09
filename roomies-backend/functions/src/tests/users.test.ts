@@ -60,6 +60,28 @@ describe("User Routes", () => {
       await deleteUsersAuth([res.body.uid]);
     });
 
+    it("should return 400 if a second user adds a existing username", async () => {
+      const res1= await request(app)
+        .post("/users")
+        .send({
+          username: "testuser1",
+          email: "testuser1@example.com",
+          password: "password123",
+        });
+      const res2 = await request(app)
+        .post("/users")
+        .send({
+          username: "testuser1",
+          email: "testuserAAA@example.com",
+          password: "password1234",
+        });
+
+      expect(res2.status).toBe(400);
+      expect(res2.body.message).toBe("Username is already being used");
+
+      await deleteUsersAuth([res1.body.uid]);
+    });
+
     it("should fail if required fields are missing", async () => {
       const res = await request(app)
         .post("/users")
