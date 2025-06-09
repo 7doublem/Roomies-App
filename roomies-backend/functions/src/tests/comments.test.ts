@@ -84,7 +84,7 @@ describe("Comments Tests", () => {
   });
 
   describe("POST /groups/:group_id/chores/:chore_id/comments", () => { // confirm the right router
-    it("should return 401 if unauthenticated", async () => {
+    it("should return 401 if user is not authenticated", async () => {
       const newComment = {
         commentBody: "Don't forget to wash gold porcelain glasses by hand",
         createdBy: uid,
