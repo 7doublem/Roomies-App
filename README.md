@@ -8,8 +8,10 @@ gamifies chores through a friendly leaderboard. We have provided user endpoints 
 ### Built With
 
 This section acknowledges the major frameworks/libraries used to bootstrap my project.
-* [![Next][Next.js]][Next-url]
-* [![React][React.js]][React-url]
+* [![React Native][ReactNative.js]][ReactNative-url]
+* [![TypeScript][TypeScript.js]][TypeScript-url]
+* [NativeWind](https://www.nativewind.dev/) (Tailwind CSS for React Native)
+* [Firebase](https://firebase.google.com/)
 
 ### In this project directory you can run
 
@@ -64,7 +66,7 @@ Mustafa, Viviane, Mel, Wendy, Suhaim and Wai
 Project Link: [https://github.com/7doublem/Roomies-App](https://github.com/7doublem/Roomies-App)
 
 <!-- MARKDOWN LINKS & IMAGES -->
-[Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
-[Next-url]: https://nextjs.org/
-[React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
-[React-url]: https://reactjs.org/
+[ReactNative.js]: https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
+[ReactNative-url]: https://reactnative.dev/
+[TypeScript.js]: https://img.shields.io/badge/TypeScript-3178c6?style=for-the-badge&logo=typescript&logoColor=white
+[TypeScript-url]: https://www.typescriptlang.org/
