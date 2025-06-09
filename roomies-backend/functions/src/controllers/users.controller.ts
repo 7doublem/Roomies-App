@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from "express";
-import { getFirestore } from "firebase-admin/firestore";
-import { getAuth } from "firebase-admin/auth";
+import {Request, Response, NextFunction} from "express";
+import {getFirestore} from "firebase-admin/firestore";
+import {getAuth} from "firebase-admin/auth";
 
 export type User = {
   username: string;
@@ -16,7 +16,7 @@ export class userController {
     try {
       const userDoc = await getFirestore().collection("users").get();
       const users = userDoc.docs.map((doc) => {
-        return { uid: doc.id, ...doc.data() };
+        return {uid: doc.id, ...doc.data()};
       });
       res.status(200).json(users);
     } catch (error) {
@@ -29,18 +29,18 @@ export class userController {
   // POST /users - user signs up
   static async createUser(req: Request, res: Response, next: NextFunction) {
     try {
-      const { username, email, password, avatarUrl } = req.body;
+      const {username, email, password, avatarUrl} = req.body;
 
       if (!username || !email || !password) {
-        res.status(400).json({ message: "Missing required fields" });
+        res.status(400).json({message: "Missing required fields"});
         return;
       }
 
       // Validate photoURL if present
       const validPhotoURL =
-        typeof avatarUrl === "string" && avatarUrl.startsWith("http")
-          ? avatarUrl
-          : undefined;
+        typeof avatarUrl === "string" && avatarUrl.startsWith("http") ?
+          avatarUrl :
+          undefined;
 
       // create user in firebase auth
       const authUser = await getAuth().createUser({
@@ -63,7 +63,7 @@ export class userController {
 
       res
         .status(201)
-        .json({ uid: authUser.uid, message: "User created successfully" });
+        .json({uid: authUser.uid, message: "User created successfully"});
       return;
     } catch (error) {
       console.error(error);
@@ -77,18 +77,18 @@ export class userController {
       const uid = req.user?.uid;
 
       if (!uid) {
-        res.status(401).json({ message: "Unauthorised" });
+        res.status(401).json({message: "Unauthorised"});
         return;
       }
 
       const userDoc = await getFirestore().collection("users").doc(uid).get();
 
       if (!userDoc.exists) {
-        res.status(404).json({ message: "User not found" });
+        res.status(404).json({message: "User not found"});
         return;
       }
 
-      res.status(200).json({ uid, ...userDoc.data() });
+      res.status(200).json({uid, ...userDoc.data()});
       return;
     } catch (error) {
       console.error(error);
@@ -106,9 +106,9 @@ export class userController {
       const search = req.query.username?.toString().trim().toLowerCase();
 
       if (!search) {
-      res.status(400).json({ message: "Username is required" });
-      return;
-    }
+        res.status(400).json({message: "Username is required"});
+        return;
+      }
 
       const usersRef = await getFirestore()
         .collection("users")
@@ -127,7 +127,7 @@ export class userController {
         };
       });
 
-      res.status(200).json({ users });
+      res.status(200).json({users});
       return;
     } catch (error) {
       console.error(error);

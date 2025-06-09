@@ -1,7 +1,7 @@
 import request from "supertest";
-import { app } from "../app";
-import { createUserAndGetToken, deleteUsersAuth } from "./test.utils/utils";
-import { getFirestore } from "firebase-admin/firestore";
+import {app} from "../app";
+import {createUserAndGetToken, deleteUsersAuth} from "./test.utils/utils";
+import {getFirestore} from "firebase-admin/firestore";
 
 describe("User Routes", () => {
   let server: ReturnType<typeof app.listen>;
@@ -149,7 +149,9 @@ describe("User Routes", () => {
         .set("Authorization", `Bearer ${token}`);
 
       expect(res.status).toBe(200);
-      const usernames = res.body.users.map((u: any) => u.username);
+      const usernames = res.body.users.map(
+        (u: { username: string }) => u.username
+      );
       expect(usernames).toEqual(expect.arrayContaining(["middle"]));
     });
 

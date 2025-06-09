@@ -10,5 +10,5 @@ node_modules/
 *.local
 
 # Firebase private key
-firebaseServiceAccount.json
+.env
 firebase.js

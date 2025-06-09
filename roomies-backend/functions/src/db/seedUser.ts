@@ -1,12 +1,16 @@
 import * as admin from "firebase-admin";
-import serviceAccount from "../../firebaseServiceAccount.json";
 import {CollectionReference, getFirestore} from "firebase-admin/firestore";
 import {getAuth} from "firebase-admin/auth";
 import {User} from "../controllers/users.controller";
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
+  credential: admin.credential.cert({
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+  }),
 });
+
 
 // seeds new_user individually, update username and email manually
 async function createAuthedUser(userCollection: CollectionReference, userData: User) {

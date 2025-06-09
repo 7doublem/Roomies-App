@@ -7,7 +7,7 @@ export const createUserAndGetToken = async (
 ) => {
   const user = await admin.auth().createUser({email, password});
 
-  const signInResponse = await request("http://localhost:9099")
+  const signInResponse = await request("http://127.0.0.1:9099")
     .post("/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=fake-api-key")
     .send({
       email,
