@@ -195,7 +195,6 @@ describe("Chore Tests", () => {
         .send(newChore);
       expect(res.status).toBe(201);
       const chore = res.body;
-      console.log(chore, "post chore");
       expect(chore.name).toContain("Chore to test");
       expect(chore).toMatchObject({
         // groupId: expect.any(String),
@@ -255,7 +254,6 @@ describe("Chore Tests", () => {
         .set("Authorization", `Bearer ${token}`);
       expect(res.status).toBe(200);
       const chores = res.body;
-      console.log(chores, "get chores");
       expect(chores).toHaveLength(1);
       expect(Array.isArray(chores)).toBe(true);
       chores.forEach((chore: Chore) => {
@@ -495,7 +493,6 @@ describe("Chore Tests", () => {
         .send(updatedChore);
       expect(res.status).toBe(201);
       const chore = res.body;
-      console.log(chore, "patch chore");
       expect(chore).toMatchObject({
         // groupId: groupA.id,
         id: choreA.id,
