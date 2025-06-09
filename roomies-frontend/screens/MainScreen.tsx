@@ -92,7 +92,7 @@ export default function MainScreen({ navigation }: any) {
                 <Ionicons name="arrow-forward-circle" size={32} color="white" />
               </View>
             )}>
-            <TouchableOpacity onPress={() => navigation.navigate('TaskDetail', { id: item.id })}>
+            <TouchableOpacity onPress={() => navigation.navigate('ChoreDetail', { id: item.id })}>
               <ChoresCard
                 status={item.status}
                 chore={item.chore}
