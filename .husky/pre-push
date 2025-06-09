@@ -5,7 +5,5 @@ cd roomies-backend/functions
 npm run build
 
 firebase emulators:exec --only firestore,auth \
-  --import=./seed \
-  --export-on-exit \
   --project roomies-app-32362 -- \
-  "npm test && npm run lint"
+  "sleep 15 && npm test && npm run lint"
