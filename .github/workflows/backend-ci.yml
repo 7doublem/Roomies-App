@@ -17,7 +17,6 @@ jobs:
       FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
       FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
       FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
-      FUNCTIONS_EMULATOR: "true"
 
     steps:
       - name: Checkout repository
@@ -34,19 +33,26 @@ jobs:
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
 
-      - name: Show debug info
-        run: |
-          node -v
-          npm -v
-          echo "Project ID: $FIREBASE_PROJECT_ID"
-          echo "Client Email: $FIREBASE_CLIENT_EMAIL"
-          echo "Private Key starts with: ${FIREBASE_PRIVATE_KEY:0:20}"
-
       - name: Run ESLint
         run: npm run lint
 
-      - name: Run tests using Firebase Emulators
+      - name: Start Emulators and Run Tests
         run: |
-          echo "Starting Firebase Emulators..."
-          firebase emulators:exec --only firestore,auth --project "$FIREBASE_PROJECT_ID" -- \
-          bash -c "sleep 15 && npm test || (echo '❌ TESTS FAILED'; exit 1)"
+          firebase emulators:start --only firestore,auth --project "$FIREBASE_PROJECT_ID" > emulator.log 2>&1 &
+          EMULATOR_PID=$!
+
+          echo "Waiting for Firebase Emulator to be ready..."
+          for i in {1..30}; do
+            if curl -s http://localhost:4400/ > /dev/null; then
+              echo "Firebase Emulator is ready."
+              break
+            fi
+            echo "Still waiting for emulator... ($i)"
+            sleep 2
+          done
+
+          echo "Running tests..."
+          npm test
+
+          kill $EMULATOR_PID
+          echo "Emulator stopped."
