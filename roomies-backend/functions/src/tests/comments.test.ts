@@ -129,7 +129,6 @@ describe("Comments Tests", () => {
         .send(newComment);
       expect(res.status).toBe(201);
       const comment = res.body;
-      console.log(comment, "post comment");
       expect(comment).toMatchObject({
         commentId: comment.commentId,
         choreId: choreA.id,
@@ -188,7 +187,6 @@ describe("Comments Tests", () => {
       expect(res.body).toHaveLength(1);
       expect(Array.isArray(res.body)).toBe(true);
       const comments = res.body;
-      console.log(comments, "get comments");
       comments.forEach((comment: Comment) => {
         expect(comment).toMatchObject({
           commentId: expect.any(String),
