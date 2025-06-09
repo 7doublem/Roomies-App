@@ -1,0 +1,35 @@
+name: Backend CI
+
+on:
+  pull_request:
+    paths:
+      - 'roomies-backend/**'
+
+jobs:
+  lint_and_test:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: roomies-backend/functions
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Start emulators and run tests
+        run: |
+          nohup npm run test-dev > emulator.log 2>&1 &
+          sleep 15
+          npm test

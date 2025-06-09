@@ -1,7 +1,7 @@
 import request from "supertest";
-import {app} from "../app";
-import {createUserAndGetToken, deleteUsersAuth} from "./test.utils/utils";
-import {getFirestore} from "firebase-admin/firestore";
+import { app } from "../app";
+import { createUserAndGetToken, deleteUsersAuth } from "./test.utils/utils";
+import { getFirestore } from "firebase-admin/firestore";
 
 describe("User Routes", () => {
   let server: ReturnType<typeof app.listen>;
@@ -45,6 +45,7 @@ describe("User Routes", () => {
 
   describe("POST /users", () => {
     it("should create a new user successfully", async () => {
+
       const res = await request(app)
         .post("/users")
         .send({
@@ -52,6 +53,13 @@ describe("User Routes", () => {
           email: "testuser1@example.com",
           password: "password123",
         });
+
+      // const res = await request(app).post("/users").send({
+      //   username: "testuser",
+      //   email: "testuser2@example.com",
+      //   password: "password123",
+      // });
+
 
       expect(res.status).toBe(201);
       expect(res.body).toHaveProperty("uid");
@@ -98,8 +106,7 @@ describe("User Routes", () => {
     });
 
     it("should return 401 if user not authenticated", async () => {
-      const res = await request(app)
-        .get("/users/currentUser");
+      const res = await request(app).get("/users/currentUser");
       expect(res.status).toBe(401);
       expect(res.body.message).toBe("Unauthorised");
     });
@@ -111,6 +118,59 @@ describe("User Routes", () => {
 
       expect(res.status).toBe(401);
       expect(res.body.message).toBe("Unauthorised");
+    });
+  });
+
+  describe("GET /users/search", () => {
+    beforeEach(async () => {
+      const usernames = ["middle", "start", "test", "jest", "supertest"];
+      await Promise.all(
+        usernames.map((name, i) =>
+          getFirestore()
+            .collection("users")
+            .doc(`user${i}`)
+            .set({
+              username: name,
+              email: `${name}@example.com`,
+              avatarUrl: null,
+              rewardPoints: 0,
+            })
+        )
+      );
+    });
+
+    it("should return 401 if unauthenticated", async () => {
+      const res = await request(app).get("/users/search?username=mi");
+      expect(res.status).toBe(401);
+      expect(res.body.message).toBe("Unauthorised");
+    });
+
+    it("should return 400 if no query is provided", async () => {
+      const res = await request(app)
+        .get("/users/search")
+        .set("Authorization", `Bearer ${token}`);
+      expect(res.status).toBe(400);
+      expect(res.body.message).toBe("Username is required");
+    });
+
+    it("should return matching users for prefix 'mi'", async () => {
+      const res = await request(app)
+        .get("/users/search?username=mi")
+        .set("Authorization", `Bearer ${token}`);
+
+      expect(res.status).toBe(200);
+      const usernames = res.body.users.map((u: any) => u.username);
+      expect(usernames).toEqual(expect.arrayContaining(["middle"]));
+    });
+
+    it("should return empty array if no matches", async () => {
+      const res = await request(app)
+        .get("/users/search?username=zz")
+        .set("Authorization", `Bearer ${token}`);
+
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body.users)).toBe(true);
+      expect(res.body.users.length).toBe(0);
     });
   });
 });

@@ -1,9 +1,10 @@
 import { View, Text, TextInput, Alert, TouchableOpacity, Image } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { setDoc, doc, serverTimestamp } from 'firebase/firestore';
 import * as ImagePicker from 'expo-image-picker';
 import { Picker } from '@react-native-picker/picker';
-import { auth } from '../../firebase/config';
+import { auth, db } from '../../firebase/config';
 import GradientContainer from '../../components/GradientContainer';
 import { styles } from '../../components/style';
 import Animated, {
@@ -85,21 +86,7 @@ export default function SignUpScreen({ navigation }: any) {
     fade.value = withTiming(1, { duration: 600 });
   }, []);
 
-  const handleSignUp = async () => {
-    setError(null);
-    if (!name.trim()) {
-      setError('Name is required.');
-      return;
-    }
-    try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      // You may want to save the name to Firestore or user profile here
-      navigation.navigate('Welcome');
-    } catch (error: any) {
-      setError(error.message);
-    }
-  };
-
+  // --- Image Picker ---
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -111,6 +98,34 @@ export default function SignUpScreen({ navigation }: any) {
     if (!result.canceled && result.assets && result.assets.length > 0) {
       setAvatarUri(result.assets[0].uri);
       setPickerValue('custom');
+    }
+  };
+
+  // --- SIGN UP LOGIC ---
+  const handleSignUp = async () => {
+    setError(null);
+    if (!name.trim()) {
+      setError('Name is required.');
+      return;
+    }
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Store user data in Firestore
+      await setDoc(doc(db, 'users', user.uid), {
+        username: name,
+        email: user.email,
+        avatarUrl: avatarUri || null, // Store URI or null if not uploaded
+        avatarIndex: pickerValue !== 'custom' ? Number(pickerValue) : null, // Store which default avatar was picked
+        createdAt: serverTimestamp(),
+        rewardPoints: 0,
+        groupId: null,
+      });
+
+      navigation.navigate('Welcome');
+    } catch (error: any) {
+      setError(error.message);
     }
   };
 

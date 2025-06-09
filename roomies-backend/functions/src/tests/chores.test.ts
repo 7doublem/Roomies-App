@@ -21,8 +21,7 @@ describe("Chore Tests", () => {
     const users = await getFirestore().collection("users").listDocuments();
     for (const doc of users) await doc.delete();
 
-    const groups = await getFirestore().collection("groups").listDocuments(); // it should delete chores together
-    for (const doc of groups) await doc.delete();
+    await getFirestore().recursiveDelete(getFirestore().collection("groups"));
   }
 
   beforeAll(async () => {
@@ -195,7 +194,6 @@ describe("Chore Tests", () => {
         .send(newChore);
       expect(res.status).toBe(201);
       const chore = res.body;
-      console.log(chore, "post chore");
       expect(chore.name).toContain("Chore to test");
       expect(chore).toMatchObject({
         // groupId: expect.any(String),
@@ -255,7 +253,6 @@ describe("Chore Tests", () => {
         .set("Authorization", `Bearer ${token}`);
       expect(res.status).toBe(200);
       const chores = res.body;
-      console.log(chores, "get chores");
       expect(chores).toHaveLength(1);
       expect(Array.isArray(chores)).toBe(true);
       chores.forEach((chore: Chore) => {
@@ -494,7 +491,6 @@ describe("Chore Tests", () => {
         .send(updatedChore);
       expect(res.status).toBe(201);
       const chore = res.body;
-      console.log(chore, "patch chore");
       expect(chore).toMatchObject({
         // groupId: groupA.id,
         choreId: choreA.id,

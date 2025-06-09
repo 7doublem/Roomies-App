@@ -90,13 +90,13 @@ export default function LeaderboardScreen() {
   }, []);
 
   // Add logic to get users after the top 5
-  const restUsers = sortedUsers.slice(5);
+  const restUsers = sortedUsers.slice(3);
 
   return (
     <GradientContainer>
       <Text style={styles.title}>Leaderboard</Text>
       <View style={styles.chartRow}>
-        {sortedUsers.slice(0, 5).map((user, idx) => (
+        {sortedUsers.slice(0, 3).map((user, idx) => (
           <AnimatedBar
             key={user.id}
             user={user}

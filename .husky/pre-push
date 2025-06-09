@@ -1,5 +1,11 @@
 #!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
+set -e
+cd roomies-backend/functions
 
-cd roomies-backend/functions || exit 1
-npm test
+npm run build
+
+firebase emulators:exec --only firestore,auth \
+  --import=./seed \
+  --export-on-exit \
+  --project roomies-app-32362 -- \
+  "npm test && npm run lint"

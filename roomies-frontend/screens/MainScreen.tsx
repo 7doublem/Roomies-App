@@ -92,7 +92,7 @@ export default function MainScreen({ navigation }: any) {
                 <Ionicons name="arrow-forward-circle" size={32} color="white" />
               </View>
             )}>
-            <TouchableOpacity onPress={() => navigation.navigate('TaskDetail', { id: item.id })}>
+            <TouchableOpacity onPress={() => navigation.navigate('ChoreDetail', { id: item.id })}>
               <ChoresCard
                 status={item.status}
                 chore={item.chore}
@@ -123,19 +123,6 @@ export default function MainScreen({ navigation }: any) {
               </TouchableOpacity>
             ))}
           </View>
-          {/* Add button for "To Do" tab */}
-          {activeTab === 'todo' && (
-            <View style={styles.mainScreen_IconView}>
-              <TouchableOpacity>
-                <Ionicons
-                  style={styles.mainScreen_IconView_IonIcon}
-                  name="add-circle-outline"
-                  size={24}
-                  color="black"
-                />
-              </TouchableOpacity>
-            </View>
-          )}
           {/* Confetti */}
           {showConfetti && (
             <Confetti width={width} height={height} numberOfPieces={180} recycle={false} />
