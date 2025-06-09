@@ -41,7 +41,7 @@ The page will reload if you make edits. firebaseConfig.ts is missing as it is pu
    ```sh
    echo > firebaseConfig.ts
    ```
-4. Open Mustafa for the API key and paste it into this file, at the end of the file write:
+4. Please ask Mustafa for the SDK setup (or check in Slack) and paste it into this file, at the end of the file write:
     ```sh
    export default firebaseConfig
    ```
