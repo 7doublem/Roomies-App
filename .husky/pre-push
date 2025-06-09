@@ -1,0 +1,14 @@
+# exit on first fail
+set -e
+
+# go into backend repo 
+cd roomies-backend/functions
+
+# starts emulators and tests in parallel, then lint to make sure there are no deployment errors
+npx concurrently \
+ --kill-others-on-fail \
+  --success "all" \
+  "npm run test-dev" \
+  "sleep 10 && npm test" \
+  "npm run lint"
+
