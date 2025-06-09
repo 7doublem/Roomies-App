@@ -12,3 +12,6 @@ userRoutes.post("/users", userController.createUser);
 
 // GET /users/currentUser - for signed up user to read/write their profile
 userRoutes.get("/users/currentUser", authenticateUser, userController.getCurrentUser);
+
+// GET /users/search?username= - search for user by username
+userRoutes.get("/users/search", authenticateUser, userController.searchUsersByUsername);
