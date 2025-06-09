@@ -41,18 +41,18 @@ jobs:
           firebase emulators:start --only firestore,auth --project "$FIREBASE_PROJECT_ID" > emulator.log 2>&1 &
           EMULATOR_PID=$!
 
-          echo "Waiting for Firebase Emulator to be ready..."
+          echo "Waiting for Firebase Auth Emulator to be ready..."
           for i in {1..30}; do
-            if curl -s http://localhost:4400/ > /dev/null; then
-              echo "Firebase Emulator is ready."
+            if nc -z 127.0.0.1 9099; then
+              echo "Auth Emulator is ready"
               break
             fi
-            echo "Still waiting for emulator... ($i)"
+            echo "Still waiting ($i)"
             sleep 2
           done
 
-          echo "Running tests..."
+          echo "Running tests"
           npm test
 
+          echo "Cleaning up"
           kill $EMULATOR_PID
-          echo "Emulator stopped."
