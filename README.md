@@ -27,7 +27,7 @@ This section acknowledges the major frameworks/libraries used to bootstrap my pr
    ```
 4. Open [http://localhost:8081](http://localhost:8081) to view it in the browser.
 
-The page will reload if you make edits. firebaseConfig.ts is missing as it is put in the .gitignore. Please ask Mustafa for the API key and please do the following:
+The page will reload if you make edits. firebaseConfig.ts is missing as it is put in the .gitignore. Please do the following:
 
 1. Change directory to the frontend folder of this project
    ```sh
