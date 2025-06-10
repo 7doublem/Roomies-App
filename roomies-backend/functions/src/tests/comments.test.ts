@@ -272,9 +272,7 @@ describe("Comments Tests", () => {
         .set("Authorization", `Bearer ${token}`)
         .send(newComment);
       const deleteRes = await request(app)
-        .delete(
-          `/groups/${groupA.id}/chores/${choreA.id}/comments/FAIL`
-        )
+        .delete(`/groups/${groupA.id}/chores/${choreA.id}/comments/FAIL`)
         .set("Authorization", `Bearer ${token}`);
       expect(deleteRes.status).toBe(404);
       expect(deleteRes.body.message).toBe("Comment not found");

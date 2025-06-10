@@ -17,29 +17,42 @@ export type Chore = {
 
 export class ChoreController {
   // POST /groups/:group_id/chores - create a new chore
-  static async createChoreByGroupId(req: Request, res: Response, next: NextFunction) {
+  static async createChoreByGroupId(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
     try {
       const groupId = req.params.group_id;
       const creatorUid = req.user?.uid;
-      const {name, description, rewardPoints, startDate, dueDate, assignedTo, status} = req.body as Chore;
+      const {
+        name,
+        description,
+        rewardPoints,
+        startDate,
+        dueDate,
+        assignedTo,
+        status,
+      } = req.body as Chore;
 
       if (!creatorUid) {
         res.status(401).json({message: "Unauthorised"});
         return;
       }
 
-      if (
-        !name ||
-        !rewardPoints ||
-        !dueDate ||
-        !status
-      ) {
-        res.status(400).send({message: "Name, rewardPoints, dueDate, and status are required"});
+      if (!name || !rewardPoints || !dueDate || !status) {
+        res
+          .status(400)
+          .send({
+            message: "Name, rewardPoints, dueDate, and status are required",
+          });
         return;
       }
 
       if (!statusOptions.includes(status)) {
-        res.status(400).send({message: "Chore' status must be: todo, doing or done"});
+        res
+          .status(400)
+          .send({message: "Chore' status must be: todo, doing or done"});
         return;
       }
 
@@ -104,12 +117,24 @@ export class ChoreController {
   }
 
   // PATCH /groups/:group_id/chores/:chore_id - patch a chore by chore_id that is a subcollection of group_id
-  static async patchChoreByChoreId(req: Request, res: Response, next: NextFunction) {
+  static async patchChoreByChoreId(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
     try {
       const groupId = req.params.group_id;
       const choreId = req.params.chore_id;
       const creatorUid = req.user?.uid;
-      const {name, description, rewardPoints, startDate, dueDate, assignedTo, status} = req.body as Chore;
+      const {
+        name,
+        description,
+        rewardPoints,
+        startDate,
+        dueDate,
+        assignedTo,
+        status,
+      } = req.body as Chore;
 
       if (!creatorUid) {
         res.status(401).json({message: "Unauthorised"});
@@ -117,7 +142,9 @@ export class ChoreController {
       }
 
       if (!statusOptions.includes(status)) {
-        res.status(400).send({message: "Chore' status must be: todo, doing or done"});
+        res
+          .status(400)
+          .send({message: "Chore' status must be: todo, doing or done"});
         return;
       }
 
@@ -154,6 +181,54 @@ export class ChoreController {
 
       res.status(200).send({choreId: choreRef.id, ...newChoreDoc.data()});
       return;
+    } catch (error) {
+      console.error(error);
+      next(error);
+    }
+  }
+
+  // DELETE /groups/:group_id/chores/:chore_id - delete a chore by its ID (only creator can delete)
+  static async deleteChoreByChoreId(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const groupId = req.params.group_id;
+      const choreId = req.params.chore_id;
+      const user = req.user?.uid;
+
+      if (!user) {
+        res.status(401).json({message: "Unauthorised"});
+        return;
+      }
+
+      const groupRef = getFirestore().collection("groups").doc(groupId);
+      const groupDoc = await groupRef.get();
+
+      if (!groupDoc.exists) {
+        res.status(404).json({message: "Group not found"});
+        return;
+      }
+
+      const choreRef = groupRef.collection("chores").doc(choreId);
+      const choreDoc = await choreRef.get();
+
+      if (!choreDoc.exists) {
+        res.status(404).json({message: "Chore not found"});
+        return;
+      }
+
+      const choreData = choreDoc.data();
+      if (choreData?.createdBy !== user) {
+        res
+          .status(403)
+          .json({message: "Only the creator can delete this chore"});
+        return;
+      }
+
+      await choreRef.delete();
+      res.status(200).json({message: "Chore deleted successfully"});
     } catch (error) {
       console.error(error);
       next(error);

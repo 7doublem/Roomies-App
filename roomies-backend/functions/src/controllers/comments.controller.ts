@@ -180,8 +180,19 @@ export class commentController {
         return;
       }
 
-      await commentRef.delete();
-      res.status(204).send();
+      // await commentRef.delete(); //mycode
+      // res.status(204).send();
+
+      await getFirestore()
+        .collection("groups")
+        .doc(groupId)
+        .collection("chores")
+        .doc(choreId)
+        .collection("comments")
+        .doc(commentId)
+        .delete();
+      res.status(204).send("Comment deleted successfully");
+
       return;
     } catch (error) {
       next(error);

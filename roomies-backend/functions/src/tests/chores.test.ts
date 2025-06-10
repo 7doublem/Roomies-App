@@ -477,4 +477,90 @@ describe("Chore Tests", () => {
       });
     });
   });
+
+  describe("DELETE /groups/:group_id/chores/:chore_id", () => {
+    it("should return 401 if user is not authenticated", async () => {
+      const choreRef = await getFirestore().collection("groups").doc(groupA.id).collection("chores").add({
+        name: "Take out trash",
+        description: "Everyday chore",
+        rewardPoints: 20,
+        startDate: 1754648400,
+        dueDate: 1754821200,
+        assignedTo: uidAlice,
+        status: "todo",
+        createdBy: uid,
+      });
+
+      const res = await request(app)
+        .delete(`/groups/${groupA.id}/chores/${choreRef.id}`);
+      expect(res.status).toBe(401);
+      expect(res.body.message).toBe("Unauthorised");
+    });
+
+    it("should return 404 if group does not exist", async () => {
+      const res = await request(app)
+        .delete("/groups/nonexistentGroupId/chores/someChoreId")
+        .set("Authorization", `Bearer ${token}`);
+
+      expect(res.status).toBe(404);
+      expect(res.body.message).toBe("Group not found");
+    });
+
+    it("should return 404 if chore does not exist", async () => {
+      const res = await request(app)
+        .delete(`/groups/${groupA.id}/chores/nonexistentChoreId`)
+        .set("Authorization", `Bearer ${token}`);
+
+      expect(res.status).toBe(404);
+      expect(res.body.message).toBe("Chore not found");
+    });
+
+    it("should return 403 if user is not the creator of the chore", async () => {
+      const choreRef = await getFirestore().collection("groups").doc(groupA.id).collection("chores").add({
+        name: "Chore only Alice made",
+        description: "Only Alice can delete this",
+        rewardPoints: 15,
+        startDate: 1754648400,
+        dueDate: 1754821200,
+        assignedTo: uid,
+        status: "todo",
+        createdBy: uidAlice,
+      });
+
+      const res = await request(app)
+        .delete(`/groups/${groupA.id}/chores/${choreRef.id}`)
+        .set("Authorization", `Bearer ${token}`); // admin trying to delete Alice's chore
+
+      expect(res.status).toBe(403);
+      expect(res.body.message).toBe("Only the creator can delete this chore");
+    });
+
+    it("should return 200 and delete the chore if user is creator", async () => {
+      const choreRef = await getFirestore().collection("groups").doc(groupA.id).collection("chores").add({
+        name: "Creator Chore",
+        description: "Made by adminuser",
+        rewardPoints: 50,
+        startDate: 1754648400,
+        dueDate: 1754821200,
+        assignedTo: uidAlice,
+        status: "doing",
+        createdBy: uid,
+      });
+
+      const res = await request(app)
+        .delete(`/groups/${groupA.id}/chores/${choreRef.id}`)
+        .set("Authorization", `Bearer ${token}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.message).toBe("Chore deleted successfully");
+
+      const deletedDoc = await getFirestore()
+        .collection("groups")
+        .doc(groupA.id)
+        .collection("chores")
+        .doc(choreRef.id)
+        .get();
+      expect(deletedDoc.exists).toBe(false);
+    });
+  });
 });

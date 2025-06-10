@@ -50,6 +50,7 @@ export class userController {
         return;
       }
 
+
       // create user in firebase auth
       const authUser = await getAuth().createUser({
         email,
