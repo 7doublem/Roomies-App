@@ -133,7 +133,7 @@ describe("Comments Tests", () => {
         .send(newComment);
       expect(res.status).toBe(201);
       const comment = res.body;
-      console.log(comment, "create a comment")
+      console.log(comment, "create a comment");
       expect(comment).toMatchObject({
         commentId: comment.commentId,
         commentBody: comment.commentBody,
@@ -191,7 +191,7 @@ describe("Comments Tests", () => {
       expect(res.body).toHaveLength(1);
       expect(Array.isArray(res.body)).toBe(true);
       const comments = res.body;
-      console.log(comments, "get all comments related to a chore")
+      console.log(comments, "get all comments related to a chore");
       comments.forEach((comment: Comment) => {
         expect(comment).toMatchObject({
           commentId: expect.any(String),
@@ -229,7 +229,7 @@ describe("Comments Tests", () => {
 
       expect(checkRes.status).toBe(200);
       expect(checkRes.body).toEqual([]);
-      console.log(checkRes.body, "delete a comment")
+      console.log(checkRes.body, "delete a comment");
       expect(Array.isArray(checkRes.body)).toBe(true);
     });
     it("404 - Fails when group is invalid", async () => {

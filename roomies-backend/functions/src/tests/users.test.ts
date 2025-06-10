@@ -55,7 +55,7 @@ describe("User Routes", () => {
 
       expect(res.status).toBe(201);
       expect(res.body).toHaveProperty("uid");
-      console.log(res.body, "create a new user successfully")
+      console.log(res.body, "create a new user successfully");
       expect(res.body.message).toBe("User created successfully");
 
       await deleteUsersAuth([res.body.uid]);
@@ -101,7 +101,7 @@ describe("User Routes", () => {
       const res = await request(app)
         .get("/users")
         .set("Authorization", `Bearer ${token}`);
-      console.log(res.body, "return a list of users")
+      console.log(res.body, "return a list of users");
       expect(res.status).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBe(1);
@@ -114,7 +114,7 @@ describe("User Routes", () => {
       const res = await request(app)
         .get("/users/currentUser")
         .set("Authorization", `Bearer ${token}`);
-      console.log(res.body, "return current user profile")
+      console.log(res.body, "return current user profile");
       expect(res.status).toBe(200);
       expect(res.body.uid).toBe(uid);
       expect(res.body.username).toBe("testuser");
@@ -173,7 +173,7 @@ describe("User Routes", () => {
       const res = await request(app)
         .get("/users/search?username=mi")
         .set("Authorization", `Bearer ${token}`);
-      console.log(res.body, "return matching users for prefix 'mi'")
+      console.log(res.body, "return matching users for prefix 'mi'");
       expect(res.status).toBe(200);
       const usernames = res.body.users.map((u: User) => u.username);
       expect(usernames).toEqual(expect.arrayContaining(["middle"]));
