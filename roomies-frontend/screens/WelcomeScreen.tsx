@@ -7,10 +7,10 @@ import {getAuth} from 'firebase/auth';
 import { joinGroup } from '../api/groups';
 export default function WelcomeScreen({ navigation }: any) {
   const [username, setUsername] = useState('');
-  const [groupId, setGroupId] = useState('');
+  const [groupCode, setGroupCode] = useState('');
 
   const joinInHandler = async () => {
-    if (!groupId) {
+    if (!groupCode) {
       Alert.alert('Please enter a Group ID');
       return;
     }
@@ -24,7 +24,7 @@ export default function WelcomeScreen({ navigation }: any) {
       }
 
       const token = await user.getIdToken(); // Firebase ID token for auth
-      const res = await joinGroup(token, groupId);
+      const res = await joinGroup(token, groupCode);
       const data = await res.json();
 
       if (res.ok) {
@@ -53,8 +53,8 @@ export default function WelcomeScreen({ navigation }: any) {
         <View style={styles.welcomeInputContainer}>
           <TextInput
             placeholder="Group ID"
-            value={groupId}
-            onChangeText={setGroupId}
+            value={groupCode}
+            onChangeText={setGroupCode}
             autoCapitalize="none"
             style={styles.welcomeInput}
             placeholderTextColor="#222"

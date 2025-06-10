@@ -12,18 +12,71 @@ import {
   import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
   import { useNavigation } from '@react-navigation/native';
   import { styles } from 'components/style';
+  import { createGroup } from '../../api/groups';
   
   export default function SetGroupScreen({ navigation }: any) {
     const [groupName, setGroupName] = useState('');
     const [addUserName, setAddUserName] = useState('');
     const [userList, setUserList] = useState<string[]>([]);
   
-    const addUserHandler = () => {
-      if (addUserName.trim() !== '') {
-        setUserList([addUserName.trim(), ...userList]);
-        setAddUserName('');
+    const addUserHandler = async () => {
+      if (addUserName.trim() === '') return;
+  
+      try {
+        const user = auth.currentUser;
+        if (!user) throw new Error('Not authenticated');
+  
+        const token = await user.getIdToken();
+  
+        const searchUsername = addUserName.trim();
+  
+        console.log('Fetching user with username:', searchUsername);
+        console.log('Using token:', token);
+  
+        const response = await fetch(
+          `https://roomiesapi-6l3ldzfk4q-uc.a.run.app/users/search?username=${searchUsername}`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+  
+        if (!response.ok) {
+          throw new Error('User not found or server error');
+        }
+  
+        const data = await response.json();
+        console.log('Response data:', data);
+  
+        if (data && Array.isArray(data.users) && data.users.length > 0) {
+          // Filter out usernames already added
+          const newUsernames = data.users
+            .map((user: any) => user.username)
+            .filter((username: string) => !userList.includes(username));
+  
+          if (newUsernames.length === 0) {
+            alert('User(s) already added.');
+            return;
+          }
+  
+          setUserList([...newUsernames, ...userList]);
+          setAddUserName('');
+        } else {
+          alert('User not found.');
+        }
+      } catch (err) {
+        console.error('Error fetching user:', err);
+        console.log('Current user:', auth.currentUser);
+        alert('Failed to fetch user. Please check username.');
       }
     };
+
+
+
+
+
 
     const removeUserHandler = (index: number) => {
       const updatedList = [...userList];

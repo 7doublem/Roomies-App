@@ -1,10 +1,12 @@
 import { apiFetch } from './index';
 
+// Get all groups for the current user
 export async function getGroups(token: string) {
   const res = await apiFetch('/groups', token);
   return res.json();
 }
 
+// Create a new group
 export async function createGroup(token: string, name: string, usernames: string[]) {
   const res = await apiFetch('/groups', token, {
     method: 'POST',
@@ -13,7 +15,8 @@ export async function createGroup(token: string, name: string, usernames: string
   return res.json();
 }
 
-export async function joinGroup(token: string, groupId: string) {
+// Join a group by group code
+export async function joinGroup(token: string, groupCode: string) {
   const API_URL = 'https://roomiesapi-6l3ldzfk4q-uc.a.run.app';
   const res = await fetch(`${API_URL}/groups/join`, {
     method: 'PATCH',
@@ -21,7 +24,7 @@ export async function joinGroup(token: string, groupId: string) {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ groupId: groupId.trim() }),
+    body: JSON.stringify({ groupCode: groupCode.trim() }),
   });
   return res;
 }
