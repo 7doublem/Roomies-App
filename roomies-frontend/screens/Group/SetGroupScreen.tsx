@@ -31,7 +31,7 @@ export default function SetGroupScreen({ navigation }: any) {
       const searchUsername = addUserName.trim();
 
       const response = await fetch(
-        `https://roomiesapi-6l3ldzfk4q-uc.a.run.app/users/search?username=${searchUsername}`,
+        `https://roomiesapi-34btz44gbq-uc.a.run.app/users/search?username=${searchUsername}`,
         {
           method: 'GET',
           headers: {

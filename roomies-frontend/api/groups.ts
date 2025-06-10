@@ -17,7 +17,7 @@ export async function createGroup(token: string, name: string, usernames: string
 
 // Join a group by group code
 export async function joinGroup(token: string, groupCode: string) {
-  const API_URL = 'https://roomiesapi-6l3ldzfk4q-uc.a.run.app';
+  const API_URL = 'https://roomiesapi-34btz44gbq-uc.a.run.app';
   const res = await fetch(`${API_URL}/groups/join`, {
     method: 'PATCH',
     headers: {
