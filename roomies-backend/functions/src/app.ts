@@ -1,8 +1,8 @@
 import express from "express";
-import { userRoutes } from "./routes/users.routes";
-import { choreRoutes } from "./routes/chores.routes";
-import { groupRoutes } from "./routes/groups.routes";
-import { commentRoutes } from "./routes/comments.routes";
+import {userRoutes} from "./routes/users.routes";
+import {choreRoutes} from "./routes/chores.routes";
+import {groupRoutes} from "./routes/groups.routes";
+import {commentRoutes} from "./routes/comments.routes";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import cors from "cors";
@@ -20,7 +20,7 @@ if (!admin.apps.length) {
     process.env.FIREBASE_AUTH_EMULATOR_HOST ||= "127.0.0.1:9099";
     console.log("Using Firestore and Auth Emulators");
 
-    admin.initializeApp({ projectId: "roomies-app-32362" });
+    admin.initializeApp({projectId: "roomies-app-32362"});
   } else if (
     process.env.FIREBASE_PROJECT_ID &&
     process.env.FIREBASE_CLIENT_EMAIL &&
