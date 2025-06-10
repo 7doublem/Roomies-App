@@ -58,8 +58,15 @@ export default function CommentSection() {
           ref={scrollViewRef}>
           {comments.map((comment) => (
             <View key={comment.id} style={styles.commentBox}>
-              <Text style={styles.CommentBoxUser}>{comment.user}</Text>
-              <Text>{comment.text}</Text>
+              <View>
+                <Text style={styles.CommentBoxUser}>{comment.user}</Text>
+                <Text>{comment.text}</Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => handleDeleteComment(comment.id)}
+                style={styles.deleteIconContainer}>
+                <FontAwesome6 name="circle-minus" size={22} color="red" />
+              </TouchableOpacity>
             </View>
           ))}
         </ScrollView>

@@ -454,8 +454,8 @@ card_Todo: {
 taskDetail_Screen_text: { fontSize: 28, fontWeight: 'bold', textAlign: 'center' },
 editBtn: { alignItems: 'flex-end' },
 
-//Comment Section
-commentSection: {
+ //Comment Section
+ commentSection: {
   marginTop: 20,
 },
 commentTitle: {
@@ -468,17 +468,26 @@ commentContainer: {
   flex: 1,
   padding: 10,
 },
-commentBox: {
-  backgroundColor: 'rgb(242 255 231)',
-  padding: 10,
-  marginBottom: 10,
-  borderRadius: 8,
-},
 CommentBoxUser: {
   fontWeight: 'bold',
   marginBottom: 4,
 },
 CommentBoxUserText: {},
+commentBox: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  backgroundColor: '#f9f9f9',
+  padding: 10,
+  borderRadius: 8,
+  marginBottom: 8,
+},
+
+deleteIconContainer: {
+  justifyContent: 'center',
+  alignItems: 'center',
+  paddingLeft: 10,
+},
 
 // Submit Comment
 
