@@ -18,7 +18,7 @@ groupRoutes.patch("/groups/join", authenticateUser, groupController.addGroupMemb
 groupRoutes.patch("/groups/:group_id", authenticateUser, groupController.updateGroupName);
 
 // PATCH /groups/:group_id/members - users can add member to the group
-groupRoutes.patch("/groups/:group_id/members", authenticateUser, groupController.addMemberToGroup);
+groupRoutes.patch("/groups/:group_id/members", authenticateUser, groupController.updateGroup);
 
 // GET /groups/:group_id/users - users can see the leaderboard screen
 groupRoutes.get("/groups/:group_id/members", authenticateUser, groupController.getUsersByGroupId);

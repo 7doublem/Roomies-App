@@ -198,8 +198,8 @@ export class groupController {
     }
   }
 
-  // PATCH /groups/:group_id/members - only admins can add new user by username
-  static async addMemberToGroup(
+  // PATCH /groups/:group_id/members - only admins can edit it 
+  static async updateGroup(
     req: Request,
     res: Response,
     next: NextFunction
@@ -207,28 +207,17 @@ export class groupController {
     try {
       const uid = req.user?.uid;
       const groupId = req.params.group_id;
-      const {members} = req.body;
+      const {name, members} = req.body;
 
       if (!uid) {
         res.status(401).json({message: "Unauthorized"});
         return;
       }
-      if (!Array.isArray(members) || members.length === 0) {
-        res.status(400).json({message: "Member(s) required"});
+
+      if(!name && (!Array.isArray(members) || members.length === 0)) {
+        res.status(401).json({message: "Nothing to update"});
         return;
       }
-
-      const userDoc = await getFirestore()
-        .collection("users")
-        .doc(uid)
-        .get();
-
-      if (!userDoc.exists) {
-        res.status(400).json({message: "Could not find details of requestor"});
-        return;
-      }
-
-      const username = userDoc.data()?.username;
 
       const groupRef = getFirestore().collection("groups").doc(groupId);
       const groupDoc = await groupRef.get();
@@ -239,22 +228,56 @@ export class groupController {
       }
 
       const group = groupDoc.data() as Group;
-      if (!group.admins.includes(username)) {
-        res.status(403).json({message: "Forbidden"});
+      
+      if(!group.admins.includes(uid)){
+        res.status(403).json({message: "Only admins can update"});
         return;
       }
 
-      const userDocs = await getFirestore()
-        .collection("users")
-        .where("members", "in", members)
-        .get();
-      const newUids = userDocs.docs.map((doc) => doc.id);
-      const currentMembers = new Set(group.members);
-      newUids.forEach((uid) => currentMembers.add(uid));
+      const updateSet: {[key:string]: any} = {};
 
-      await groupRef.update({members: Array.from(currentMembers)});
-      res.status(200).json({message: "Members added successfully"});
-      return;
+      let updatedMembers: {uid: string, username: string}[] =[]
+      
+      if (name) {
+        updateSet.name = name;
+      }
+
+      if (Array.isArray(members) && members.length > 0) {
+        const userDocs = await getFirestore()
+          .collection("users")
+          .where("username", "in", members)
+          .get();
+
+        updatedMembers = userDocs.docs.map((doc) => ({
+          uid: doc.id,
+          username: doc.data()?.username,
+        }))
+
+        const membersUids = updatedMembers.map((member) => member.uid);
+
+        if(!membersUids.includes(uid)){
+          const userDoc = await getFirestore().collection("users").doc(uid).get();
+          if(userDoc.exists) {
+            const userData = userDoc.data();
+            updatedMembers.push({
+              uid,
+              username: userData?.username,
+            })
+          }
+        }
+
+        updateSet.members = updatedMembers.map((member) => member.uid);
+      }
+
+      if (Object.keys(updateSet).length === 0) {
+        res.status(400).json({message: "Nothing to update"});
+        return;
+      }
+
+      await groupRef.update(updateSet);
+      const updatedGroupDoc = await groupRef.get();
+
+      res.status(200).send({groupId: groupRef.id, ...updatedGroupDoc.data()});
     } catch (error) {
       console.error(error);
       next(error);

@@ -152,7 +152,7 @@ export class ChoreController {
       const newChoreRef = groupRef.collection("chores").doc(choreId);
       const newChoreDoc = await newChoreRef.get();
 
-      res.status(201).send({choreId: choreRef.id, ...newChoreDoc.data()});
+      res.status(200).send({choreId: choreRef.id, ...newChoreDoc.data()});
       return;
     } catch (error) {
       console.error(error);

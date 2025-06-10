@@ -379,7 +379,7 @@ describe("Chore Tests", () => {
         .patch(`/groups/${groupA.id}/chores/${choreA.id}`)
         .set("Authorization", `Bearer ${token}`)
         .send(updatedChore);
-      expect(res.status).toBe(201);
+      expect(res.status).toBe(200);
       const chore = res.body;
       expect(chore).toMatchObject({
         choreId: choreA.id,
@@ -394,7 +394,7 @@ describe("Chore Tests", () => {
       });
     });
 
-    it("should return 201 but createdBy must be ignored", async () => {
+    it("should return 200 but createdBy must be ignored", async () => {
       const choreA = await getFirestore().collection("groups").doc(groupA.id).collection("chores").add({
         name: "Chore to test",
         description: "", // optional
@@ -421,7 +421,7 @@ describe("Chore Tests", () => {
         .patch(`/groups/${groupA.id}/chores/${choreA.id}`)
         .set("Authorization", `Bearer ${token}`)
         .send(updatedChore);
-      expect(res.status).toBe(201);
+      expect(res.status).toBe(200);
       const chore = res.body;
       expect(chore).toMatchObject({
         choreId: choreA.id,
@@ -436,7 +436,7 @@ describe("Chore Tests", () => {
       });
     });
 
-    it("should return 201 and update a chore", async () => {
+    it("should return 200 and update a chore", async () => {
       const choreA = await getFirestore().collection("groups").doc(groupA.id).collection("chores").add({
         name: "Chore to test",
         description: "", // optional
@@ -462,7 +462,7 @@ describe("Chore Tests", () => {
         .patch(`/groups/${groupA.id}/chores/${choreA.id}`)
         .set("Authorization", `Bearer ${token}`)
         .send(updatedChore);
-      expect(res.status).toBe(201);
+      expect(res.status).toBe(200);
       const chore = res.body;
       expect(chore).toMatchObject({
         choreId: choreA.id,
