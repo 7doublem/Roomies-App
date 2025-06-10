@@ -91,6 +91,7 @@ describe("Group Tests", () => {
         .set("Authorization", `Bearer ${token}`);
       expect(res.status).toBe(200);
       const groups = res.body;
+      console.log(groups, "return a list of chores")
       expect(groups).toHaveLength(1);
       expect(Array.isArray(groups)).toBe(true);
       groups.forEach((group: Group) => {
@@ -134,6 +135,7 @@ describe("Group Tests", () => {
         .send(newGroup);
       expect(res.status).toBe(201);
       const group = res.body;
+      console.log(group, "create a group")
       expect(group).toMatchObject({
         groupId: expect.any(String),
         name: group.name,
@@ -215,6 +217,7 @@ describe("Group Tests", () => {
 
       expect(res.status).toBe(200);
       const group = res.body;
+      console.log(group, "user join a group by groupId")
       expect(group).toMatchObject({
         groupId: expect.any(String),
         name: group.name,
@@ -265,6 +268,7 @@ describe("Group Tests", () => {
         .set("Authorization", `Bearer ${token}`)
         .send({name: "New Name"});
       expect(res.status).toBe(200);
+      console.log(res.body, "update group name")
       expect(res.body.message).toBe("Group name updated");
     });
 
@@ -376,6 +380,7 @@ describe("Group Tests", () => {
 
       expect(res.status).toBe(200);
       const group = res.body;
+      console.log(res.body, "update group - name and members")
       expect(group).toMatchObject({
         groupId: expect.any(String),
         name: group.name,
@@ -455,6 +460,7 @@ describe("Group Tests", () => {
       expect(res.body[0]).toHaveProperty("uid");
       expect(res.body[0].rewardPoints).toBe(300);
       const groups = res.body;
+      console.log(groups, "get all members related to a group")
       groups.forEach((group: Comment) => {
         expect(group).toMatchObject({
           uid: expect.any(String),

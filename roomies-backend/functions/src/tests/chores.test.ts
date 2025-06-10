@@ -184,6 +184,7 @@ describe("Chore Tests", () => {
         .send(newChore);
       expect(res.status).toBe(201);
       const chore = res.body;
+      console.log(chore, "create a chore")
       expect(chore.name).toContain("Chore to test");
       expect(chore).toMatchObject({
         choreId: expect.any(String),
@@ -243,6 +244,7 @@ describe("Chore Tests", () => {
       const chores = res.body;
       expect(chores).toHaveLength(1);
       expect(Array.isArray(chores)).toBe(true);
+      console.log(chores, "return a list of chores")
       chores.forEach((chore: Chore) => {
         expect(chore).toMatchObject({
           name: expect.any(String),
@@ -271,7 +273,7 @@ describe("Chore Tests", () => {
         createdBy: uid,
       });
 
-      const updatedChore = {
+      const updateChore = {
         name: "Chore to test updated",
         description: "updated", // optional
         rewardPoints: 87,
@@ -284,7 +286,7 @@ describe("Chore Tests", () => {
 
       const res = await request(app)
         .patch(`/groups/${groupA.id}/chores/${choreA.id}`)
-        .send(updatedChore);
+        .send(updateChore);
       expect(res.status).toBe(401);
       expect(res.body.message).toBe("Unauthorised");
     });
@@ -464,6 +466,7 @@ describe("Chore Tests", () => {
         .send(updatedChore);
       expect(res.status).toBe(200);
       const chore = res.body;
+      console.log(chore, "update a chore")
       expect(chore).toMatchObject({
         choreId: choreA.id,
         name: "Chore to test updated",
@@ -553,7 +556,7 @@ describe("Chore Tests", () => {
 
       expect(res.status).toBe(200);
       expect(res.body.message).toBe("Chore deleted successfully");
-
+      console.log(res.body, "delete a chore")
       const deletedDoc = await getFirestore()
         .collection("groups")
         .doc(groupA.id)
