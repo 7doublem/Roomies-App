@@ -12,3 +12,16 @@ export async function createGroup(token: string, name: string, usernames: string
   });
   return res.json();
 }
+
+export async function joinGroup(token: string, groupId: string) {
+  const API_URL = 'https://roomiesapi-6l3ldzfk4q-uc.a.run.app';
+  const res = await fetch(`${API_URL}/groups/join`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ groupId: groupId.trim() }),
+  });
+  return res;
+}

@@ -40,7 +40,16 @@ if (!admin.apps.length) {
 
 export const app = express();
 
-app.use(cors({origin: true}));
+app.use(cors({
+  origin: [
+    "http://localhost:8081", // Expo web/dev
+    "http://localhost:8082", // Expo web/dev
+    "http://localhost:19006", // Expo Go web
+    "http://localhost:3000",  // If you use another port
+    // Add your deployed frontend URL here for production
+  ],
+  credentials: true,
+}));
 app.use(express.json());
 app.use(userRoutes);
 app.use(groupRoutes);

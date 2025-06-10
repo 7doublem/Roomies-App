@@ -24,6 +24,7 @@ import {
         setAddUserName('');
       }
     };
+
     const removeUserHandler = (index: number) => {
       const updatedList = [...userList];
       updatedList.splice(index, 1);
