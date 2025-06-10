@@ -1,10 +1,7 @@
 import * as admin from "firebase-admin";
-import serviceAccount from "../../firebaseServiceAccount.json";
 import {getFirestore} from "firebase-admin/firestore";
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
-});
+admin.initializeApp({ credential: admin.credential.cert({ projectId: process.env.FIREBASE_PROJECT_ID, clientEmail: process.env.FIREBASE_CLIENT_EMAIL, privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"), }),});
 
 // seeds new_group individually, update name and members manually
 (async function seedGroup() {
