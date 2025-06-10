@@ -9,7 +9,7 @@ export const authenticateUser = async (
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    res.status(401).json({message: "Unauthorised"});
+    res.status(401).json({message: "Unauthorised cause I cant find the header"});
     return;
   }
 
@@ -22,8 +22,8 @@ export const authenticateUser = async (
 
     next();
     return;
-  } catch (error) {
-    res.status(401).json({message: "Unauthorised"});
+  } catch (error: any) {
+    res.status(401).json({message: "Unauthorised cause theres something wrong", error: error.message});
     return;
   }
 };

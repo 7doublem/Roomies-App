@@ -3,6 +3,9 @@ import {CollectionReference, getFirestore} from "firebase-admin/firestore";
 import {getAuth} from "firebase-admin/auth";
 import {generateGroupCode} from "../utils/GroupCodeGenerator";
 import {User} from "../controllers/users.controller";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 admin.initializeApp({
   credential: admin.credential.cert({
