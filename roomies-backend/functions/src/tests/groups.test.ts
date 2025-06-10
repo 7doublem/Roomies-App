@@ -311,11 +311,11 @@ describe("Group Tests", () => {
           groupCode: "JOIN123",
           members: ["adminuser"],
           admins: [uid],
-          createdBy: uid, 
+          createdBy: uid,
         });
       groupId = docRef.id;
-      const groupDoc = (await docRef.get()).data()
-      console.log(groupDoc, "groupDoc")  ////// remove it later.. testing
+      const groupDoc = (await docRef.get()).data();
+      console.log(groupDoc, "groupDoc"); // //// remove it later.. testing
 
       await getFirestore().collection("users").doc("otherUser").set({
         username: "otherUser",
@@ -374,18 +374,18 @@ describe("Group Tests", () => {
       const res = await request(app)
         .patch(`/groups/${groupId}/members`)
         .set("Authorization", `Bearer ${token}`)
-        .send({name:"Group with Alice",  members: ["Alice"]});
+        .send({name: "Group with Alice", members: ["Alice"]});
 
       expect(res.status).toBe(200);
       const group = res.body;
-      //console.log(group, " patch group")
-        expect(group).toMatchObject({
-          groupId: expect.any(String),
-          name: group.name,
-          members: group.members,
-          admins: group.admins,
-          createdBy: expect.any(String),
-          groupCode: expect.any(String),
+      // console.log(group, " patch group")
+      expect(group).toMatchObject({
+        groupId: expect.any(String),
+        name: group.name,
+        members: group.members,
+        admins: group.admins,
+        createdBy: expect.any(String),
+        groupCode: expect.any(String),
       });
     });
     it("should return 200 and add new name", async () => {
@@ -396,14 +396,14 @@ describe("Group Tests", () => {
 
       expect(res.status).toBe(200);
       const group = res.body;
-      //console.log(group, " patch group")
-        expect(group).toMatchObject({
-          groupId: expect.any(String),
-          name: group.name,
-          members: group.members,
-          admins: group.admins,
-          createdBy: expect.any(String),
-          groupCode: expect.any(String),
+      // console.log(group, " patch group")
+      expect(group).toMatchObject({
+        groupId: expect.any(String),
+        name: group.name,
+        members: group.members,
+        admins: group.admins,
+        createdBy: expect.any(String),
+        groupCode: expect.any(String),
       });
     });
 
@@ -411,18 +411,18 @@ describe("Group Tests", () => {
       const res = await request(app)
         .patch(`/groups/${groupId}/members`)
         .set("Authorization", `Bearer ${token}`)
-        .send({name:"That's my new name"});
+        .send({name: "That's my new name"});
 
       expect(res.status).toBe(200);
       const group = res.body;
-      console.log(group, " patch group")
-        expect(group).toMatchObject({
-          groupId: expect.any(String),
-          name: group.name,
-          members: group.members,
-          admins: group.admins,
-          createdBy: expect.any(String),
-          groupCode: expect.any(String),
+      console.log(group, " patch group");
+      expect(group).toMatchObject({
+        groupId: expect.any(String),
+        name: group.name,
+        members: group.members,
+        admins: group.admins,
+        createdBy: expect.any(String),
+        groupCode: expect.any(String),
       });
     });
   });

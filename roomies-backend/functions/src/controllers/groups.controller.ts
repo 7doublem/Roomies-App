@@ -198,7 +198,7 @@ export class groupController {
     }
   }
 
-  // PATCH /groups/:group_id/members - only admins can edit it 
+  // PATCH /groups/:group_id/members - only admins can edit it
   static async updateGroup(
     req: Request,
     res: Response,
@@ -214,7 +214,7 @@ export class groupController {
         return;
       }
 
-      if(!name && (!Array.isArray(members) || members.length === 0)) {
+      if (!name && (!Array.isArray(members) || members.length === 0)) {
         res.status(401).json({message: "Nothing to update"});
         return;
       }
@@ -228,16 +228,17 @@ export class groupController {
       }
 
       const group = groupDoc.data() as Group;
-      
-      if(!group.admins.includes(uid)){
+
+      if (!group.admins.includes(uid)) {
         res.status(403).json({message: "Only admins can update"});
         return;
       }
 
-      const updateSet: {[key:string]: any} = {};
+      //const updateSet: {[key:string]: any} = {};
+      const updateSet: Partial<{name: string, members:string[]}> = {};
 
-      let updatedMembers: {uid: string, username: string}[] =[]
-      
+      let updatedMembers: {uid: string, username: string}[] =[];
+
       if (name) {
         updateSet.name = name;
       }
@@ -251,18 +252,18 @@ export class groupController {
         updatedMembers = userDocs.docs.map((doc) => ({
           uid: doc.id,
           username: doc.data()?.username,
-        }))
+        }));
 
         const membersUids = updatedMembers.map((member) => member.uid);
 
-        if(!membersUids.includes(uid)){
+        if (!membersUids.includes(uid)) {
           const userDoc = await getFirestore().collection("users").doc(uid).get();
-          if(userDoc.exists) {
+          if (userDoc.exists) {
             const userData = userDoc.data();
             updatedMembers.push({
               uid,
               username: userData?.username,
-            })
+            });
           }
         }
 
