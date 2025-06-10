@@ -234,7 +234,6 @@ export class groupController {
         return;
       }
 
-      //const updateSet: {[key:string]: any} = {};
       const updateSet: Partial<{name: string, members:string[]}> = {};
 
       let updatedMembers: {uid: string, username: string}[] =[];

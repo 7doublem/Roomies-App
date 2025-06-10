@@ -314,8 +314,6 @@ describe("Group Tests", () => {
           createdBy: uid,
         });
       groupId = docRef.id;
-      const groupDoc = (await docRef.get()).data();
-      console.log(groupDoc, "groupDoc"); // //// remove it later.. testing
 
       await getFirestore().collection("users").doc("otherUser").set({
         username: "otherUser",
@@ -378,7 +376,6 @@ describe("Group Tests", () => {
 
       expect(res.status).toBe(200);
       const group = res.body;
-      // console.log(group, " patch group")
       expect(group).toMatchObject({
         groupId: expect.any(String),
         name: group.name,
@@ -393,10 +390,8 @@ describe("Group Tests", () => {
         .patch(`/groups/${groupId}/members`)
         .set("Authorization", `Bearer ${token}`)
         .send({members: ["Alice"]});
-
       expect(res.status).toBe(200);
       const group = res.body;
-      // console.log(group, " patch group")
       expect(group).toMatchObject({
         groupId: expect.any(String),
         name: group.name,
@@ -415,7 +410,6 @@ describe("Group Tests", () => {
 
       expect(res.status).toBe(200);
       const group = res.body;
-      console.log(group, " patch group");
       expect(group).toMatchObject({
         groupId: expect.any(String),
         name: group.name,
