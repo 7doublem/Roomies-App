@@ -1,0 +1,3 @@
+.husky
+.github/workflows
+# Ignore node_modules
