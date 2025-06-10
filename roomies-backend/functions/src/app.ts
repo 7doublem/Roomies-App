@@ -43,6 +43,9 @@ export const app = express();
 
 app.use(cors({origin: true}));
 
+// Handle preflight requests for all routes
+app.options("*", cors({ origin: true }));
+
 app.use(express.json());
 app.use(userRoutes);
 app.use(groupRoutes);
