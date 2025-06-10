@@ -19,12 +19,12 @@ if (!admin.apps.length) {
     process.env.FIRESTORE_EMULATOR_HOST ||= "127.0.0.1:8080";
     process.env.FIREBASE_AUTH_EMULATOR_HOST ||= "127.0.0.1:9099";
     console.log("Using Firestore and Auth Emulators");
-
     admin.initializeApp({projectId: "roomies-app-32362"});
   } else if (
     process.env.FIREBASE_PROJECT_ID &&
     process.env.FIREBASE_CLIENT_EMAIL &&
     process.env.FIREBASE_PRIVATE_KEY
+
   ) {
     admin.initializeApp({
       credential: admin.credential.cert({
@@ -48,5 +48,4 @@ app.use(userRoutes);
 app.use(groupRoutes);
 app.use(choreRoutes);
 app.use(commentRoutes);
-
 export const roomiesapi = functions.https.onRequest(app);

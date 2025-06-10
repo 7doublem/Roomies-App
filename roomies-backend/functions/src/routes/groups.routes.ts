@@ -6,7 +6,7 @@ export const groupRoutes = Router();
 
 
 // GET /groups - used for app administration
-groupRoutes.get("/groups", groupController.getAllGroups);
+groupRoutes.get("/groups", authenticateUser, groupController.getAllGroups);
 
 // POST /groups - for users to create a group
 groupRoutes.post("/groups", authenticateUser, groupController.createGroup);
@@ -18,7 +18,7 @@ groupRoutes.patch("/groups/join", authenticateUser, groupController.addGroupMemb
 groupRoutes.patch("/groups/:group_id", authenticateUser, groupController.updateGroupName);
 
 // PATCH /groups/:group_id/members - users can add member to the group
-groupRoutes.patch("/groups/:group_id/members", authenticateUser, groupController.addMemberToGroup);
+groupRoutes.patch("/groups/:group_id/members", authenticateUser, groupController.updateGroup);
 
 // GET /groups/:group_id/users - users can see the leaderboard screen
 groupRoutes.get("/groups/:group_id/members", authenticateUser, groupController.getUsersByGroupId);

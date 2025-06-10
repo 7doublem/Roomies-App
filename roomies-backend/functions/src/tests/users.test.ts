@@ -2,6 +2,7 @@ import request from "supertest";
 import {app} from "../app";
 import {createUserAndGetToken, deleteUsersAuth} from "./test.utils/utils";
 import {getFirestore} from "firebase-admin/firestore";
+import {User} from "../controllers/users.controller";
 
 describe("User Routes", () => {
   let server: ReturnType<typeof app.listen>;
@@ -31,7 +32,6 @@ describe("User Routes", () => {
       email: "testuser@example.com",
       avatarUrl: null,
       rewardPoints: 300,
-      groupId: null,
     });
   });
 
@@ -45,17 +45,42 @@ describe("User Routes", () => {
 
   describe("POST /users", () => {
     it("should create a new user successfully", async () => {
-      const res = await request(app).post("/users").send({
-        username: "testuser",
-        email: "testuser2@example.com",
-        password: "password123",
-      });
+      const res = await request(app)
+        .post("/users")
+        .send({
+          username: "testuser1",
+          email: "testuser1@example.com",
+          password: "password123",
+        });
 
       expect(res.status).toBe(201);
       expect(res.body).toHaveProperty("uid");
+      console.log(res.body, "create a new user successfully");
       expect(res.body.message).toBe("User created successfully");
 
       await deleteUsersAuth([res.body.uid]);
+    });
+
+    it("should return 400 if a second user adds a existing username", async () => {
+      const res1= await request(app)
+        .post("/users")
+        .send({
+          username: "testuser1",
+          email: "testuser1@example.com",
+          password: "password123",
+        });
+      const res2 = await request(app)
+        .post("/users")
+        .send({
+          username: "testuser1",
+          email: "testuserAAA@example.com",
+          password: "password1234",
+        });
+
+      expect(res2.status).toBe(400);
+      expect(res2.body.message).toBe("Username is already being used");
+
+      await deleteUsersAuth([res1.body.uid]);
     });
 
     it("should fail if required fields are missing", async () => {
@@ -76,7 +101,7 @@ describe("User Routes", () => {
       const res = await request(app)
         .get("/users")
         .set("Authorization", `Bearer ${token}`);
-
+      console.log(res.body, "return a list of users");
       expect(res.status).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBe(1);
@@ -89,7 +114,7 @@ describe("User Routes", () => {
       const res = await request(app)
         .get("/users/currentUser")
         .set("Authorization", `Bearer ${token}`);
-
+      console.log(res.body, "return current user profile");
       expect(res.status).toBe(200);
       expect(res.body.uid).toBe(uid);
       expect(res.body.username).toBe("testuser");
@@ -139,6 +164,7 @@ describe("User Routes", () => {
       const res = await request(app)
         .get("/users/search")
         .set("Authorization", `Bearer ${token}`);
+
       expect(res.status).toBe(400);
       expect(res.body.message).toBe("Username is required");
     });
@@ -147,11 +173,9 @@ describe("User Routes", () => {
       const res = await request(app)
         .get("/users/search?username=mi")
         .set("Authorization", `Bearer ${token}`);
-
+      console.log(res.body, "return matching users for prefix 'mi'");
       expect(res.status).toBe(200);
-      const usernames = res.body.users.map(
-        (u: { username: string }) => u.username
-      );
+      const usernames = res.body.users.map((u: User) => u.username);
       expect(usernames).toEqual(expect.arrayContaining(["middle"]));
     });
 

@@ -2,10 +2,10 @@ import {Request, Response, NextFunction} from "express";
 import {getFirestore, Timestamp} from "firebase-admin/firestore";
 type Comment = {
   // commentId:string,
-  choreId: string;
-  commentBody: string;
-  createdAt: number;
-  createdBy: string; // uid but show name for the front....
+  // choreId: string, //its nested
+  commentBody: string,
+  createdAt: number,
+  createdBy: string,
 };
 
 export class commentController {
@@ -44,11 +44,9 @@ export class commentController {
       }
 
       const newComment: Comment = {
-        // commentId:string, //generated
-        choreId: choreId,
         commentBody,
         createdAt: Timestamp.now().seconds,
-        createdBy: creatorUid, // uid but show name for the front....
+        createdBy: creatorUid,
       };
 
       const commentRef = await choreRef.collection("comments").add(newComment);
@@ -182,6 +180,9 @@ export class commentController {
         return;
       }
 
+      // await commentRef.delete(); //mycode
+      // res.status(204).send();
+
       await getFirestore()
         .collection("groups")
         .doc(groupId)
@@ -191,6 +192,7 @@ export class commentController {
         .doc(commentId)
         .delete();
       res.status(204).send("Comment deleted successfully");
+
       return;
     } catch (error) {
       next(error);

@@ -7,7 +7,6 @@ export type User = {
   email: string;
   avatarUrl: string | null;
   rewardPoints: number;
-  groupId: null;
 };
 
 export class userController {
@@ -42,6 +41,16 @@ export class userController {
           avatarUrl :
           undefined;
 
+      const existingUser = await getFirestore().collection("users")
+        .where("username", "==", username)
+        .get();
+
+      if (!existingUser.empty) {
+        res.status(400).json({message: "Username is already being used"});
+        return;
+      }
+
+
       // create user in firebase auth
       const authUser = await getAuth().createUser({
         email,
@@ -56,7 +65,6 @@ export class userController {
         email,
         avatarUrl: validPhotoURL || null,
         rewardPoints: 0,
-        groupId: null,
       };
 
       await getFirestore().collection("users").doc(authUser.uid).set(userDoc);

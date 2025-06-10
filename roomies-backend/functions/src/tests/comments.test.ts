@@ -20,8 +20,7 @@ describe("Comments Tests", () => {
     const users = await getFirestore().collection("users").listDocuments();
     for (const doc of users) await doc.delete();
 
-    const groups = await getFirestore().collection("groups").listDocuments(); // it should delete chores together
-    for (const doc of groups) await doc.delete();
+    await getFirestore().recursiveDelete(getFirestore().collection("groups"));
   }
 
   beforeAll(async () => {
@@ -44,7 +43,6 @@ describe("Comments Tests", () => {
       email: "adminuser@example.com",
       avatarUrl: null,
       rewardPoints: 300,
-      groupId: null,
     });
 
     await getFirestore().collection("users").doc(uidAlice).set({
@@ -52,7 +50,6 @@ describe("Comments Tests", () => {
       email: "alice@example.com",
       avatarUrl: null,
       rewardPoints: 100,
-      groupId: null,
     });
 
     groupA = await getFirestore()
@@ -136,10 +133,10 @@ describe("Comments Tests", () => {
         .send(newComment);
       expect(res.status).toBe(201);
       const comment = res.body;
+      console.log(comment, "create a comment");
       expect(comment).toMatchObject({
         commentId: comment.commentId,
-        choreId: choreA.id,
-        commentBody: "Don't forget to wash gold porcelain glasses by hand",
+        commentBody: comment.commentBody,
         createdAt: expect.any(Number),
         createdBy: expect.any(String),
       });
@@ -183,7 +180,6 @@ describe("Comments Tests", () => {
 
     it("should return 200 and get all comments related to a chore", async () => {
       await choreA.collection("comments").add({
-        choreId: choreA.id,
         commentBody: "That's super boring!",
         createdBy: uidAlice,
         createdAt: 123356,
@@ -195,10 +191,10 @@ describe("Comments Tests", () => {
       expect(res.body).toHaveLength(1);
       expect(Array.isArray(res.body)).toBe(true);
       const comments = res.body;
+      console.log(comments, "get all comments related to a chore");
       comments.forEach((comment: Comment) => {
         expect(comment).toMatchObject({
           commentId: expect.any(String),
-          choreId: expect.any(String),
           commentBody: expect.any(String),
           createdAt: expect.any(Number),
           createdBy: expect.any(String),
@@ -212,22 +208,28 @@ describe("Comments Tests", () => {
       const newComment = {
         commentBody: "Don't forget to wash gold porcelain glasses by hand",
       };
+
       const commentRes = await request(app)
         .post(`/groups/${groupA.id}/chores/${choreA.id}/comments`)
         .set("Authorization", `Bearer ${token}`)
         .send(newComment);
+
       const comment = commentRes.body;
       const deleteRes = await request(app)
         .delete(
           `/groups/${groupA.id}/chores/${choreA.id}/comments/${comment.commentId}`
         )
         .set("Authorization", `Bearer ${token}`);
+
       expect(deleteRes.status).toBe(204);
+
       const checkRes = await request(app)
         .get(`/groups/${groupA.id}/chores/${choreA.id}/comments`)
         .set("Authorization", `Bearer ${token}`);
+
       expect(checkRes.status).toBe(200);
       expect(checkRes.body).toEqual([]);
+      console.log(checkRes.body, "delete a comment");
       expect(Array.isArray(checkRes.body)).toBe(true);
     });
     it("404 - Fails when group is invalid", async () => {

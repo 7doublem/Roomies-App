@@ -1,0 +1,247 @@
+{
+"POST /users": {
+  "description": "create a new user",
+  "exampleBody": {
+      "username": "testuser1",
+      "email": "testuser1@example.com",
+      "password": "password123"
+  },
+  "exampleResponse": {
+    "uid": "KzoIsrAR4VFknSxg6lLXVUwJVyMv",
+    "message": "User created successfully"
+  }   
+},
+"GET /users": {
+  "description": "return a list all users",
+  "exampleResponse": [
+    {
+        "uid": "2nTbvIApkXdUXU7dvgcsQjsUJzNO",
+        "username": "testuser",
+        "email": "testuser@example.com",
+        "avatarUrl": "https://www.img.com",
+        "rewardPoints": 300
+    },
+    {
+        "uid": "2nTbvIApkXdUXU7dvgcsQjsUJzNO",
+        "username": "testuser",
+        "email": "testuser@example.com",
+        "avatarUrl": "https://www.img.com",
+        "rewardPoints": 200
+    }
+  ]
+},
+"GET /users/currentUser": {
+  "description": "return current user profile",
+  "exampleResponse": {
+      "uid": "bloJbQGKaXUmG7VgXLSlguHKuj0H",
+      "username": "testuser",
+      "email": "testuser@example.com",
+      "avatarUrl": "https://www.img.com",
+      "rewardPoints": 300
+  }
+},
+"GET /users/search": {
+  "description": "return matching users for prefix (mi)", 
+  "exampleResponse": {
+      "users": [
+        {
+          "uid": "user0",
+          "username": "middle",
+          "email": "middle@example.com",
+          "avatarUrl": "https://www.img.com"
+        }
+      ]
+  }
+},
+"GET /groups": {
+  "description": "return a list of chores",
+  "exampleResponse": [
+    {
+      "uid": "2nTbvIApkXdUXU7dvgcsQjsUJzNO",
+      "username": "testuser",
+      "email": "testuser@example.com",
+      "avatarUrl": "https://www.img.com",
+      "rewardPoints": 300
+    },
+    {
+      "uid": "2nTbvIApkXdUXU7dvgcsQjsUJzNO",
+      "username": "testuser",
+      "email": "testuser@example.com",
+      "avatarUrl": "https://www.img.com",
+      "rewardPoints": 200
+    }
+  ]
+},
+"POST /groups": {
+  "description": "create a group",
+  "exampleBody": {
+    "name": "Group A",
+    "members": ["Henry", "Alice"]
+  },
+  "exampleResponse": {
+    "groupId": "SCDGJoTRaDuvfzQChxmD",
+    "name": "Group A",
+    "members": [ "O45AwdTjcmoRuVA77iL5EY16dCDK", "AyFvZHXhNHqhrEspFMsYNRa8p7BH" ],
+    "admins": ["O45AwdTjcmoRuVA77iL5EY16dCDK"],
+    "createdBy": "O45AwdTjcmoRuVA77iL5EY16dCDK",
+    "groupCode": "AZR1K6"
+  }
+},
+"PATCH /groups/join": {
+  "description": "user join a group by groupId",
+  "exampleBody": {
+    "groupCode": "JOIN123"  
+  },
+  "exampleResponse":     {
+    "groupId": "imOBqi2iZ3U0v8Ia4PVt",
+    "name": "Joinable Group",
+    "groupCode": "JOIN123",
+    "admins": [ "N0ul9DdZkoDLtpKqWFeoOaV1C6NM" ],
+    "createdBy": "N0ul9DdZkoDLtpKqWFeoOaV1C6NM",
+    "members": [ "N0ul9DdZkoDLtpKqWFeoOaV1C6NM", "H5OBIpIUHJADbzHq7u7rKIG2wYiI" ]
+  }
+},
+"PATCH /groups/:group_id": {
+  "description": "update group name",
+  "params": ["group_id"],
+  "exampleBody": {
+    "name": "New Name"
+  },
+  "exampleResponse": { 
+    "message": "Group name updated" 
+  }
+},
+"PATCH /groups/:group_id/members": {
+  "description": "update group - name and members",
+  "params": ["group_id"],
+  "exampleBody": {
+    "name": "Group with Alice",
+    "members": ["Alice"]
+  },
+  "exampleResponse": { 
+    "message": "Group name updated" 
+  }
+},
+"GET /groups/:group_id/members": {
+  "description": "get all members related to a group", 
+  "params": ["group_id"],
+  "exampleResponse": [
+    {
+      "uid": "kBNWR0RxmCPGedEstSN9oCoqwvhz",
+      "username": "Henry",
+      "email": "adminuser@example.com",
+      "avatarUrl": "https://adminuser.com",
+      "rewardPoints": 300
+    },
+    {
+      "uid": "QNTEzCnGn44BYg2PCpD4JUsmuWcc",
+      "username": "Alice",
+      "email": "alice@example.com",
+      "avatarUrl": "https://adminuser.com",
+      "rewardPoints": 100
+    }
+  ]
+},
+"POST /groups/:group_id/chores": {
+  "description": "create a chore",
+  "params": ["group_id"],
+  "exampleBody": {
+    "name": "Chore to test",
+    "description": "OPTIONAL", 
+    "rewardPoints": 87,
+    "startDate": 1754648400, 
+    "dueDate": 1754821200, 
+    "assignedTo": "uidAlice",
+    "status": "todo"
+  },
+  "exampleResponse": {
+      "choreId": "c5VpyPUV8QLAb9RxFVZp",
+      "name": "Chore to test",
+      "description": "OPTIONAL",
+      "rewardPoints": 87,
+      "startDate": 1754648400,
+      "dueDate": 1754821200,
+      "assignedTo": "FpnNKyf72VWF5TU4Bjsk1Oh1g4BE",
+      "status": "todo",
+      "createdBy": "Mxua80JSrX1RN0uev8X9OKiHrglK"
+    }
+},
+"GET /groups/:group_id/chores": {
+  "description": "return a list of chores",
+  "params": ["group_id"],
+  "exampleResponse": [
+      {
+        "id": "4B3IEpvDtSrCd6Srnawo",
+        "name": "Chore to test",
+        "description": "optional",
+        "rewardPoints": 87,
+        "startDate": 1754648400,
+        "dueDate": 1754821200,
+        "assignedTo": "NmzlBNug7Z3pRDfHvxGNptZVyiWm",
+        "status": "todo",
+        "createdBy": "lK6B6I8AQjTapcIsf8J6VijIRgLu"
+      }
+  ]
+},
+"PATCH /groups/:group_id/chores/:chore_id": {
+  "description": "update a chore",
+  "params": ["group_id", "chore_id"],
+  "exampleBody": {
+    "name": "Chore to test updated",
+    "description": "updated chore",
+    "rewardPoints": 87,
+    "startDate": 1754648400, 
+    "dueDate": 1754821200,
+    "assignedTo": "uidAlice",
+    "status": "doing"
+  },
+  "exampleResponse": {
+    "choreId": "E64SFH6E99oMeGw4tTAi",
+    "rewardPoints": 87,
+    "startDate": 1754648400,
+    "dueDate": 1754821200,
+    "assignedTo": "mn766w7LYnYoqHkHIIbpxcaRplVq",
+    "createdBy": "nLJ4J3AU9vHn5ekqPzxOVl4SPm85",
+    "name": "Chore to test updated",
+    "description": "updated",
+    "status": "doing"
+  }
+},
+"DELETE /groups/:group_id/chores/:chore_id": {
+  "description": "delete a chore",
+  "params": ["group_id", "chore_id"],
+  "exampleResponse": {
+    "message": "Chore deleted successfully"
+  }
+},
+"POST /groups/:group_id/chores/:chore_id/comments": {
+  "description": "create a comment",
+  "params": ["group_id", "chore_id"],
+  "exampleBody": {
+    "commentBody": "Don't forget to wash gold porcelain glasses by hand"
+  },
+  "exampleResponse": {
+      "commentId": "hEqpC6b2DhIuAOu8TRhM",
+      "commentBody": "Don't forget to wash gold porcelain glasses by hand",
+      "createdAt": 1749563482,
+      "createdBy": "b8qKd3GPqGfgzbdXrVVpPdxcFVpm"
+    }
+},
+"GET /groups/:group_id/chores/:chore_id/comments": {
+  "description": "get all comments related to a chore",
+  "params": ["group_id", "chore_id"],
+  "exampleResponse": [
+    {
+      "commentId": "U7mUY0QeG0qPCPgVfH6D",
+      "commentBody": "That's super boring!",
+      "createdBy": "pYeLIulj3hPXfgwplGj0Ou34BJba",
+      "createdAt": 123356
+    }
+  ]
+},
+"DELETE /groups/:group_id/chores/:chore_id/comment/:comment_id": {
+  "description": "delete a comment",
+  "params": ["group_id", "chore_id", "comment_id"],
+  "exampleResponse":  []
+}
+}

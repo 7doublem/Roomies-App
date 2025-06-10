@@ -12,6 +12,7 @@ admin.initializeApp({
   }),
 });
 
+
 const users = ["Alice", "Paul", "Harry", "Noah"];
 
 // created a new_user and create a new group using the new_user data
@@ -37,7 +38,6 @@ async function createAuthedUser(userCollection: CollectionReference, userData: U
       email: `${name}@example.com`,
       avatarUrl: "https://example.com/avatar.png",
       rewardPoints: 100,
-      groupId: null,
     };
 
     const uid = await createAuthedUser(userCollection, userData);
