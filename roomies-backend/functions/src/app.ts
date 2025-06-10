@@ -5,7 +5,6 @@ import {groupRoutes} from "./routes/groups.routes";
 import {commentRoutes} from "./routes/comments.routes";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
-import cors from "cors";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -21,16 +20,16 @@ if (!admin.apps.length) {
     console.log("Using Firestore and Auth Emulators");
     admin.initializeApp({projectId: "roomies-app-32362"});
   } else if (
-    process.env.FIREBASE_PROJECT_ID &&
-    process.env.FIREBASE_CLIENT_EMAIL &&
-    process.env.FIREBASE_PRIVATE_KEY
+    process.env.PROJECT_ID &&
+    process.env.CLIENT_EMAIL &&
+    process.env.PRIVATE_KEY
 
   ) {
     admin.initializeApp({
       credential: admin.credential.cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+        projectId: process.env.PROJECT_ID,
+        clientEmail: process.env.CLIENT_EMAIL,
+        privateKey: process.env.PRIVATE_KEY?.replace(/\\n/g, "\n"),
       }),
     });
   } else {
@@ -41,11 +40,15 @@ if (!admin.apps.length) {
 
 export const app = express();
 
-app.use(cors({origin: true}));
-
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "OPTIONS,GET,PUT,POST,DELETE");
+  next();
+});
 app.use(express.json());
 app.use(userRoutes);
 app.use(groupRoutes);
 app.use(choreRoutes);
 app.use(commentRoutes);
-export const roomiesapi = functions.https.onRequest(app);
+
+export const roomiesapi = functions.https.onRequest({cors: true}, app);
