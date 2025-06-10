@@ -20,11 +20,34 @@ export default function SignInScreen({ navigation }: any) {
 
   const handleSignIn = async () => {
     setError(null);
+    if (!email.trim() || !password.trim()) {
+      setError('Please enter both an email address and password')
+      return;
+    }
     try {
       await signInWithEmailAndPassword(auth, email, password);
       navigation.navigate('Welcome');
     } catch (error: any) {
-      setError(error.message);
+      switch (error.code) {
+        
+        case 'auth/invalid-credential':
+          setError('Invalid email or password');
+          break;
+        case 'auth/user-not-found':
+          setError('No user found with this email address');
+          break;
+        case 'auth/wrong-password':
+          setError('Incorrect password');
+          break;
+        case 'auth/too-many-requests':
+          setError('Too many attempts. Please try again later.');
+          break;
+        case 'auth/network-request-failed':
+          setError('Network error. Please check your connection.');
+          break;
+        default:
+          setError(error.message || 'Something went wrong');
+      }
     }
   };
 
@@ -32,10 +55,10 @@ export default function SignInScreen({ navigation }: any) {
   const buttonScale = useSharedValue(1);
   const animatedButtonStyle = useAnimatedStyle(() => ({
     transform: [{ scale: buttonScale.value }],
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
+    // shadowColor: '#000',
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.15,
+    // shadowRadius: 4,
     elevation: 3,
   }));
 
@@ -87,12 +110,6 @@ export default function SignInScreen({ navigation }: any) {
   return (
     <GradientContainer>
       <Animated.View style={fadeStyle}>
-        {/* Logo */}
-        <Image
-          source={require('../../assets/logo.png')}
-          style={{ width: 140, height: 140, alignSelf: 'center', marginBottom: 16 }}
-          resizeMode="contain"
-        />
         <Text style={styles.signIn_Text}>Sign In</Text>
 
         {/* Error Message */}

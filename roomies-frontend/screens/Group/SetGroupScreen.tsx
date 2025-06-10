@@ -19,6 +19,8 @@ export default function SetGroupScreen({ navigation }: any) {
   const [groupName, setGroupName] = useState('');
   const [addUserName, setAddUserName] = useState('');
   const [userList, setUserList] = useState<string[]>([]);
+  const [groupNameError, setGroupNameError] = useState<string | null>(null);
+  const [userNameError, setUserNameError] = useState<string | null>(null);
 
   const addUserHandler = async () => {
     if (addUserName.trim() === '') return;
@@ -76,14 +78,18 @@ export default function SetGroupScreen({ navigation }: any) {
 
   const createGroupHandler = async () => {
     if (!groupName.trim()) {
-      alert('Please enter a group name.');
+      setGroupNameError('Please enter a group name.');
       return;
+    } else {
+      setGroupNameError('');
     }
     if (userList.length === 0) {
-      alert('Please add at least one user.');
+      setUserNameError('Please add at least one user.');
       return;
     }
+
     try {
+      setUserNameError('');
       const user = auth.currentUser;
       if (!user) throw new Error('Not authenticated');
       const token = await user.getIdToken();
@@ -115,6 +121,12 @@ export default function SetGroupScreen({ navigation }: any) {
         <View style={styles.SetGroup_container}>
           <Text style={styles.SetGroup_title}>Create a Group</Text>
 
+          {groupNameError && (
+            <View style={{ marginBottom: 12, alignItems: 'flex-start' }}>
+              <Text style={{ color: '#e74c3c', fontSize: 14 }}>{groupNameError}</Text>
+            </View>
+          )}
+
           <TextInput
             placeholder="Name of Group"
             value={groupName}
@@ -124,6 +136,13 @@ export default function SetGroupScreen({ navigation }: any) {
           />
 
           <Text style={styles.SetGroup_SearchText}>Add a User</Text>
+
+          {userNameError && (
+            <View style={{ marginBottom: 12, alignItems: 'flex-start' }}>
+              <Text style={{ color: '#e74c3c', fontSize: 14 }}>{userNameError}</Text>
+            </View>
+          )}
+
           <View style={styles.SetGroup_addUserContainer}>
             <TextInput
               placeholder="UserName"

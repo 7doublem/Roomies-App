@@ -34,10 +34,10 @@ export default function SignUpScreen({ navigation }: any) {
   const buttonScale = useSharedValue(1);
   const animatedButtonStyle = useAnimatedStyle(() => ({
     transform: [{ scale: buttonScale.value }],
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
+    // shadowColor: '#000',
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.15,
+    // shadowRadius: 4,
     elevation: 3,
   }));
 
@@ -108,6 +108,17 @@ export default function SignUpScreen({ navigation }: any) {
       setError('Name is required.');
       return;
     }
+
+    if (!email.includes('@')) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long.');
+      return;
+    }
+
+
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
@@ -125,19 +136,30 @@ export default function SignUpScreen({ navigation }: any) {
 
       navigation.navigate('Welcome');
     } catch (error: any) {
-      setError(error.message);
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          setError('This email is already in use. Try signing in instead.');
+          break;
+        case 'auth/invalid-email':
+          setError('The email address is invalid.');
+          break;
+        case 'auth/weak-password':
+          setError('Password should be at least 6 characters.');
+          break;
+        case 'auth/network-request-failed':
+          setError('Network error. Please check your internet connection.');
+          break;
+        default:
+          setError(error.message || 'Something went wrong. Please try again.');
+      }
+     
     }
   };
 
   return (
     <GradientContainer>
       <Animated.View style={fadeStyle}>
-        {/* Logo */}
-        <Image
-          source={require('../../assets/logo.png')}
-          style={{ width: 140, height: 140, alignSelf: 'center', marginBottom: 16 }}
-          resizeMode="contain"
-        />
+
         <Text style={styles.signUp_text}>Sign Up</Text>
 
         {/* Error Message */}
