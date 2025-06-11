@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import GradientContainer from '../components/GradientContainer';
 import { styles } from 'components/style';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,41 +7,91 @@ import { GestureHandlerRootView, Swipeable, PanGestureHandler } from 'react-nati
 import ChoresCard from './TabComponents/ChoresCard';
 import Confetti from 'react-confetti';
 import { useWindowDimensions } from 'react-native';
+import { getAuth } from 'firebase/auth';
+import { db } from '../firebase/config';
+import { doc, getDoc } from 'firebase/firestore';
+import { getAuthToken, apiFetch } from '../api/index';
+import dayjs from 'dayjs';
 
 const tabOrder = ['todo', 'doing', 'done'];
 
 export default function MainScreen({ navigation }: any) {
   const [activeTab, setActiveTab] = useState('todo');
-  const [todos, setTodos] = useState([
-    {
-      id: 1,
-      status: 'todo',
-      chore: 'Wash the dishes',
-      assignedTo: 'John',
-      countdown: '1d 20m 30s',
-      reward: 40,
-    },
-    {
-      id: 2,
-      status: 'todo',
-      chore: 'Vacuum the living room',
-      assignedTo: 'Wendy',
-      countdown: '1d 20m 30s',
-      reward: 40,
-    },
-    {
-      id: 3,
-      status: 'todo',
-      chore: 'Take out the trash',
-      assignedTo: 'Emma',
-      countdown: '1d 20m 30s',
-      reward: 70,
-    },
-  ]);
+  const [todos, setTodos] = useState<any[]>([]);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [currentUserName, setCurrentUserName] = useState<string>('');
   const { width, height } = useWindowDimensions();
 
-  const moveChore = (id: number, direction: 'forward' | 'backward') => {
+  // Helper to calculate countdown string from dueDate (seconds)
+  function getCountdown(dueDate: number) {
+    if (!dueDate) return '';
+    const now = dayjs();
+    const due = dayjs.unix(dueDate);
+    const diff = due.diff(now, 'second');
+    if (diff <= 0) return 'Overdue';
+    const days = Math.floor(diff / (60 * 60 * 24));
+    const hours = Math.floor((diff % (60 * 60 * 24)) / 3600);
+    const mins = Math.floor((diff % 3600) / 60);
+    const secs = diff % 60;
+    let str = '';
+    if (days > 0) str += `${days}d `;
+    if (hours > 0 || days > 0) str += `${hours}h `;
+    if (mins > 0 || hours > 0 || days > 0) str += `${mins}m `;
+    str += `${secs}s`;
+    return str;
+  }
+
+  useEffect(() => {
+    const fetchChores = async () => {
+      try {
+        const user = getAuth().currentUser;
+        if (!user) throw new Error('Not authenticated');
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        let groupId = userDoc.data()?.groupId;
+        const username = userDoc.data()?.username || '';
+        setCurrentUserName(username);
+        if (!groupId) throw new Error('No group found');
+
+        // If groupId is a group code (short), resolve to Firestore doc id
+        if (groupId.length <= 8) {
+          const token = await getAuthToken();
+          const res = await apiFetch('/groups', token);
+          const groups = await res.json();
+          const found = groups.find((g: any) => g.groupCode === groupId);
+          if (!found) throw new Error('Group not found');
+          groupId = found.groupId;
+        }
+
+        // Fetch all chores for the group from your backend
+        const token = await getAuthToken();
+        const res = await apiFetch(`/groups/${groupId}/chores`, token);
+        let chores = await res.json();
+
+        // Defensive: ensure chores is always an array
+        if (!Array.isArray(chores)) {
+          chores = [];
+        }
+
+        // Only show chores assigned to the current user, and format for display
+        const userChores = chores
+          .filter((chore: any) => chore.assignedTo === user.uid)
+          .map((chore: any) => ({
+            ...chore,
+            assignedTo: username, // Replace UID with username for display
+            chore: chore.name, // Ensure 'chore' prop is the name
+            countdown: getCountdown(chore.dueDate),
+            reward: chore.rewardPoints, // Ensure reward is set to rewardPoints
+          }));
+
+        setTodos(userChores);
+      } catch (err) {
+        setTodos([]);
+      }
+    };
+    fetchChores();
+  }, []);
+
+  const moveChore = (id: string, direction: 'forward' | 'backward') => {
     setTodos((prev) =>
       prev.map((t) => {
         if (t.id !== id) return t;
