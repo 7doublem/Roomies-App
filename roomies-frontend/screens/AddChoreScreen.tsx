@@ -1,4 +1,4 @@
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Platform, ActivityIndicator, Alert } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { styles } from 'components/style';
 import GradientContainer from 'components/GradientContainer';
@@ -11,6 +11,10 @@ import Animated, {
   withTiming,
   interpolateColor,
 } from 'react-native-reanimated';
+import { getAuth } from 'firebase/auth';
+import { db } from '../firebase/config';
+import { doc, getDoc, collection, addDoc } from 'firebase/firestore';
+import { getAuthToken, apiFetch } from '../api/index';
 
 export default function AddChoreScreen({ navigation }: any) {
   const [choreName, setChoreName] = useState('');
@@ -23,6 +27,10 @@ export default function AddChoreScreen({ navigation }: any) {
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showDuePicker, setShowDuePicker] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [groupId, setGroupId] = useState<string | null>(null);
+  const [groupMembers, setGroupMembers] = useState<any[]>([]);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const users = [
     { id: '1', name: 'Alice' },
@@ -42,7 +50,51 @@ export default function AddChoreScreen({ navigation }: any) {
   const rewardBorder = useSharedValue(0);
 
   useEffect(() => {
-    fade.value = withTiming(1, { duration: 600 });
+    const fetchGroupInfo = async () => {
+      setLoading(true);
+      try {
+        const user = getAuth().currentUser;
+        if (!user) throw new Error('Not authenticated');
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        const userData = userDoc.data();
+        let groupIdValue = userData?.groupId;
+        if (!groupIdValue) throw new Error('No group found');
+        // Defensive: groupId may be a group code, not a Firestore doc ID
+        if (groupIdValue.length <= 8) {
+          const token = await getAuthToken();
+          const res = await apiFetch('/groups', token);
+          const groups = await res.json();
+          const found = groups.find((g: any) => g.groupCode === groupIdValue);
+          if (!found) throw new Error('Group not found');
+          groupIdValue = found.groupId;
+        }
+        setGroupId(groupIdValue);
+
+        // Fetch group document
+        const groupDoc = await getDoc(doc(db, 'groups', groupIdValue));
+        const groupData = groupDoc.data();
+        if (!groupData) throw new Error('Group data not found');
+
+        // Check if current user is in admins array
+        const isAdminUser = Array.isArray(groupData.admins) && groupData.admins.includes(user.uid);
+        setIsAdmin(isAdminUser);
+
+        // Fetch group members' profiles
+        const memberUids = Array.isArray(groupData.members) ? groupData.members : [];
+        const memberDocs = await Promise.all(
+          memberUids.map((uid: string) => getDoc(doc(db, 'users', uid)))
+        );
+        const members = memberDocs
+          .filter((doc) => doc.exists())
+          .map((doc) => ({ uid: doc.id, ...doc.data() }));
+        setGroupMembers(members);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load group info');
+      }
+      setLoading(false);
+      fade.value = withTiming(1, { duration: 600 });
+    };
+    fetchGroupInfo();
   }, []);
 
   const fadeStyle = useAnimatedStyle(() => ({
@@ -76,24 +128,59 @@ export default function AddChoreScreen({ navigation }: any) {
   const handlePressIn = () => (buttonScale.value = withSpring(0.96));
   const handlePressOut = () => (buttonScale.value = withSpring(1));
 
-  const submitChoreHandler = () => {
+  const submitChoreHandler = async () => {
     setError(null);
     if (!choreName.trim()) return setError('Chore name is required.');
     if (!assignedUser) return setError('Please assign a user.');
+    if (!groupId) return setError('No group found.');
 
-    const newChore = {
-      choreName,
-      description,
-      rewardPoints: Number(rewardPoints),
-      startDate: startDate ? startDate.toISOString().split('T')[0] : '',
-      dueDate: dueDate ? dueDate.toISOString().split('T')[0] : '',
-      assignedUser,
-      choreStatus,
-    };
+    try {
+      const user = getAuth().currentUser;
+      if (!user) throw new Error('Not authenticated');
+      // Only allow admin to add chores
+      if (!isAdmin) throw new Error('Only group admins can add chores.');
 
-    console.log('Chore submitted:', newChore);
-    // You can now send this to Firestore here
+      const newChore = {
+        name: choreName,
+        description,
+        rewardPoints: Number(rewardPoints),
+        startDate: startDate ? startDate.toISOString() : '',
+        dueDate: dueDate ? dueDate.toISOString() : '',
+        assignedTo: assignedUser,
+        status: choreStatus,
+        createdBy: user.uid,
+        createdAt: new Date().toISOString(),
+      };
+
+      // Add to Firestore: groups/{groupId}/chores
+      await addDoc(collection(db, 'groups', groupId, 'chores'), newChore);
+
+      Alert.alert('Success', 'Chore added!');
+      navigation.goBack();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to add chore');
+    }
   };
+
+  if (loading) {
+    return (
+      <GradientContainer>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color="#4f8cff" />
+        </View>
+      </GradientContainer>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <GradientContainer>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={{ color: '#e74c3c', fontSize: 18 }}>Only group admins can add chores.</Text>
+        </View>
+      </GradientContainer>
+    );
+  }
 
   return (
     <GradientContainer>
@@ -102,7 +189,6 @@ export default function AddChoreScreen({ navigation }: any) {
         contentContainerStyle={{ paddingBottom: 120, paddingHorizontal: 20 }}>
         <Animated.View style={fadeStyle}>
           <Text style={[styles.title, { marginBottom: 12, alignSelf: 'center' }]}>Add a Chore</Text>
-
           {error && (
             <Text style={{ color: '#e74c3c', fontSize: 14, marginBottom: 12 }}>{error}</Text>
           )}
@@ -258,8 +344,8 @@ export default function AddChoreScreen({ navigation }: any) {
               dropdownIconColor="#111"
               mode="dropdown">
               <Picker.Item label="Select a user" value="" />
-              {users.map((user) => (
-                <Picker.Item key={user.id} label={user.name} value={user.id} />
+              {groupMembers.map((user) => (
+                <Picker.Item key={user.uid} label={user.username} value={user.uid} />
               ))}
             </Picker>
           </View>
