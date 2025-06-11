@@ -9,7 +9,7 @@ import Confetti from 'react-confetti';
 import { useWindowDimensions } from 'react-native';
 import { getAuth } from 'firebase/auth';
 import { db } from '../firebase/config';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, increment } from 'firebase/firestore';
 import { getAuthToken, apiFetch } from '../api/index';
 import dayjs from 'dayjs';
 
@@ -40,24 +40,6 @@ export default function MainScreen({ navigation }: any) {
     if (mins > 0 || hours > 0 || days > 0) str += `${mins}m `;
     str += `${secs}s`;
     return str;
-  }
-
-  // Helper to calculate dynamic reward points based on time left
-  function getDynamicReward(chore: any) {
-    const { rewardPoints, startDate, dueDate } = chore;
-    if (!startDate || !dueDate) return rewardPoints;
-    const now = dayjs().unix();
-    if (now >= dueDate) return Math.max(1, Math.floor(rewardPoints * 0.2)); // Minimum 20% if overdue
-
-    const totalDuration = dueDate - startDate;
-    const timeLeft = dueDate - now;
-    if (totalDuration <= 0) return rewardPoints;
-
-    // Linear decrease: reward decreases as deadline approaches (down to 20% at deadline)
-    const percentLeft = Math.max(0, timeLeft / totalDuration);
-    const minReward = Math.floor(rewardPoints * 0.2);
-    const dynamicReward = Math.floor(minReward + (rewardPoints - minReward) * percentLeft);
-    return dynamicReward;
   }
 
   useEffect(() => {
@@ -100,7 +82,7 @@ export default function MainScreen({ navigation }: any) {
             assignedTo: username, // Replace UID with username for display
             chore: chore.name, // Ensure 'chore' prop is the name
             countdown: getCountdown(chore.dueDate),
-            reward: getDynamicReward(chore), // Use dynamic reward
+            reward: chore.rewardPoints, // Use static rewardPoints
           }));
 
         setTodos(userChores);
@@ -111,7 +93,7 @@ export default function MainScreen({ navigation }: any) {
     fetchChores();
   }, []);
 
-  const moveChore = (id: string, direction: 'forward' | 'backward') => {
+  const moveChore = async (id: string, direction: 'forward' | 'backward') => {
     setTodos((prev) =>
       prev.map((t) => {
         if (t.id !== id) return t;
@@ -120,10 +102,25 @@ export default function MainScreen({ navigation }: any) {
           direction === 'forward'
             ? Math.min(currentIndex + 1, tabOrder.length - 1)
             : Math.max(currentIndex - 1, 0);
-        // Show confetti if moving to done
+
+        // If moving to done, update user points in Firestore
         if (tabOrder[nextIndex] === 'done' && t.status !== 'done') {
           setShowConfetti(true);
           setTimeout(() => setShowConfetti(false), 4000);
+
+          // --- Add points to user in Firestore ---
+          (async () => {
+            try {
+              const user = getAuth().currentUser;
+              if (!user) return;
+              const userRef = doc(db, 'users', user.uid);
+              await updateDoc(userRef, {
+                rewardPoints: increment(t.reward),
+              });
+            } catch (err) {
+              // handle error if needed
+            }
+          })();
         }
         return { ...t, status: tabOrder[nextIndex] };
       })
