@@ -1,0 +1,711 @@
+openapi: 3.0.3
+info:
+  title: Roomies API
+  version: 1.0.0
+  description: Roomies App API
+
+security:
+  - BearerAuth: []
+
+paths:
+  /users:
+    post:
+      summary: Create a new user
+      description: Create a new user with username, email, and password
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+            example:
+              username: testuser1
+              email: testuser1@example.com
+              password: password123
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateUserResponse'
+              example:
+                uid: KzoIsrAR4VFknSxg6lLXVUwJVyMv
+                message: User created successfully
+
+    get:
+      summary: List all users
+      description: Return a list of all users
+      responses:
+        '200':
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+              example:
+                - uid: 2nTbvIApkXdUXU7dvgcsQjsUJzNO
+                  username: testuser
+                  email: testuser@example.com
+                  avatarUrl: https://www.img.com
+                  rewardPoints: 300
+                - uid: 2nTbvIApkXdUXU7dvgcsQjsUJzNO
+                  username: testuser
+                  email: testuser@example.com
+                  avatarUrl: https://www.img.com
+                  rewardPoints: 200
+
+  /users/currentUser:
+    get:
+      summary: Get current user
+      description: Return current user profile
+      responses:
+        '200':
+          description: Current user data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              example:
+                uid: bloJbQGKaXUmG7VgXLSlguHKuj0H
+                username: testuser
+                email: testuser@example.com
+                avatarUrl: https://www.img.com
+                rewardPoints: 300
+
+  /users/search:
+    get:
+      summary: Search users
+      description: Return matching users for prefix (e.g., "mi")
+      responses:
+        '200':
+          description: Matching users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSearchResponse'
+              example:
+                users:
+                  - uid: user0
+                    username: middle
+                    email: middle@example.com
+                    avatarUrl: https://www.img.com
+
+  /groups:
+    get:
+      summary: List groups
+      description: Return a list of groups
+      responses:
+        '200':
+          description: A list of groups
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Group'
+              example:
+                - groupId: cPR3Az7HgqCJM5eUd8Eg
+                  name: Group Admin
+                  members: [VngyWE2e8pRPTZJo9MZXv0kqDDuY, uejq25TaayBoyUELpiwVncAq7Bgk]
+                  admins: [VngyWE2e8pRPTZJo9MZXv0kqDDuY]
+                  createdBy: VngyWE2e8pRPTZJo9MZXv0kqDDuY
+                  groupCode: DSS7YY
+
+    post:
+      summary: Create a group
+      description: Create a new group with name and initial members
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGroupRequest'
+            example:
+              name: Group A
+              members: [Henry, Alice]
+      responses:
+        '201':
+          description: Group created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+              example:
+                groupId: SCDGJoTRaDuvfzQChxmD
+                name: Group A
+                members: [O45AwdTjcmoRuVA77iL5EY16dCDK, AyFvZHXhNHqhrEspFMsYNRa8p7BH]
+                admins: [O45AwdTjcmoRuVA77iL5EY16dCDK]
+                createdBy: O45AwdTjcmoRuVA77iL5EY16dCDK
+                groupCode: AZR1K6
+
+  /groups/join:
+    patch:
+      summary: Join group
+      description: User joins a group using a groupCode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JoinGroupRequest'
+            example:
+              groupCode: JOIN123
+      responses:
+        '200':
+          description: Joined group successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+              example:
+                groupId: imOBqi2iZ3U0v8Ia4PVt
+                name: Joinable Group
+                groupCode: JOIN123
+                admins: [N0ul9DdZkoDLtpKqWFeoOaV1C6NM]
+                createdBy: N0ul9DdZkoDLtpKqWFeoOaV1C6NM
+                members: [N0ul9DdZkoDLtpKqWFeoOaV1C6NM, H5OBIpIUHJADbzHq7u7rKIG2wYiI]
+
+  /groups/{group_id}:
+    patch:
+      summary: Update group name
+      description: Update the name of a specific group
+      parameters:
+        - name: group_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGroupNameRequest'
+            example:
+              name: New Name
+      responses:
+        '200':
+          description: Group name updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericMessageResponse'
+              example:
+                message: Group name updated
+
+  /groups/{group_id}/members:
+    patch:
+      summary: Update group name and members
+      description: Update the group name and its members
+      parameters:
+        - name: group_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGroupMembersRequest'
+            example:
+              name: Group with Alice
+              members: [Alice]
+      responses:
+        '200':
+          description: Group updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericMessageResponse'
+              example:
+                message: Group name updated
+
+    get:
+      summary: Get group members
+      description: Return all members related to a group
+      parameters:
+        - name: group_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of group members
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+              example:
+                - uid: kBNWR0RxmCPGedEstSN9oCoqwvhz
+                  username: Henry
+                  email: adminuser@example.com
+                  avatarUrl: https://adminuser.com
+                  rewardPoints: 300
+                - uid: QNTEzCnGn44BYg2PCpD4JUsmuWcc
+                  username: Alice
+                  email: alice@example.com
+                  avatarUrl: https://adminuser.com
+                  rewardPoints: 100
+
+  /groups/{group_id}/chores:
+    post:
+      summary: Create a chore
+      description: Create a new chore in a group
+      parameters:
+        - name: group_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateChoreRequest'
+            example:
+              name: Chore to test
+              description: OPTIONAL
+              rewardPoints: 87
+              startDate: 1754648400
+              dueDate: 1754821200
+              assignedTo: uidAlice
+              status: todo
+      responses:
+        '201':
+          description: Chore created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chore'
+              example:
+                choreId: c5VpyPUV8QLAb9RxFVZp
+                name: Chore to test
+                description: OPTIONAL
+                rewardPoints: 87
+                startDate: 1754648400
+                dueDate: 1754821200
+                assignedTo: FpnNKyf72VWF5TU4Bjsk1Oh1g4BE
+                status: todo
+                createdBy: Mxua80JSrX1RN0uev8X9OKiHrglK
+
+    get:
+      summary: List chores
+      description: Return a list of chores in a group
+      parameters:
+        - name: group_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of chores
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Chore'
+              example:
+                - id: 4B3IEpvDtSrCd6Srnawo
+                  name: Chore to test
+                  description: optional
+                  rewardPoints: 87
+                  startDate: 1754648400
+                  dueDate: 1754821200
+                  assignedTo: NmzlBNug7Z3pRDfHvxGNptZVyiWm
+                  status: todo
+                  createdBy: lK6B6I8AQjTapcIsf8J6VijIRgLu
+
+  /groups/{group_id}/chores/{chore_id}:
+    patch:
+      summary: Update a chore
+      description: Update the details of a chore
+      parameters:
+        - name: group_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: chore_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateChoreRequest'
+            example:
+              name: Chore to test updated
+              description: updated chore
+              rewardPoints: 87
+              startDate: 1754648400
+              dueDate: 1754821200
+              assignedTo: uidAlice
+              status: doing
+      responses:
+        '200':
+          description: Chore updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chore'
+              example:
+                choreId: E64SFH6E99oMeGw4tTAi
+                name: Chore to test updated
+                description: updated
+                rewardPoints: 87
+                startDate: 1754648400
+                dueDate: 1754821200
+                assignedTo: mn766w7LYnYoqHkHIIbpxcaRplVq
+                status: doing
+                createdBy: nLJ4J3AU9vHn5ekqPzxOVl4SPm85
+
+    delete:
+      summary: Delete a chore
+      description: Delete a chore by its ID
+      parameters:
+        - name: group_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: chore_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Chore deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericMessageResponse'
+              example:
+                message: Chore deleted successfully
+
+  /groups/{group_id}/chores/{chore_id}/comments:
+    post:
+      summary: Create a comment
+      description: Create a comment on a chore
+      parameters:
+        - name: group_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: chore_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommentRequest'
+            example:
+              commentBody: "Don't forget to wash gold porcelain glasses by hand"
+      responses:
+        '201':
+          description: Comment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+              example:
+                commentId: hEqpC6b2DhIuAOu8TRhM
+                commentBody: "Don't forget to wash gold porcelain glasses by hand"
+                createdAt: 1749563482
+                createdBy: b8qKd3GPqGfgzbdXrVVpPdxcFVpm
+
+    get:
+      summary: Get all comments
+      description: Get all comments related to a chore
+      parameters:
+        - name: group_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: chore_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of comments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+              example:
+                - commentId: U7mUY0QeG0qPCPgVfH6D
+                  commentBody: "That's super boring!"
+                  createdBy: pYeLIulj3hPXfgwplGj0Ou34BJba
+                  createdAt: 123356
+
+  /groups/{group_id}/chores/{chore_id}/comment/{comment_id}:
+    delete:
+      summary: Delete a comment
+      description: Delete a specific comment on a chore
+      parameters:
+        - name: group_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: chore_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: comment_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Comment deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmptyResponse'
+              example: []
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    CreateUserRequest:
+      type: object
+      required:
+        - username
+        - email
+        - password
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+
+    CreateUserResponse:
+      type: object
+      properties:
+        uid:
+          type: string
+        message:
+          type: string
+
+    User:
+      type: object
+      properties:
+        uid:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+        avatarUrl:
+          type: string
+          format: uri
+        rewardPoints:
+          type: integer
+          example: 300
+
+    UserSearchResponse:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            type: object
+            properties:
+              uid:
+                type: string
+              username:
+                type: string
+              email:
+                type: string
+              avatarUrl:
+                type: string
+                format: uri
+
+    Group:
+      type: object
+      properties:
+        groupId:
+          type: string
+        name:
+          type: string
+        members:
+          type: array
+          items:
+            type: string
+        admins:
+          type: array
+          items:
+            type: string
+        createdBy:
+          type: string
+        groupCode:
+          type: string
+
+    CreateGroupRequest:
+      type: object
+      required:
+        - name
+        - members
+      properties:
+        name:
+          type: string
+        members:
+          type: array
+          items:
+            type: string
+
+    JoinGroupRequest:
+      type: object
+      required:
+        - groupCode
+      properties:
+        groupCode:
+          type: string
+
+    UpdateGroupNameRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+
+    UpdateGroupMembersRequest:
+      type: object
+      required:
+        - name
+        - members
+      properties:
+        name:
+          type: string
+        members:
+          type: array
+          items:
+            type: string
+
+    GenericMessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+
+    CreateChoreRequest:
+      type: object
+      required:
+        - name
+        - rewardPoints
+        - startDate
+        - dueDate
+        - assignedTo
+        - status
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        rewardPoints:
+          type: integer
+        startDate:
+          type: integer
+          description: Unix timestamp
+        dueDate:
+          type: integer
+          description: Unix timestamp
+        assignedTo:
+          type: string
+        status:
+          type: string
+          enum: [todo, doing, done]
+
+    UpdateChoreRequest:
+      allOf:
+        - $ref: '#/components/schemas/CreateChoreRequest'
+
+    Chore:
+      type: object
+      properties:
+        choreId:
+          type: string
+        id:
+          type: string
+          description: Alias for choreId (used in list response)
+        name:
+          type: string
+        description:
+          type: string
+        rewardPoints:
+          type: integer
+        startDate:
+          type: integer
+        dueDate:
+          type: integer
+        assignedTo:
+          type: string
+        status:
+          type: string
+          enum: [todo, doing, done]
+        createdBy:
+          type: string
+
+    CreateCommentRequest:
+      type: object
+      required:
+        - commentBody
+      properties:
+        commentBody:
+          type: string
+
+    Comment:
+      type: object
+      properties:
+        commentId:
+          type: string
+        commentBody:
+          type: string
+        createdAt:
+          type: integer
+          description: Unix timestamp
+        createdBy:
+          type: string
+
+    EmptyResponse:
+      type: array
+      description: Empty array response (e.g., for delete)
+      items: {}

@@ -32,6 +32,7 @@
 },
 "GET /users/currentUser": {
   "description": "return current user profile",
+
   "exampleResponse": {
       "uid": "bloJbQGKaXUmG7VgXLSlguHKuj0H",
       "username": "testuser",
@@ -40,8 +41,9 @@
       "rewardPoints": 300
   }
 },
-"GET /users/search": {
+"GET /users/search?username=username": {
   "description": "return matching users for prefix (mi)", 
+  "exampleBody": {},
   "exampleResponse": {
       "users": [
         {
