@@ -42,6 +42,24 @@ export default function MainScreen({ navigation }: any) {
     return str;
   }
 
+  // Helper to calculate dynamic reward points based on time left
+  function getDynamicReward(chore: any) {
+    const { rewardPoints, startDate, dueDate } = chore;
+    if (!startDate || !dueDate) return rewardPoints;
+    const now = dayjs().unix();
+    if (now >= dueDate) return Math.max(1, Math.floor(rewardPoints * 0.2)); // Minimum 20% if overdue
+
+    const totalDuration = dueDate - startDate;
+    const timeLeft = dueDate - now;
+    if (totalDuration <= 0) return rewardPoints;
+
+    // Linear decrease: reward decreases as deadline approaches (down to 20% at deadline)
+    const percentLeft = Math.max(0, timeLeft / totalDuration);
+    const minReward = Math.floor(rewardPoints * 0.2);
+    const dynamicReward = Math.floor(minReward + (rewardPoints - minReward) * percentLeft);
+    return dynamicReward;
+  }
+
   useEffect(() => {
     const fetchChores = async () => {
       try {
@@ -82,7 +100,7 @@ export default function MainScreen({ navigation }: any) {
             assignedTo: username, // Replace UID with username for display
             chore: chore.name, // Ensure 'chore' prop is the name
             countdown: getCountdown(chore.dueDate),
-            reward: chore.rewardPoints, // Ensure reward is set to rewardPoints
+            reward: getDynamicReward(chore), // Use dynamic reward
           }));
 
         setTodos(userChores);
