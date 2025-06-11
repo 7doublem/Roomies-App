@@ -33,3 +33,13 @@ export async function createUser(token: string, userData: any) {
   });
   return res.json();
 }
+
+export async function addUser(token: string, searchUsername: string) {
+  const res = await apiFetch(`/users/search?username=${searchUsername}`, token, {
+    method: 'GET',
+    // body: JSON.stringify(searchUsername),
+  });
+
+  const data = await res.json();
+  return data;
+}

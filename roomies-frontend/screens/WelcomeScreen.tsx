@@ -2,8 +2,10 @@ import { View, Text, Button, TextInput, TouchableOpacity, Alert } from 'react-na
 import React, { useState } from 'react';
 import { styles } from '../components/style';
 import GradientContainer from 'components/GradientContainer';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+
 import { getAuth } from 'firebase/auth';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+
 import { joinGroup } from '../api/groups';
 import { doc, updateDoc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
@@ -53,6 +55,8 @@ export default function WelcomeScreen({ navigation }: any) {
       const data = await res.json();
 
       if (res.ok) {
+        console.log('Success', 'You joined the group!');
+        navigation.navigate('MainTab');
         await updateDoc(doc(db, 'users', user.uid), { groupId: groupCode });
         Alert.alert('Success', 'You joined the group!');
         // No navigation needed! AppNavigator will switch to AppTabs automatically
@@ -61,6 +65,7 @@ export default function WelcomeScreen({ navigation }: any) {
       }
     } catch (error) {
       console.error('Join Group Error:', error);
+      setError('Something went wrong'); // Also fixed here
       setError('Something went wrong');
     } finally {
       setLoading(false);
@@ -84,6 +89,7 @@ export default function WelcomeScreen({ navigation }: any) {
             <Text style={{ color: '#e74c3c', fontSize: 14 }}>{error}</Text>
           </View>
         )}
+
         <View style={styles.welcomeInputContainer}>
           <TextInput
             placeholder="Group Code"
@@ -93,21 +99,21 @@ export default function WelcomeScreen({ navigation }: any) {
             style={styles.welcomeInput}
             placeholderTextColor="#222"
           />
+
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={joinInHandler}
             style={styles.welcomeJoinInButton}
-            disabled={loading}
-          >
-            <Text style={styles.welcomeJoinInButtontext}>
-              {loading ? 'Joining...' : 'Join In'}
-            </Text>
+            disabled={loading}>
+            <Text style={styles.welcomeJoinInButtontext}>{loading ? 'Joining...' : 'Join In'}</Text>
           </TouchableOpacity>
         </View>
 
         <Text style={styles.welcomeText}>or</Text>
 
-        <TouchableOpacity onPress={createGroupHandler} style={[styles.welcomeCreateGroupButton, { marginVertical: 10 }]}>
+        <TouchableOpacity
+          onPress={createGroupHandler}
+          style={[styles.welcomeCreateGroupButton, { marginVertical: 10 }]}>
           <Text style={styles.welcomeCreateBtnText}>Create a group</Text>
         </TouchableOpacity>
       </View>
