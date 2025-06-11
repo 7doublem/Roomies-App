@@ -1,7 +1,7 @@
 import { getIdToken } from 'firebase/auth';
 import { auth } from '../firebase/config';
 
-const API_URL = 'https://us-central1-roomies-app-32362.cloudfunctions.net/roomiesapi';
+const API_URL = 'https://roomiesapi-nrpu6hx2qq-nw.a.run.app';
 
 export async function apiFetch(
   endpoint: string,

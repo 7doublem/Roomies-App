@@ -25,41 +25,72 @@ export class userController {
     }
   }
 
+  // In your backend file: src/controllers/users.controller.ts (or wherever this lives)
+
   // POST /users - user signs up
   static async createUser(req: Request, res: Response, next: NextFunction) {
+    console.log("Backend: POST /users route hit.");
     try {
       const {username, email, password, avatarUrl} = req.body;
+      console.log(`Backend: Received signup request for email: ${email}, username: ${username}`);
 
       if (!username || !email || !password) {
+        console.warn("Backend: Missing required fields for user creation.");
         res.status(400).json({message: "Missing required fields"});
         return;
       }
 
-      // Validate photoURL if present
       const validPhotoURL =
-        typeof avatarUrl === "string" && avatarUrl.startsWith("http") ?
-          avatarUrl :
-          undefined;
+      typeof avatarUrl === "string" && avatarUrl.startsWith("http") ?
+        avatarUrl :
+        undefined;
 
+      // Check for existing username in Firestore
+      console.log(`Backend: Checking for existing username: ${username}`);
       const existingUser = await getFirestore().collection("users")
         .where("username", "==", username)
         .get();
 
       if (!existingUser.empty) {
+        console.warn(`Backend: Username '${username}' is already being used.`);
         res.status(400).json({message: "Username is already being used"});
         return;
       }
 
+      // Create user in Firebase Auth
+      let authUser;
+      try {
+        console.log(`Backend: Attempting to create user in Firebase Auth for email: ${email}`);
+        authUser = await getAuth().createUser({
+          email,
+          password,
+          displayName: username,
+          photoURL: validPhotoURL,
+        });
+        console.log(`Backend: Firebase Auth user created with UID: ${authUser.uid}`);
+      } catch (authError: unknown) { // Use 'unknown' as recommended by TypeScript
+      // Type guard to safely access properties of authError
+        if (authError instanceof Error) {
+          console.error("Backend: Firebase Auth user creation failed:", authError.name, authError.message);
+          // Check for specific Firebase Auth error codes
+          if ("code" in authError && typeof authError.code === "string") {
+            if (authError.code === "auth/email-already-in-use") {
+              res.status(400).json({message: "Email is already being used"});
+            } else {
+              res.status(500).json({message: `Failed to create user in Authentication: ${authError.message}`});
+            }
+          } else {
+            res.status(500).json({message: `Failed to create user in Authentication: ${authError.message}`});
+          }
+        } else {
+          console.error("Backend: An unknown error occurred during Firebase Auth user creation:", authError);
+          res.status(500).json({message: "An unexpected error occurred during user authentication"});
+        }
+        return;
+      }
 
-      // create user in firebase auth
-      const authUser = await getAuth().createUser({
-        email,
-        password,
-        displayName: username,
-        photoURL: validPhotoURL,
-      });
 
-      // save user profile in firestore
+      // Save user profile in Firestore
       const userDoc: User = {
         username,
         email,
@@ -67,15 +98,24 @@ export class userController {
         rewardPoints: 0,
       };
 
+      console.log(`Backend: Attempting to save user profile to Firestore for UID: ${authUser.uid}`);
+      console.log("Backend: User profile data being sent to Firestore:", JSON.stringify(userDoc));
       await getFirestore().collection("users").doc(authUser.uid).set(userDoc);
+      console.log(`Backend: Firestore user profile saved successfully for UID: ${authUser.uid}`);
 
-      res
-        .status(201)
-        .json({uid: authUser.uid, message: "User created successfully"});
+
+      res.status(201).json({uid: authUser.uid, message: "User created successfully"});
       return;
-    } catch (error) {
-      console.error(error);
-      next(error);
+    } catch (error: unknown) { // Use 'unknown' for the main catch block as well
+    // Type guard for the main error
+      if (error instanceof Error) {
+        console.error("Backend: Uncaught error in createUser function:", error.name, error.message, error);
+        // You might want to handle specific HTTP-related errors or just pass it to the next middleware
+        next(error);
+      } else {
+        console.error("Backend: An unknown error occurred in createUser function:", error);
+        next(new Error("An unexpected error occurred")); // Wrap unknown errors for consistent handling
+      }
     }
   }
 
