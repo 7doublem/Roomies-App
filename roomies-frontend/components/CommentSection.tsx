@@ -9,6 +9,7 @@ import {
   Platform,
 } from 'react-native';
 import { styles } from './style';
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 
 type Comment = {
   id: number;
@@ -42,6 +43,11 @@ export default function CommentSection() {
         scrollViewRef.current?.scrollToEnd({ animated: true });
       }, 100);
     }
+  };
+
+  const handleDeleteComment = (id: number) => {
+    const updatedComments = comments.filter((comment) => comment.id !== id);
+    setComments(updatedComments);
   };
 
   return (
