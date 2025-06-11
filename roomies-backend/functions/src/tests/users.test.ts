@@ -2,7 +2,6 @@ import request from "supertest";
 import {app} from "../app";
 import {createUserAndGetToken, deleteUsersAuth} from "./test.utils/utils";
 import {getFirestore} from "firebase-admin/firestore";
-import {User} from "../controllers/users.controller";
 
 describe("User Routes", () => {
   let server: ReturnType<typeof app.listen> | undefined; // Changed to allow undefined
@@ -18,7 +17,11 @@ describe("User Routes", () => {
 
   beforeAll(() => {
     // ONLY START SERVER IF NOT IN A CLOUD FUNCTION ENVIRONMENT
-    if (process.env.NODE_ENV === "test" && !process.env.FUNCTIONS_EMULATOR && !process.env.K_SERVICE) {
+    if (
+      process.env.NODE_ENV === "test" &&
+      !process.env.FUNCTIONS_EMULATOR &&
+      !process.env.K_SERVICE
+    ) {
       server = app.listen(5003);
     }
   });
@@ -53,13 +56,11 @@ describe("User Routes", () => {
 
   describe("POST /users", () => {
     it("should create a new user successfully", async () => {
-      const res = await request(app)
-        .post("/users")
-        .send({
-          username: "testuser1",
-          email: "testuser1@example.com",
-          password: "password123",
-        });
+      const res = await request(app).post("/users").send({
+        username: "testuser1",
+        email: "testuser1@example.com",
+        password: "password123",
+      });
 
       expect(res.status).toBe(201);
       expect(res.body).toHaveProperty("uid");
@@ -70,20 +71,16 @@ describe("User Routes", () => {
     });
 
     it("should return 400 if a second user adds a existing username", async () => {
-      const res1= await request(app)
-        .post("/users")
-        .send({
-          username: "testuser1",
-          email: "testuser1@example.com",
-          password: "password123",
-        });
-      const res2 = await request(app)
-        .post("/users")
-        .send({
-          username: "testuser1",
-          email: "testuserAAA@example.com",
-          password: "password1234",
-        });
+      const res1 = await request(app).post("/users").send({
+        username: "testuser1",
+        email: "testuser1@example.com",
+        password: "password123",
+      });
+      const res2 = await request(app).post("/users").send({
+        username: "testuser1",
+        email: "testuserAAA@example.com",
+        password: "password1234",
+      });
 
       expect(res2.status).toBe(400);
       expect(res2.body.message).toBe("Username is already being used");
@@ -146,12 +143,12 @@ describe("User Routes", () => {
 
   describe("GET /users/search", () => {
     beforeEach(async () => {
-      const usernames = ["middle", "start", "test", "jest", "supertest"];
+      const usernames = ["exactmatchuser", "anotheruser", "somethingelse"];
       await Promise.all(
         usernames.map((name, i) =>
           getFirestore()
             .collection("users")
-            .doc(`user${i}`)
+            .doc(`searchuser${i}`)
             .set({
               username: name,
               email: `${name}@example.com`,
@@ -163,7 +160,9 @@ describe("User Routes", () => {
     });
 
     it("should return 401 if unauthenticated", async () => {
-      const res = await request(app).get("/users/search?username=mi");
+      const res = await request(app).get(
+        "/users/search?username=exactmatchuser"
+      );
       expect(res.status).toBe(401);
       expect(res.body.message).toBe("Unauthorised");
     });
@@ -177,24 +176,39 @@ describe("User Routes", () => {
       expect(res.body.message).toBe("Username is required");
     });
 
-    it("should return matching users for prefix 'mi'", async () => {
+    it("should return a single matching user for exact username 'exactmatchuser'", async () => {
       const res = await request(app)
-        .get("/users/search?username=mi")
+        .get("/users/search?username=exactmatchuser")
         .set("Authorization", `Bearer ${token}`);
-      console.log(res.body, "return matching users for prefix 'mi'");
+      console.log(
+        res.body,
+        "return matching user for exact username 'exactmatchuser'"
+      );
       expect(res.status).toBe(200);
-      const usernames = res.body.users.map((u: User) => u.username);
-      expect(usernames).toEqual(expect.arrayContaining(["middle"]));
+      expect(res.body).not.toBeNull(); // Ensure response body is not null
+      expect(res.body).toHaveProperty("username", "exactmatchuser");
+      expect(res.body).toHaveProperty("email", "exactmatchuser@example.com");
+      expect(res.body).toHaveProperty("uid");
+      expect(res.body).toHaveProperty("avatarUrl");
     });
 
-    it("should return empty array if no matches", async () => {
+    it("should return 404 if no exact match is found", async () => {
       const res = await request(app)
-        .get("/users/search?username=zz")
+        .get("/users/search?username=nonexistent")
         .set("Authorization", `Bearer ${token}`);
 
-      expect(res.status).toBe(200);
-      expect(Array.isArray(res.body.users)).toBe(true);
-      expect(res.body.users.length).toBe(0);
+      expect(res.status).toBe(404);
+      expect(res.body.message).toBe("User not found");
+    });
+
+    it("should return 404 if a partial match exists but no exact match", async () => {
+      // Even if "exactmatchuser" exists, searching for "exact" should return 404
+      const res = await request(app)
+        .get("/users/search?username=exact")
+        .set("Authorization", `Bearer ${token}`);
+
+      expect(res.status).toBe(404);
+      expect(res.body.message).toBe("User not found");
     });
   });
 });

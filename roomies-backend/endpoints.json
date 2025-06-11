@@ -54,23 +54,17 @@
   }
 },
 "GET /groups": {
-  "description": "return a list of chores",
+  "description": "return a list of groups",
   "exampleResponse": [
-    {
-      "uid": "2nTbvIApkXdUXU7dvgcsQjsUJzNO",
-      "username": "testuser",
-      "email": "testuser@example.com",
-      "avatarUrl": "https://www.img.com",
-      "rewardPoints": 300
-    },
-    {
-      "uid": "2nTbvIApkXdUXU7dvgcsQjsUJzNO",
-      "username": "testuser",
-      "email": "testuser@example.com",
-      "avatarUrl": "https://www.img.com",
-      "rewardPoints": 200
-    }
-  ]
+      {
+        "groupId": "cPR3Az7HgqCJM5eUd8Eg",
+        "name": "Group Admin",
+        "members": [ "VngyWE2e8pRPTZJo9MZXv0kqDDuY", "uejq25TaayBoyUELpiwVncAq7Bgk" ],
+        "admins": [ "VngyWE2e8pRPTZJo9MZXv0kqDDuY" ],
+        "createdBy": "VngyWE2e8pRPTZJo9MZXv0kqDDuY",
+        "groupCode": "DSS7YY"
+      }
+    ]
 },
 "POST /groups": {
   "description": "create a group",
@@ -245,3 +239,9 @@
   "exampleResponse":  []
 }
 }
+
+
+
+
+
+
