@@ -5,7 +5,9 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import CommentSection from '../components/CommentSection';
 
 
-export default function ChoreDetailScreen({ navigation }: any) {
+export default function ChoreDetailScreen({ navigation, route }: any) {
+  const { groupId, choreId } = route.params;
+
   return (
     <GradientContainer>
       <View style={{ flex: 1 }}>
@@ -32,7 +34,7 @@ export default function ChoreDetailScreen({ navigation }: any) {
         </View>
 
         {/* Import Comment Section */}
-        <CommentSection />
+        <CommentSection groupId={groupId} choreId={choreId} />
       </View>
     </GradientContainer>
   );
