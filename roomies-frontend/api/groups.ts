@@ -26,3 +26,9 @@ export async function joinGroup(token: string, groupCode: string) {
 
   return res;
 }
+
+// Get members of a group by groupId (Firestore doc id)
+export async function getGroupMembers(token: string, groupId: string) {
+  const res = await apiFetch(`/groups/${groupId}/members`, token);
+  return res.json();
+}

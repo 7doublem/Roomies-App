@@ -1,96 +1,111 @@
-import { View, Text, TouchableOpacity, TextInput, Image, ScrollView } from 'react-native';
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
-import React, { useState } from 'react';
-import { styles } from 'components/style'; // your styles file
+import { View, Text, Image, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { styles } from 'components/style';
 import GradientContainer from 'components/GradientContainer';
-import UserCard from './UserCard';
 import Animated, { FadeInUp, withSpring } from 'react-native-reanimated';
+import { getAuth } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../firebase/config';
+import { getAuthToken, apiFetch } from '../../api/index';
 
 export default function GroupScreen({ navigation }: any) {
-  const [addUser, setAddUser] = useState('');
-  const [users, setUsers] = useState([
-    { id: '1', name: 'Alice', totalPoints: 1200, avatar: require('assets/bear.png') },
-    { id: '2', name: 'Bob', totalPoints: 11000, avatar: require('assets/deer.png') },
-    { id: '3', name: 'Charlie', totalPoints: 10000, avatar: require('assets/turtle.png') },
-    { id: '4', name: 'David', totalPoints: 900, avatar: require('assets/bear.png') },
-    { id: '5', name: 'Eve', totalPoints: 8000, avatar: require('assets/deer.png') },
-    { id: '6', name: 'Suhaim', totalPoints: 70000, avatar: require('assets/deer.png') },
-    { id: '7', name: 'Wendy', totalPoints: 15000, avatar: require('assets/turtle.png') }
-  ]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [groupCode, setGroupCode] = useState<string | null>(null);
 
-  const addUserHandler = () => {
-    const trimmedName = addUser.trim();
-    if (!trimmedName) return;
+  useEffect(() => {
+    const fetchGroupMembers = async () => {
+      try {
+        const user = getAuth().currentUser;
+        if (!user) return;
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        const userData = userDoc.data();
+        let groupId = userData?.groupId;
+        if (!groupId) return;
 
-    const newUser = {
-      id: Date.now().toString(),
-      name: trimmedName,
-      totalPoints: 0,
-      avatar: require('assets/bear.png'),
+        // Defensive: groupId may be a group code, not a Firestore doc ID
+        let groupDocId = groupId;
+        if (groupId.length <= 8) {
+          const token = await getAuthToken();
+          const res = await apiFetch('/groups', token);
+          const groups = await res.json();
+          const found = groups.find((g: any) => g.groupCode === groupId);
+          if (!found) {
+            setUsers([]);
+            setGroupCode(null);
+            return;
+          }
+          groupDocId = found.groupId;
+          setGroupCode(found.groupCode);
+        } else {
+          const groupDoc = await getDoc(doc(db, 'groups', groupDocId));
+          const groupData = groupDoc.data();
+          if (groupData?.groupCode) setGroupCode(groupData.groupCode);
+        }
+
+        // --- Use the same logic as LeaderboardScreen ---
+        const token = await getAuthToken();
+        const res = await apiFetch(`/groups/${groupDocId}/members`, token);
+        const groupUsers = await res.json();
+        const members = Array.isArray(groupUsers)
+          ? groupUsers.map((user: any) => ({
+              id: user.uid,
+              name: user.username || 'Unknown',
+              totalPoints: user.rewardPoints || 0,
+              avatar: user.avatarUrl ? { uri: user.avatarUrl } : require('assets/bear.png'),
+            }))
+          : [];
+        setUsers(members);
+      } catch (err) {
+        setUsers([]);
+        setGroupCode(null);
+      }
     };
+    fetchGroupMembers();
+  }, []);
 
-    setUsers((prev) => [newUser, ...prev]);
-    setAddUser('');
-  };
+  const sortedUsers = users.sort((a, b) => b.totalPoints - a.totalPoints);
 
-  const deleteUserHandler = (id: string) => {
-    setUsers((prev) => prev.filter((user) => user.id !== id));
-  };
-
-  // const sortedUsers = [...users].sort((a, b) => b.totalPoints - a.totalPoints);
-
-  const sortedUsers = users;
   return (
     <GradientContainer>
       <View style={{ flex: 1 }}>
         <Text style={styles.title}>Your Group</Text>
-        <View style={styles.groupScreen_container}>
-          <Text style={styles.groupSection_text}>Add New Users</Text>
-
-          <View style={styles.inputContainer}>
-            <TextInput
-              placeholder="Enter username"
-              value={addUser}
-              onChangeText={setAddUser}
-              autoCapitalize="none"
-              style={styles.textInput}
-              returnKeyType="done"
-              onSubmitEditing={addUserHandler}
-            />
-            <TouchableOpacity onPress={addUserHandler} activeOpacity={0.8} style={styles.addButton}>
-              <FontAwesome6 name="circle-plus" size={28} color="#4a90e2" />
-            </TouchableOpacity>
+        {groupCode && (
+          <View style={{ alignItems: 'center', marginBottom: 10 }}>
+            <Text style={{ fontSize: 16, color: '#555' }}>
+              Group Code: <Text style={{ fontWeight: 'bold', color: '#222' }}>{groupCode}</Text>
+            </Text>
           </View>
-
+        )}
+        <View style={styles.groupScreen_container}>
+          <Text style={styles.groupSection_text}>Group Members</Text>
           <ScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 40 }}>
-            {sortedUsers.map((user, idx) => (
-              <Animated.View
-                key={user.id}
-                entering={FadeInUp.delay(idx * 100)}
-                style={[
-                  styles.userCardContainer,
-                  {
-                    transform: [{ scale: withSpring(1, { damping: 12, stiffness: 120 }) }],
-                  },
-                ]}>
-                <View style={styles.userInfoContainer}>
-                  <Image source={user.avatar} style={styles.avatar} />
-                  <View style={styles.userTextContainer}>
-                    <Text style={styles.GroupScreen_userName}>{user.name}</Text>
-                    <Text style={styles.userPoints}>{user.totalPoints} pts</Text>
+            {sortedUsers.length === 0 ? (
+              <Text style={{ textAlign: 'center', marginTop: 40, color: '#888' }}>
+                No group members found.
+              </Text>
+            ) : (
+              sortedUsers.map((user, idx) => (
+                <Animated.View
+                  key={user.id}
+                  entering={FadeInUp.delay(idx * 100)}
+                  style={[
+                    styles.userCardContainer,
+                    {
+                      transform: [{ scale: withSpring(1, { damping: 12, stiffness: 120 }) }],
+                    },
+                  ]}>
+                  <View style={styles.userInfoContainer}>
+                    <Image source={user.avatar} style={styles.avatar} />
+                    <View style={styles.userTextContainer}>
+                      <Text style={styles.GroupScreen_userName}>{user.name}</Text>
+                      <Text style={styles.userPoints}>{user.totalPoints} pts</Text>
+                    </View>
                   </View>
-                </View>
-
-                <TouchableOpacity
-                  onPress={() => deleteUserHandler(user.id)}
-                  style={styles.deleteButton}
-                  activeOpacity={0.7}>
-                  <FontAwesome6 name="circle-minus" size={26} color="#e74c3c" />
-                </TouchableOpacity>
-              </Animated.View>
-            ))}
+                </Animated.View>
+              ))
+            )}
           </ScrollView>
         </View>
       </View>
