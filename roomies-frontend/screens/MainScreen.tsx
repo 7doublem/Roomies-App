@@ -20,6 +20,7 @@ export default function MainScreen({ navigation }: any) {
   const [todos, setTodos] = useState<any[]>([]);
   const [showConfetti, setShowConfetti] = useState(false);
   const [currentUserName, setCurrentUserName] = useState<string>('');
+  const [groupId, setGroupId] = useState<string>(''); // add groupId state
   const { width, height } = useWindowDimensions();
 
   // Helper to calculate countdown string from dueDate (seconds)
@@ -61,6 +62,7 @@ export default function MainScreen({ navigation }: any) {
           if (!found) throw new Error('Group not found');
           groupId = found.groupId;
         }
+        setGroupId(groupId); // store groupId in state
 
         // Fetch all chores for the group from your backend
         const token = await getAuthToken();
@@ -142,7 +144,13 @@ export default function MainScreen({ navigation }: any) {
                 <Ionicons name="arrow-forward-circle" size={32} color="white" />
               </View>
             )}>
-            <TouchableOpacity onPress={() => navigation.navigate('ChoreDetail', { id: item.id })}>
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate('ChoreDetail', {
+                  groupId: groupId,
+                  choreId: item.id,
+                })
+              }>
               <ChoresCard
                 status={item.status}
                 chore={item.chore}
