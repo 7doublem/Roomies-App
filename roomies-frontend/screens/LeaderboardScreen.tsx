@@ -1,49 +1,35 @@
-import React, { useEffect } from 'react';
-import { View, Text, Image, StyleSheet, Dimensions, FlatList } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Image, StyleSheet, Dimensions, FlatList, ActivityIndicator } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
   withDelay,
   useDerivedValue,
-  FadeInUp,
   runOnJS,
 } from 'react-native-reanimated';
 import GradientContainer from '../components/GradientContainer';
-
-const users = [
-  { id: '1', name: 'Alice', points: 120, avatar: require('../assets/bear.png') },
-  { id: '2', name: 'Bob', points: 110, avatar: require('../assets/deer.png') },
-  { id: '3', name: 'Charlie', points: 100, avatar: require('../assets/turtle.png') },
-  { id: '4', name: 'David', points: 90, avatar: require('../assets/bear.png') },
-  { id: '5', name: 'Eve', points: 80, avatar: require('../assets/deer.png') },
-  { id: '6', name: 'Suhaim', points: 70, avatar: require('../assets/deer.png') },
-  { id: '7', name: 'Wendy', points: 150, avatar: require('../assets/deer.png') }
-];
+import { getAuth } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase/config';
+import { getAuthToken, apiFetch } from '../api/index';
 
 const { width } = Dimensions.get('window');
 const BAR_SPACING = 18;
-const BAR_WIDTH = Math.max(36, Math.min(56, width / (users.length * 2)));
+const BAR_WIDTH = 48;
 const AVATAR_SIZE = BAR_WIDTH;
 const MAX_BAR_HEIGHT = 180;
 
-// Sort users by points descending
-const sortedUsers = [...users].sort((a, b) => b.points - a.points);
-const maxPoints = sortedUsers[0]?.points || 1;
-
-function AnimatedBar({ user, index, anim, onFinish }: any) {
-  // Animate bar height
+function AnimatedBar({ user, index, anim, maxPoints }: any) {
   const barAnim = useDerivedValue(() =>
     withDelay(
       index * 120,
-      withSpring(anim.value, { damping: 12, stiffness: 120 }, (finished) => {
-        if (finished && onFinish) runOnJS(onFinish)();
-      })
+      withSpring(anim.value, { damping: 12, stiffness: 120 })
     )
   );
 
   const barStyle = useAnimatedStyle(() => ({
-    height: barAnim.value * (user.points / maxPoints) * MAX_BAR_HEIGHT,
+    height: barAnim.value * (user.rewardPoints / maxPoints) * MAX_BAR_HEIGHT,
     opacity: barAnim.value,
     backgroundColor: index === 0 ? '#ffcc5c' : index === 1 ? '#ffeead' : index === 2 ? '#96ceb4' : '#fff',
     borderRadius: 16,
@@ -59,21 +45,28 @@ function AnimatedBar({ user, index, anim, onFinish }: any) {
   }));
 
   return (
-    <Animated.View style={[styles.barColumn, { zIndex: users.length - index }]}>
+    <Animated.View style={[styles.barColumn, { zIndex: 100 - index }]}>
       {index < 3 && (
         <Text style={styles.medal}>
           {index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}
         </Text>
       )}
       <Animated.Text style={[styles.points, avatarStyle]}>
-        {user.points}
+        {user.rewardPoints}
       </Animated.Text>
       <Animated.View style={[styles.bar, barStyle]} />
       <Animated.View style={[styles.avatarWrapper, avatarStyle]}>
-        <Image source={user.avatar} style={styles.avatar} />
+        <Image
+          source={
+            user.avatarUrl
+              ? { uri: user.avatarUrl }
+              : require('../assets/bear.png')
+          }
+          style={styles.avatar}
+        />
       </Animated.View>
       <Animated.Text style={[styles.name, avatarStyle]} numberOfLines={1}>
-        {user.name}
+        {user.username}
       </Animated.Text>
       <Animated.Text style={[styles.rank, avatarStyle]}>
         #{index + 1}
@@ -83,40 +76,99 @@ function AnimatedBar({ user, index, anim, onFinish }: any) {
 }
 
 export default function LeaderboardScreen() {
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const anim = useSharedValue(0);
 
   useEffect(() => {
-    anim.value = 1;
+    const fetchGroupUsers = async () => {
+      setLoading(true);
+      try {
+        const user = getAuth().currentUser;
+        if (!user) throw new Error('Not authenticated');
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        const groupId = userDoc.data()?.groupId;
+        if (!groupId) throw new Error('No group found');
+        // Defensive: groupId may be a group code, not a Firestore doc ID
+        // Try to find the group by groupCode if needed
+        let groupDocId = groupId;
+        if (groupId.length <= 8) { // likely a group code, not Firestore doc id
+          // fetch all groups and find the one with this groupCode
+          const token = await getAuthToken();
+          const res = await apiFetch('/groups', token);
+          const groups = await res.json();
+          const found = groups.find((g: any) => g.groupCode === groupId);
+          if (!found) throw new Error('Group not found');
+          groupDocId = found.groupId;
+        }
+        const token = await getAuthToken();
+        const res = await apiFetch(`/groups/${groupDocId}/members`, token);
+        const groupUsers = await res.json();
+        groupUsers.sort((a: any, b: any) => b.rewardPoints - a.rewardPoints);
+        setUsers(groupUsers);
+      } catch (err) {
+        setUsers([]);
+      }
+      setLoading(false);
+      anim.value = 1;
+    };
+    fetchGroupUsers();
   }, []);
 
-  // Add logic to get users after the top 5
-  const restUsers = sortedUsers.slice(3);
+  if (loading) {
+    return (
+      <GradientContainer>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color="#4f8cff" />
+        </View>
+      </GradientContainer>
+    );
+  }
+
+  if (!users.length) {
+    return (
+      <GradientContainer>
+        <Text style={styles.title}>Leaderboard</Text>
+        <Text style={{ textAlign: 'center', marginTop: 40 }}>No group members found.</Text>
+      </GradientContainer>
+    );
+  }
+
+  const maxPoints = users[0]?.rewardPoints || 1;
+  const top3 = users.slice(0, 3);
+  const restUsers = users.slice(3);
 
   return (
     <GradientContainer>
       <Text style={styles.title}>Leaderboard</Text>
       <View style={styles.chartRow}>
-        {sortedUsers.slice(0, 3).map((user, idx) => (
+        {top3.map((user, idx) => (
           <AnimatedBar
-            key={user.id}
+            key={user.uid}
             user={user}
             index={idx}
             anim={anim}
-            onFinish={idx === sortedUsers.length - 1 ? () => {} : undefined}
+            maxPoints={maxPoints}
           />
         ))}
       </View>
-      {/* Render restUsers in a FlatList if there are more than 5 */}
       {restUsers.length > 0 && (
         <FlatList
           data={restUsers}
-          keyExtractor={item => item.id}
+          keyExtractor={item => item.uid}
           renderItem={({ item, index }) => (
             <View style={styles.listItem}>
-              <Text style={styles.rank}>#{index + 6}</Text>
-              <Image source={item.avatar} style={styles.avatarSmall} />
-              <Text style={styles.name}>{item.name}</Text>
-              <Text style={styles.points}>{item.points}</Text>
+              <Text style={styles.rank}>#{index + 4}</Text>
+              <Image
+                source={
+                  item.avatarUrl
+                    ? { uri: item.avatarUrl }
+                    : require('../assets/bear.png')
+                }
+                style={styles.avatarSmall}
+              />
+              <Text style={styles.name}>{item.username}</Text>
+              <Text style={styles.points}>{item.rewardPoints}</Text>
             </View>
           )}
           style={{ marginTop: 24 }}
@@ -186,31 +238,31 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   listItem: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  backgroundColor: 'rgba(255,255,255,0.7)',
-  marginVertical: 4,
-  marginHorizontal: 24,
-  borderRadius: 8,
-  padding: 12,
-  justifyContent: 'space-between',
-},
-avatarSmall: {
-  width: 28,
-  height: 28,
-  borderRadius: 14,
-  marginRight: 8,
-},
-medal: {
-  fontSize: 24,
-  marginBottom: 2,
-  textAlign: 'center',
-},
-rank: {
-  color: '#111',
-  fontWeight: 'bold',
-  fontSize: 12,
-  marginTop: 2,
-  textAlign: 'center',
-}
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    marginVertical: 4,
+    marginHorizontal: 24,
+    borderRadius: 8,
+    padding: 12,
+    justifyContent: 'space-between',
+  },
+  avatarSmall: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    marginRight: 8,
+  },
+  medal: {
+    fontSize: 24,
+    marginBottom: 2,
+    textAlign: 'center',
+  },
+  rank: {
+    color: '#111',
+    fontWeight: 'bold',
+    fontSize: 12,
+    marginTop: 2,
+    textAlign: 'center',
+  }
 });
