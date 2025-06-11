@@ -75,8 +75,17 @@ export default function AddChoreScreen({ navigation }: any) {
         const groupData = groupDoc.data();
         if (!groupData) throw new Error('Group data not found');
 
-        // Check if current user is in admins array
-        const isAdminUser = Array.isArray(groupData.admins) && groupData.admins.includes(user.uid);
+        // Debug: log admins and user.uid
+        // Remove or comment out after debugging
+        // @ts-ignore
+        if (__DEV__) {
+          console.log('Admins:', groupData.admins);
+          console.log('Current user UID:', user.uid);
+        }
+
+        // Check if current user is in admins array (robust string comparison)
+        const adminsArray = Array.isArray(groupData.admins) ? groupData.admins.map(String) : [];
+        const isAdminUser = adminsArray.includes(String(user.uid));
         setIsAdmin(isAdminUser);
 
         // Fetch group members' profiles
