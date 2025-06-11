@@ -13,13 +13,16 @@ import { styles } from './style';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { getAuth } from 'firebase/auth';
 import { db } from '../firebase/config';
-import { collection, addDoc, query, orderBy, onSnapshot, doc, getDoc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, doc, getDoc } from 'firebase/firestore';
+import { getAuthToken } from '../api/index';
+import { createComment, deleteComment, getCommentsByChore } from '../api/comments';
 
 type Comment = {
   id: string;
   user: string;
   text: string;
   createdAt: number;
+  createdBy?: string;
 };
 
 type Props = {
@@ -32,6 +35,25 @@ export default function CommentSection({ groupId, choreId }: Props) {
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(true);
   const scrollViewRef = useRef<ScrollView>(null);
+
+  // Helper to fetch comments from backend and update state
+  const fetchBackendComments = async () => {
+    try {
+      const token = await getAuthToken();
+      const res = await getCommentsByChore(token, groupId, choreId);
+      // Map backend response to Comment[]
+      const fetched: Comment[] = (res || []).map((c: any) => ({
+        id: c.commentId || c.id,
+        user: c.createdByName || c.createdBy || 'Unknown',
+        text: c.commentBody,
+        createdAt: c.createdAt,
+        createdBy: c.createdBy,
+      }));
+      setComments(fetched);
+    } catch {
+      setComments([]);
+    }
+  };
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
@@ -51,7 +73,7 @@ export default function CommentSection({ groupId, choreId }: Props) {
             const userDoc = await getDoc(doc(db, 'users', user.uid));
             const token = await user.getIdToken();
             const res = await fetch('https://roomiesapi-nrpu6hx2qq-nw.a.run.app/groups', {
-              headers: { Authorization: `Bearer ${token}` }
+              headers: { Authorization: `Bearer ${token}` },
             });
             const groups = await res.json();
             const found = groups.find((g: any) => g.groupCode === groupId);
@@ -60,17 +82,30 @@ export default function CommentSection({ groupId, choreId }: Props) {
         }
         const commentsRef = collection(db, 'groups', groupDocId, 'chores', choreId, 'comments');
         const q = query(commentsRef, orderBy('createdAt', 'asc'));
-        unsubscribe = onSnapshot(q, (snapshot) => {
+        unsubscribe = onSnapshot(q, async (snapshot) => {
           const fetched: Comment[] = [];
-          snapshot.forEach((doc) => {
-            const data = doc.data();
+          for (const docSnap of snapshot.docs) {
+            const data = docSnap.data();
+            let userName = data.createdByName;
+            // If username is missing, fetch from users collection
+            if (!userName && data.createdBy) {
+              try {
+                const userDoc = await getDoc(doc(db, 'users', data.createdBy));
+                userName = userDoc.exists()
+                  ? userDoc.data()?.username || data.createdBy
+                  : data.createdBy;
+              } catch {
+                userName = data.createdBy;
+              }
+            }
             fetched.push({
-              id: doc.id,
-              user: data.createdByName || 'Unknown',
+              id: docSnap.id,
+              user: userName || 'Unknown',
               text: data.commentBody,
               createdAt: data.createdAt,
+              createdBy: data.createdBy,
             });
-          });
+          }
           setComments(fetched);
           setLoading(false);
           setTimeout(() => {
@@ -90,23 +125,24 @@ export default function CommentSection({ groupId, choreId }: Props) {
 
   const handleAddComment = async () => {
     if (newComment.trim() === '') return;
-    const user = getAuth().currentUser;
-    if (!user) return;
-    // Optionally fetch username from Firestore or use user.displayName
-    const createdByName = user.displayName || user.email || 'User';
-    const commentsRef = collection(db, 'groups', groupId, 'chores', choreId, 'comments');
-    await addDoc(commentsRef, {
-      commentBody: newComment,
-      createdBy: user.uid,
-      createdByName,
-      createdAt: Date.now(),
-    });
-    setNewComment('');
+    try {
+      const token = await getAuthToken();
+      await createComment(token, groupId, choreId, newComment.trim());
+      setNewComment('');
+      // Comments will refresh via Firestore listener if backend syncs to Firestore
+    } catch (err) {
+      // Optionally handle error
+    }
   };
 
   const handleDeleteComment = async (id: string) => {
-    // Optional: implement delete logic if needed
-    // For now, only show delete for own comments, or skip delete
+    try {
+      const token = await getAuthToken();
+      await deleteComment(token, groupId, choreId, id);
+      await fetchBackendComments();
+    } catch (err) {
+      // Optionally handle error
+    }
   };
 
   if (loading) {
@@ -128,15 +164,26 @@ export default function CommentSection({ groupId, choreId }: Props) {
           style={styles.commentContainer}
           contentContainerStyle={{ paddingBottom: 100 }}
           ref={scrollViewRef}>
-          {comments.map((comment) => (
-            <View key={comment.id} style={styles.commentBox}>
-              <View>
-                <Text style={styles.CommentBoxUser}>{comment.user}</Text>
-                <Text>{comment.text}</Text>
+          {comments.map((comment) => {
+            const currentUser = getAuth().currentUser;
+            const canDelete = currentUser && (comment.createdBy === currentUser.uid);
+            return (
+              <View key={comment.id} style={styles.commentBox}>
+                <View>
+                  <Text style={styles.CommentBoxUser}>{comment.user}</Text>
+                  <Text>{comment.text}</Text>
+                </View>
+                {canDelete && (
+                  <TouchableOpacity
+                    onPress={() => handleDeleteComment(comment.id)}
+                    style={{ marginLeft: 10 }}
+                  >
+                    <FontAwesome6 name="trash" size={16} color="#d11a2a" />
+                  </TouchableOpacity>
+                )}
               </View>
-              {/* Optionally add delete button if you want */}
-            </View>
-          ))}
+            );
+          })}
         </ScrollView>
         <View style={styles.CommentInputWrapper}>
           <TextInput
