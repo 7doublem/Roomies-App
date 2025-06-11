@@ -13,8 +13,9 @@ import Animated, {
 } from 'react-native-reanimated';
 import { getAuth } from 'firebase/auth';
 import { db } from '../firebase/config';
-import { doc, getDoc, collection, addDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, addDoc, Timestamp } from 'firebase/firestore';
 import { getAuthToken, apiFetch } from '../api/index';
+import { getGroupMembers } from '../api/groups';
 
 export default function AddChoreScreen({ navigation }: any) {
   const [choreName, setChoreName] = useState('');
@@ -32,16 +33,6 @@ export default function AddChoreScreen({ navigation }: any) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const users = [
-    { id: '1', name: 'Alice' },
-    { id: '2', name: 'Bob' },
-    { id: '3', name: 'Charlie' },
-    { id: '4', name: 'David' },
-    { id: '5', name: 'Eve' },
-    { id: '6', name: 'Suhaim' },
-    { id: '7', name: 'Wendy' },
-  ];
-
   // Shared animated values
   const buttonScale = useSharedValue(1);
   const fade = useSharedValue(0);
@@ -57,46 +48,19 @@ export default function AddChoreScreen({ navigation }: any) {
         if (!user) throw new Error('Not authenticated');
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         const userData = userDoc.data();
-        let groupIdValue = userData?.groupId;
+        const groupIdValue = userData?.groupId;
         if (!groupIdValue) throw new Error('No group found');
-        // Defensive: groupId may be a group code, not a Firestore doc ID
-        if (groupIdValue.length <= 8) {
-          const token = await getAuthToken();
-          const res = await apiFetch('/groups', token);
-          const groups = await res.json();
-          const found = groups.find((g: any) => g.groupCode === groupIdValue);
-          if (!found) throw new Error('Group not found');
-          groupIdValue = found.groupId;
-        }
         setGroupId(groupIdValue);
 
-        // Fetch group document
-        const groupDoc = await getDoc(doc(db, 'groups', groupIdValue));
-        const groupData = groupDoc.data();
-        if (!groupData) throw new Error('Group data not found');
-
-        // Debug: log admins and user.uid
-        // Remove or comment out after debugging
-        // @ts-ignore
-        if (__DEV__) {
-          console.log('Admins:', groupData.admins);
-          console.log('Current user UID:', user.uid);
-        }
-
-        // Check if current user is in admins array (robust string comparison)
-        const adminsArray = Array.isArray(groupData.admins) ? groupData.admins.map(String) : [];
-        const isAdminUser = adminsArray.includes(String(user.uid));
-        setIsAdmin(isAdminUser);
-
-        // Fetch group members' profiles
-        const memberUids = Array.isArray(groupData.members) ? groupData.members : [];
-        const memberDocs = await Promise.all(
-          memberUids.map((uid: string) => getDoc(doc(db, 'users', uid)))
-        );
-        const members = memberDocs
-          .filter((doc) => doc.exists())
-          .map((doc) => ({ uid: doc.id, ...doc.data() }));
+        // Fetch group members using the backend route /:group_id/members
+        const token = await getAuthToken();
+        const members = await getGroupMembers(token, groupIdValue);
+        // members should be an array of user objects with uid and username
         setGroupMembers(members);
+
+        if (members.length > 0 && !assignedUser) {
+          setAssignedUser(members[0].uid);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load group info');
       }
@@ -104,6 +68,7 @@ export default function AddChoreScreen({ navigation }: any) {
       fade.value = withTiming(1, { duration: 600 });
     };
     fetchGroupInfo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fadeStyle = useAnimatedStyle(() => ({
@@ -146,22 +111,28 @@ export default function AddChoreScreen({ navigation }: any) {
     try {
       const user = getAuth().currentUser;
       if (!user) throw new Error('Not authenticated');
-      // Only allow admin to add chores
-      if (!isAdmin) throw new Error('Only group admins can add chores.');
+
+      // Convert JS Date to Firestore Timestamp (seconds)
+      const startDateSeconds =
+        startDate instanceof Date
+          ? Timestamp.fromDate(startDate).seconds
+          : Timestamp.now().seconds;
+      const dueDateSeconds =
+        dueDate instanceof Date
+          ? Timestamp.fromDate(dueDate).seconds
+          : Timestamp.now().seconds;
 
       const newChore = {
         name: choreName,
         description,
         rewardPoints: Number(rewardPoints),
-        startDate: startDate ? startDate.toISOString() : '',
-        dueDate: dueDate ? dueDate.toISOString() : '',
+        startDate: startDateSeconds,
+        dueDate: dueDateSeconds,
         assignedTo: assignedUser,
         status: choreStatus,
         createdBy: user.uid,
-        createdAt: new Date().toISOString(),
       };
 
-      // Add to Firestore: groups/{groupId}/chores
       await addDoc(collection(db, 'groups', groupId, 'chores'), newChore);
 
       Alert.alert('Success', 'Chore added!');
@@ -176,16 +147,6 @@ export default function AddChoreScreen({ navigation }: any) {
       <GradientContainer>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <ActivityIndicator size="large" color="#4f8cff" />
-        </View>
-      </GradientContainer>
-    );
-  }
-
-  if (!isAdmin) {
-    return (
-      <GradientContainer>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ color: '#e74c3c', fontSize: 18 }}>Only group admins can add chores.</Text>
         </View>
       </GradientContainer>
     );
@@ -354,7 +315,7 @@ export default function AddChoreScreen({ navigation }: any) {
               mode="dropdown">
               <Picker.Item label="Select a user" value="" />
               {groupMembers.map((user) => (
-                <Picker.Item key={user.uid} label={user.username} value={user.uid} />
+                <Picker.Item key={user.uid} label={user.username || user.name || user.email || user.uid} value={user.uid} />
               ))}
             </Picker>
           </View>
