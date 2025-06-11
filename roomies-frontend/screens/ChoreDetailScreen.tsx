@@ -5,11 +5,14 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import CommentSection from '../components/CommentSection';
 import { useEffect, useState } from 'react';
 import { getAuthToken, apiFetch } from '../api/index';
+import { db } from '../firebase/config';
+import { doc, getDoc } from 'firebase/firestore';
 
 export default function ChoreDetailScreen({ navigation, route }: any) {
   const { groupId, choreId } = route.params;
   const [chore, setChore] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [assignedUserName, setAssignedUserName] = useState<string>('');
 
   useEffect(() => {
     const fetchChore = async () => {
@@ -23,8 +26,17 @@ export default function ChoreDetailScreen({ navigation, route }: any) {
         // Find the chore by id
         const found = choresArr.find((c: any) => String(c.id) === String(choreId));
         setChore(found || null);
+
+        // Fetch assigned user's username if assignedTo exists
+        if (found && found.assignedTo) {
+          const userDoc = await getDoc(doc(db, 'users', found.assignedTo));
+          setAssignedUserName(userDoc.exists() ? userDoc.data()?.username || found.assignedTo : found.assignedTo);
+        } else {
+          setAssignedUserName('');
+        }
       } catch (err) {
         setChore(null);
+        setAssignedUserName('');
       }
       setLoading(false);
     };
@@ -51,7 +63,9 @@ export default function ChoreDetailScreen({ navigation, route }: any) {
               </View>
               {/* Chore info */}
               <Text style={styles.choreName}>{chore.name}</Text>
-              <Text style={styles.assignedTo}>👤 Assigned to: {chore.assignedTo}</Text>
+              <Text style={styles.assignedTo}>
+                👤 Assigned to: {assignedUserName || chore.assignedTo}
+              </Text>
               {/* Optionally add countdown logic here if needed */}
               <Text style={styles.countdown}></Text>
               <Text style={styles.startdate}>
