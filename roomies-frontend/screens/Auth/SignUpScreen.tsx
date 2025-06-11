@@ -22,11 +22,15 @@ const avatarOptions = [
   require('../../assets/turtle.png'),
 ];
 
+function getRandomAvatarIndex() {
+  return Math.floor(Math.random() * avatarOptions.length);
+}
+
 export default function SignUpScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [avatar, setAvatar] = useState(avatarOptions[0]);
+  const [avatar, setAvatar] = useState(avatarOptions[getRandomAvatarIndex()]);
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [pickerValue, setPickerValue] = useState('0');
   const [error, setError] = useState<string | null>(null);
@@ -119,6 +123,17 @@ export default function SignUpScreen({ navigation }: any) {
       return;
     }
 
+    // If no avatar selected or uploaded, randomly assign one
+    let finalAvatar = avatar;
+    let finalAvatarIndex = pickerValue;
+    if (!avatarUri && (pickerValue === 'custom' || !pickerValue)) {
+      const randomIdx = getRandomAvatarIndex();
+      finalAvatar = avatarOptions[randomIdx];
+      finalAvatarIndex = String(randomIdx);
+      setAvatar(finalAvatar);
+      setPickerValue(finalAvatarIndex);
+    }
+
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
@@ -130,7 +145,7 @@ export default function SignUpScreen({ navigation }: any) {
         email: user.email,
         username: name,
         avatarUrl: avatarUri || null,
-        avatarIndex: pickerValue !== 'custom' ? Number(pickerValue) : null,
+        avatarIndex: finalAvatarIndex !== 'custom' ? Number(finalAvatarIndex) : null,
         // ...add any other fields your backend expects
       });
 
@@ -138,13 +153,16 @@ export default function SignUpScreen({ navigation }: any) {
         username: name,
         email: user.email,
         avatarUrl: avatarUri || null,
-        avatarIndex: pickerValue !== 'custom' ? Number(pickerValue) : null,
+        avatarIndex: finalAvatarIndex !== 'custom' ? Number(finalAvatarIndex) : null,
         createdAt: serverTimestamp(),
         rewardPoints: 0,
         groupId: null,
       });
 
-      navigation.navigate('Welcome');
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Welcome' }],
+      });
     } catch (error: any) {
       switch (error.code) {
         case 'auth/email-already-in-use':
