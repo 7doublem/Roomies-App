@@ -32,3 +32,18 @@ export async function getGroupMembers(token: string, groupId: string) {
   const res = await apiFetch(`/groups/${groupId}/members`, token);
   return res.json();
 }
+
+// PATCH members of a group by groupId (add or update members)
+export async function updateGroupMembers(token: string, groupId: string, members: string[]) {
+  const res = await apiFetch(`/groups/${groupId}/members`, token, {
+    method: 'PATCH',
+    body: JSON.stringify({ members }),
+  });
+  return res.json();
+}
+
+// Get all groups (for admin purposes)
+export async function getAllGroups(token: string) {
+  const res = await apiFetch('/groups', token);
+  return res.json();
+}

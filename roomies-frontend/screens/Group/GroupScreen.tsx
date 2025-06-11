@@ -7,57 +7,80 @@ import { getAuth } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { getAuthToken, apiFetch } from '../../api/index';
+import { getAllGroups } from '../../api/groups';
 
 export default function GroupScreen({ navigation }: any) {
   const [users, setUsers] = useState<any[]>([]);
   const [groupCode, setGroupCode] = useState<string | null>(null);
+  const [groupName, setGroupName] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchGroupMembers = async () => {
       try {
         const user = getAuth().currentUser;
         if (!user) return;
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        const userData = userDoc.data();
-        let groupId = userData?.groupId;
-        if (!groupId) return;
 
-        // Defensive: groupId may be a group code, not a Firestore doc ID
-        let groupDocId = groupId;
-        if (groupId.length <= 8) {
-          const token = await getAuthToken();
-          const res = await apiFetch('/groups', token);
-          const groups = await res.json();
-          const found = groups.find((g: any) => g.groupCode === groupId);
-          if (!found) {
-            setUsers([]);
-            setGroupCode(null);
-            return;
+        // Fetch all groups and find the group where the user is a member
+        const token = await getAuthToken();
+        const allGroups = await getAllGroups(token);
+        const group = allGroups.find(
+          (g: any) => Array.isArray(g.members) && g.members.includes(user.uid)
+        );
+        if (!group) {
+          setUsers([]);
+          setGroupCode(null);
+          setGroupName(null);
+          return;
+        }
+        const groupId = group.groupId;
+
+        // Fetch group members (UIDs) and group info from backend using the group's groupId
+        const res = await apiFetch(`/groups/${groupId}/members`, token);
+        const membersResponse = await res.json();
+
+        // If your /groups/:group_id/members response includes groupName and groupCode:
+        setGroupName(membersResponse.groupName || null);
+        setGroupCode(membersResponse.groupCode || null);
+
+        // Defensive: handle if membersResponse.members is an array of objects or strings
+        let uids: string[] = [];
+        const memberUids = membersResponse.members || membersResponse; // fallback if response is just an array
+        if (Array.isArray(memberUids)) {
+          if (typeof memberUids[0] === 'string') {
+            uids = memberUids;
+          } else if (typeof memberUids[0] === 'object' && memberUids[0]?.uid) {
+            uids = memberUids.map((u: any) => u.uid);
           }
-          groupDocId = found.groupId;
-          setGroupCode(found.groupCode);
-        } else {
-          const groupDoc = await getDoc(doc(db, 'groups', groupDocId));
-          const groupData = groupDoc.data();
-          if (groupData?.groupCode) setGroupCode(groupData.groupCode);
         }
 
-        // --- Use the same logic as LeaderboardScreen ---
-        const token = await getAuthToken();
-        const res = await apiFetch(`/groups/${groupDocId}/members`, token);
-        const groupUsers = await res.json();
-        const members = Array.isArray(groupUsers)
-          ? groupUsers.map((user: any) => ({
-              id: user.uid,
-              name: user.username || 'Unknown',
-              totalPoints: user.rewardPoints || 0,
-              avatar: user.avatarUrl ? { uri: user.avatarUrl } : require('assets/bear.png'),
-            }))
-          : [];
+        // Fetch each user document by UID
+        let members: any[] = [];
+        if (uids.length > 0) {
+          members = await Promise.all(
+            uids.map(async (uid: string) => {
+              try {
+                const userDoc = await getDoc(doc(db, 'users', uid));
+                const userData = userDoc.data();
+                return {
+                  id: uid,
+                  name: userData?.username || userData?.name || 'Unknown',
+                  totalPoints: userData?.rewardPoints ?? userData?.totalPoints ?? 0,
+                  avatar: userData?.avatarUrl
+                    ? { uri: userData.avatarUrl }
+                    : require('assets/bear.png'),
+                };
+              } catch (e) {
+                return null;
+              }
+            })
+          );
+          members = members.filter(Boolean);
+        }
         setUsers(members);
       } catch (err) {
         setUsers([]);
         setGroupCode(null);
+        setGroupName(null);
       }
     };
     fetchGroupMembers();
@@ -68,7 +91,7 @@ export default function GroupScreen({ navigation }: any) {
   return (
     <GradientContainer>
       <View style={{ flex: 1 }}>
-        <Text style={styles.title}>Your Group</Text>
+        <Text style={styles.title}>{groupName || 'Your Group'}</Text>
         {groupCode && (
           <View style={{ alignItems: 'center', marginBottom: 10 }}>
             <Text style={{ fontSize: 16, color: '#555' }}>
