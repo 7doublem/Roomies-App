@@ -120,22 +120,30 @@ export class userController {
 
       const usersRef = await getFirestore()
         .collection("users")
-        .where("username", ">=", search)
-        .where("username", "<=", search + "\uf8ff")
-        .limit(10)
+        .where("username", "==", search)
+        .limit(1)
         .get();
 
-      const users = usersRef.docs.map((doc) => {
-        const data = doc.data();
-        return {
-          uid: doc.id,
-          username: data.username,
-          email: data.email,
-          avatarUrl: data.avatarUrl || null,
-        };
-      });
 
-      res.status(200).json({users});
+      if (usersRef.empty) {
+        res.status(404).json({message: "User not found"});
+        return;
+      }
+
+
+      const doc = usersRef.docs[0];
+      const data = doc.data();
+
+
+      const user = {
+        uid: doc.id,
+        username: data.username,
+        email: data.email,
+        avatarUrl: data.avatarUrl || null,
+      };
+
+
+      res.status(200).json(user);
       return;
     } catch (error) {
       console.error(error);
