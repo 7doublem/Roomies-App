@@ -7,12 +7,14 @@ export async function getGroups(token: string) {
 }
 
 // Create a new group
-export async function createGroup(token: string, name: string, usernames: string[]) {
+export async function createGroup(token: string, name: string, members: string[]) {
   const res = await apiFetch('/groups', token, {
     method: 'POST',
-    body: JSON.stringify({ name, usernames }),
+    body: JSON.stringify({ name, members }),
   });
-  return res.json();
+  const data = await res.json();
+  console.log(data);
+  return data;
 }
 
 // Join a group by group code
@@ -21,5 +23,6 @@ export async function joinGroup(token: string, groupCode: string) {
     method: 'PATCH',
     body: JSON.stringify({ groupCode: groupCode.trim() }),
   });
+
   return res;
 }

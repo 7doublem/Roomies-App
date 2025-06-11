@@ -7,15 +7,17 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import GradientContainer from 'components/GradientContainer';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { useNavigation } from '@react-navigation/native';
 import { styles } from 'components/style';
 import { createGroup } from '../../api/groups';
 import { auth } from '../../firebase/config';
+
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
+import { addUser } from 'api/users';
 
 export default function SetGroupScreen({ navigation }: any) {
   const [groupName, setGroupName] = useState('');
@@ -26,6 +28,7 @@ export default function SetGroupScreen({ navigation }: any) {
 
   const addUserHandler = async () => {
     if (addUserName.trim() === '') return;
+    console.log('Searching for:', addUserName);
 
     try {
       const user = auth.currentUser;
@@ -34,41 +37,48 @@ export default function SetGroupScreen({ navigation }: any) {
       const token = await user.getIdToken();
       const searchUsername = addUserName.trim();
 
-      const response = await fetch(
-        `https://roomiesapi-6l3ldzfk4q-uc.a.run.app/users/search?username=${searchUsername}`,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      // 1. First log the API response
+      console.log('Calling addUser with:', searchUsername);
+      const res = await addUser(token, searchUsername);
+      console.log('API response:', res);
 
-      if (!response.ok) {
+      // 2. Handle the response properly
+      if (!res) {
         throw new Error('User not found or server error');
       }
 
-      const data = await response.json();
-
-      if (data && Array.isArray(data.users) && data.users.length > 0) {
-        // Filter out usernames already added
-        const newUsernames = data.users
-          .map((user: any) => user.username)
-          .filter((username: string) => !userList.includes(username));
-
-        if (newUsernames.length === 0) {
-          alert('User(s) already added.');
-          return;
-        }
-
-        setUserList([...newUsernames, ...userList]);
-        setAddUserName('');
+      // 3. Check if response is an array or single object
+      let users = [];
+      if (Array.isArray(res)) {
+        users = res;
+      } else if (typeof res === 'object' && res !== null) {
+        // If single user object, convert to array
+        users = [res];
       } else {
-        alert('User not found.');
+        throw new Error('Invalid response format');
       }
+
+      console.log('Processed users:', users);
+
+      // 4. Extract usernames (handle both array and single object responses)
+      const newUsernames = users
+        .map((user) => user.username) // Changed from data.username to user.username
+        .filter((username) => username && !userList.includes(username));
+
+      if (newUsernames.length === 0) {
+        setUserNameError(users.length > 0 ? 'User(s) already added.' : 'No valid usernames found.');
+        return;
+      }
+
+      // 5. Update state
+      setUserList([...newUsernames, ...userList]);
+      setAddUserName('');
+      setUserNameError('');
     } catch (err) {
-      console.error('Error fetching user:', err);
-      alert('Failed to fetch user. Please check username.');
+      console.error('Error in addUserHandler:', err);
+      setUserNameError(
+        err instanceof Error ? err.message : 'Failed to add user. Please try again.'
+      );
     }
   };
 
@@ -79,36 +89,62 @@ export default function SetGroupScreen({ navigation }: any) {
   };
 
   const createGroupHandler = async () => {
+    // Input validation
     if (!groupName.trim()) {
       setGroupNameError('Please enter a group name.');
       return;
-    } else {
-      setGroupNameError('');
     }
+
     if (userList.length === 0) {
       setUserNameError('Please add at least one user.');
       return;
     }
 
+    // Clear previous errors
+    setGroupNameError('');
+    setUserNameError('');
+
     try {
-      setUserNameError('');
       const user = auth.currentUser;
       if (!user) throw new Error('Not authenticated');
+
       const token = await user.getIdToken();
+      console.log('Creating group with:', {
+        name: groupName.trim(),
+        members: userList,
+      });
 
+      // 1. Create the group
       const response = await createGroup(token, groupName.trim(), userList);
+      console.log('Create group response:', response);
 
-      if (response && response.group) {
-        alert('Group created successfully!');
-        // Update user's groupId in Firestore
-        await updateDoc(doc(db, 'users', user.uid), { groupId: response.group.id });
-        // No navigation needed! AppNavigator will switch to AppTabs automatically
-      } else {
-        alert(response.message || 'Failed to create group.');
+      if (!response) {
+        throw new Error('No response received from server');
       }
-    } catch (err: any) {
+
+      // 2. Verify the response structure
+      // ✅ Directly extract groupId
+      const groupId = response.groupId;
+      console.log('Extracted groupId:', groupId);
+
+      if (!groupId || typeof groupId !== 'string') {
+        console.error('Malformed response:', response);
+        throw new Error('Server returned invalid group data');
+      }
+
+      // 3. Update user's groupId in Firestore
+      console.log('Updating user with groupId:', groupId);
+      await updateDoc(doc(db, 'users', user.uid), {
+        groupId: groupId,
+      });
+
+      // 4. Navigate or show success
+      // navigation.navigate('MainTab'); // REMOVE THIS LINE
+      // AppNavigator will switch to AppTabs automatically
+    } catch (err) {
       console.error('Error creating group:', err);
-      alert(err.message || 'Failed to create group.');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create group';
+      console.error('Error', errorMessage);
     }
   };
 
@@ -125,11 +161,11 @@ export default function SetGroupScreen({ navigation }: any) {
         <View style={styles.SetGroup_container}>
           <Text style={styles.SetGroup_title}>Create a Group</Text>
 
-          {groupNameError && (
+          {groupNameError ? (
             <View style={{ marginBottom: 12, alignItems: 'flex-start' }}>
               <Text style={{ color: '#e74c3c', fontSize: 14 }}>{groupNameError}</Text>
             </View>
-          )}
+          ) : null}
 
           <TextInput
             placeholder="Name of Group"
@@ -141,11 +177,9 @@ export default function SetGroupScreen({ navigation }: any) {
 
           <Text style={styles.SetGroup_SearchText}>Add a User</Text>
 
-          {userNameError && (
-            <View style={{ marginBottom: 12, alignItems: 'flex-start' }}>
-              <Text style={{ color: '#e74c3c', fontSize: 14 }}>{userNameError}</Text>
-            </View>
-          )}
+          {userNameError ? (
+            <Text style={{ color: 'red', marginTop: 8 }}>{userNameError}</Text>
+          ) : null}
 
           <View style={styles.SetGroup_addUserContainer}>
             <TextInput
@@ -164,12 +198,13 @@ export default function SetGroupScreen({ navigation }: any) {
               />
             </TouchableOpacity>
           </View>
+
           <ScrollView
             style={styles.SetGroup_userList}
             contentContainerStyle={{ paddingBottom: 150 }}>
             {userList.map((user, index) => (
               <View key={index} style={styles.SetGroup_userCard}>
-                <Text style={styles.SetGroup_userText}>{user}</Text>
+                <Text style={styles.SetGroup_userText}>{String(user)}</Text>
                 <TouchableOpacity onPress={() => removeUserHandler(index)}>
                   <FontAwesome6 name="circle-minus" size={22} color="red" />
                 </TouchableOpacity>
@@ -184,6 +219,7 @@ export default function SetGroupScreen({ navigation }: any) {
               activeOpacity={0.8}>
               <Text style={styles.SetGroup_createGroupbtn_text}>Create Group</Text>
             </TouchableOpacity>
+
             <TouchableOpacity
               style={styles.SetGroup_JoinGroupbtn}
               onPress={joinGroupHandler}
