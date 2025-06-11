@@ -52,10 +52,18 @@ export default function AddChoreScreen({ navigation }: any) {
         if (!groupIdValue) throw new Error('No group found');
         setGroupId(groupIdValue);
 
+        // Fetch group document to get admin info
+        const groupDoc = await getDoc(doc(db, 'groups', groupIdValue));
+        const groupData = groupDoc.data();
+
+        // Check if current user is in admins array
+        const adminsArray = Array.isArray(groupData.admins) ? groupData.admins : [];
+        const isAdminUser = adminsArray.includes(user.uid);
+        setIsAdmin(isAdminUser);
+
         // Fetch group members using the backend route /:group_id/members
         const token = await getAuthToken();
         const members = await getGroupMembers(token, groupIdValue);
-        // members should be an array of user objects with uid and username
         setGroupMembers(members);
 
         if (members.length > 0 && !assignedUser) {
@@ -107,6 +115,7 @@ export default function AddChoreScreen({ navigation }: any) {
     if (!choreName.trim()) return setError('Chore name is required.');
     if (!assignedUser) return setError('Please assign a user.');
     if (!groupId) return setError('No group found.');
+    if (!isAdmin) return setError('Admin authentication required.');
 
     try {
       const user = getAuth().currentUser;
@@ -126,8 +135,12 @@ export default function AddChoreScreen({ navigation }: any) {
         name: choreName,
         description,
         rewardPoints: Number(rewardPoints),
-        startDate: startDateSeconds,
-        dueDate: dueDateSeconds,
+        startDate: startDate instanceof Date
+          ? Timestamp.fromDate(startDate).seconds
+          : Timestamp.now().seconds,
+        dueDate: dueDate instanceof Date
+          ? Timestamp.fromDate(dueDate).seconds
+          : Timestamp.now().seconds,
         assignedTo: assignedUser,
         status: choreStatus,
         createdBy: user.uid,
@@ -147,6 +160,47 @@ export default function AddChoreScreen({ navigation }: any) {
       <GradientContainer>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <ActivityIndicator size="large" color="#4f8cff" />
+        </View>
+      </GradientContainer>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <GradientContainer>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 }}>
+          <View
+            style={{
+              backgroundColor: '#fff',
+              borderRadius: 18,
+              paddingVertical: 36,
+              paddingHorizontal: 28,
+              alignItems: 'center',
+              shadowColor: '#000',
+              shadowOpacity: 0.10,
+              shadowRadius: 12,
+              shadowOffset: { width: 0, height: 4 },
+              elevation: 4,
+            }}>
+            <View
+              style={{
+                backgroundColor: '#ffe5e5',
+                borderRadius: 50,
+                width: 64,
+                height: 64,
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: 18,
+              }}>
+              <Text style={{ fontSize: 32 }}>🔒</Text>
+            </View>
+            <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#e74c3c', marginBottom: 10, textAlign: 'center' }}>
+              Access Restricted
+            </Text>
+            <Text style={{ fontSize: 16, color: '#444', textAlign: 'center', lineHeight: 24 }}>
+              Only the group admin can add chores.
+            </Text>
+          </View>
         </View>
       </GradientContainer>
     );
