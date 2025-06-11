@@ -14,6 +14,7 @@ import Animated, {
   withTiming,
   interpolateColor,
 } from 'react-native-reanimated';
+import { createUser } from '../../api/users';
 
 const avatarOptions = [
   require('../../assets/bear.png'),
@@ -118,17 +119,26 @@ export default function SignUpScreen({ navigation }: any) {
       return;
     }
 
-
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Store user data in Firestore
+      // --- NEW: Get Firebase ID token and call backend API ---
+      const token = await user.getIdToken();
+      await createUser(token, {
+        uid: user.uid,
+        email: user.email,
+        username: name,
+        avatarUrl: avatarUri || null,
+        avatarIndex: pickerValue !== 'custom' ? Number(pickerValue) : null,
+        // ...add any other fields your backend expects
+      });
+
       await setDoc(doc(db, 'users', user.uid), {
         username: name,
         email: user.email,
-        avatarUrl: avatarUri || null, // Store URI or null if not uploaded
-        avatarIndex: pickerValue !== 'custom' ? Number(pickerValue) : null, // Store which default avatar was picked
+        avatarUrl: avatarUri || null,
+        avatarIndex: pickerValue !== 'custom' ? Number(pickerValue) : null,
         createdAt: serverTimestamp(),
         rewardPoints: 0,
         groupId: null,

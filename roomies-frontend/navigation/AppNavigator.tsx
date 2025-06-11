@@ -1,4 +1,6 @@
+import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
+import { onAuthStateChanged, getAuth } from 'firebase/auth';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from '@expo/vector-icons/Ionicons'
@@ -112,12 +114,18 @@ function AppTabs() {
 }
 
 export default function AppNavigator() {
-  // const [isSignedIn, setIsSignedIn] = React.useState(false); 
+  const [isSignedIn, setIsSignedIn] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
+      setIsSignedIn(!!user);
+    });
+    return unsubscribe;
+  }, []);
 
   return (
     <NavigationContainer>
-      {/* {isSignedIn ? <AppTabs /> : <AuthStack />} */}
-      <AuthStack/>
+      {isSignedIn ? <AppTabs /> : <AuthStack />}
     </NavigationContainer>
   );
 }
