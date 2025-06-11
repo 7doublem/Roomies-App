@@ -38,9 +38,10 @@ export default function GroupScreen({ navigation }: any) {
         const res = await apiFetch(`/groups/${groupId}/members`, token);
         const membersResponse = await res.json();
 
-        // If your /groups/:group_id/members response includes groupName and groupCode:
+        // --- Ensure groupCode is set from group object ---
+        setGroupCode(group.groupCode || null);
+
         setGroupName(membersResponse.groupName || null);
-        setGroupCode(membersResponse.groupCode || null);
 
         // Defensive: handle if membersResponse.members is an array of objects or strings
         let uids: string[] = [];
