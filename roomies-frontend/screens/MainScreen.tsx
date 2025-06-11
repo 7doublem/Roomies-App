@@ -12,6 +12,7 @@ import { db } from '../firebase/config';
 import { doc, getDoc, updateDoc, increment } from 'firebase/firestore';
 import { getAuthToken, apiFetch } from '../api/index';
 import dayjs from 'dayjs';
+import { getGroupMembers } from '../api/groups';
 
 const tabOrder = ['todo', 'doing', 'done'];
 
@@ -21,6 +22,7 @@ export default function MainScreen({ navigation }: any) {
   const [showConfetti, setShowConfetti] = useState(false);
   const [currentUserName, setCurrentUserName] = useState<string>('');
   const [groupId, setGroupId] = useState<string>(''); // add groupId state
+  const [groupMembers, setGroupMembers] = useState<any[]>([]);
   const { width, height } = useWindowDimensions();
 
   // Helper to calculate countdown string from dueDate (seconds)
@@ -62,10 +64,14 @@ export default function MainScreen({ navigation }: any) {
           if (!found) throw new Error('Group not found');
           groupId = found.groupId;
         }
-        setGroupId(groupId); // store groupId in state
+        setGroupId(groupId);
+
+        // Fetch group members to map UIDs to usernames
+        const token = await getAuthToken();
+        const members = await getGroupMembers(token, groupId);
+        setGroupMembers(members);
 
         // Fetch all chores for the group from your backend
-        const token = await getAuthToken();
         const res = await apiFetch(`/groups/${groupId}/chores`, token);
         let chores = await res.json();
 
@@ -74,16 +80,19 @@ export default function MainScreen({ navigation }: any) {
           chores = [];
         }
 
-        // Only show chores assigned to the current user, and format for display
-        const userChores = chores
-          .filter((chore: any) => chore.assignedTo === user.uid)
-          .map((chore: any) => ({
-            ...chore,
-            assignedTo: username, // Replace UID with username for display
-            chore: chore.name, // Ensure 'chore' prop is the name
-            countdown: getCountdown(chore.dueDate),
-            reward: chore.rewardPoints, // Use static rewardPoints
-          }));
+        // Map assignedTo UID to username for all chores
+        const uidToUsername: Record<string, string> = {};
+        members.forEach((m: any) => {
+          uidToUsername[m.uid] = m.username || m.name || m.email || m.uid;
+        });
+
+        const userChores = chores.map((chore: any) => ({
+          ...chore,
+          assignedTo: uidToUsername[chore.assignedTo] || chore.assignedTo,
+          chore: chore.name,
+          countdown: getCountdown(chore.dueDate),
+          reward: chore.rewardPoints,
+        }));
 
         setTodos(userChores);
       } catch (err) {
@@ -103,20 +112,33 @@ export default function MainScreen({ navigation }: any) {
             ? Math.min(currentIndex + 1, tabOrder.length - 1)
             : Math.max(currentIndex - 1, 0);
 
-        // If moving to done, update user points in Firestore
+        // If moving to done, update the assigned user's points in Firestore
         if (tabOrder[nextIndex] === 'done' && t.status !== 'done') {
           setShowConfetti(true);
           setTimeout(() => setShowConfetti(false), 4000);
 
-          // --- Add points to user in Firestore ---
+          // --- Add points to the assigned user in Firestore ---
           (async () => {
             try {
-              const user = getAuth().currentUser;
-              if (!user) return;
-              const userRef = doc(db, 'users', user.uid);
-              await updateDoc(userRef, {
-                rewardPoints: increment(t.reward),
-              });
+              // Find the UID of the assigned user (reverse lookup if needed)
+              let assignedUid = t.assignedTo;
+              // If assignedTo is a username, map it back to UID
+              if (groupMembers && groupMembers.length > 0) {
+                const found = groupMembers.find(
+                  (m: any) =>
+                    m.username === t.assignedTo ||
+                    m.name === t.assignedTo ||
+                    m.email === t.assignedTo
+                );
+                if (found && found.uid) assignedUid = found.uid;
+              }
+              // Only update if we have a UID
+              if (assignedUid) {
+                const userRef = doc(db, 'users', assignedUid);
+                await updateDoc(userRef, {
+                  rewardPoints: increment(t.reward),
+                });
+              }
             } catch (err) {
               // handle error if needed
             }
