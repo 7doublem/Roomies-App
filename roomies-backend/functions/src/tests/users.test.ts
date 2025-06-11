@@ -5,7 +5,7 @@ import {getFirestore} from "firebase-admin/firestore";
 import {User} from "../controllers/users.controller";
 
 describe("User Routes", () => {
-  let server: ReturnType<typeof app.listen>;
+  let server: ReturnType<typeof app.listen> | undefined; // Changed to allow undefined
   let token: string;
   let uid: string;
 
@@ -17,7 +17,10 @@ describe("User Routes", () => {
   }
 
   beforeAll(() => {
-    server = app.listen(5003);
+    // ONLY START SERVER IF NOT IN A CLOUD FUNCTION ENVIRONMENT
+    if (process.env.NODE_ENV === "test" && !process.env.FUNCTIONS_EMULATOR && !process.env.K_SERVICE) {
+      server = app.listen(5003);
+    }
   });
 
   beforeEach(async () => {
@@ -40,7 +43,12 @@ describe("User Routes", () => {
   });
 
   afterAll((done) => {
-    server.close(done);
+    // ONLY CLOSE SERVER IF IT WAS STARTED
+    if (server) {
+      server.close(done);
+    } else {
+      done(); // Call done immediately if server was not started
+    }
   });
 
   describe("POST /users", () => {

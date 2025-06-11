@@ -6,7 +6,7 @@ import {generateGroupCode} from "../utils/GroupCodeGenerator";
 import {Chore} from "../controllers/chores.controller";
 
 describe("Chore Tests", () => {
-  let server: ReturnType<typeof app.listen>;
+  let server: ReturnType<typeof app.listen> | undefined; // Changed to allow undefined
   let token: string;
   let uid: string;
   // let tokenAlice: string;
@@ -25,7 +25,10 @@ describe("Chore Tests", () => {
   }
 
   beforeAll(async () => {
-    server = app.listen(5003);
+    // ONLY START SERVER IF NOT IN A CLOUD FUNCTION ENVIRONMENT
+    if (process.env.NODE_ENV === "test" && !process.env.FUNCTIONS_EMULATOR && !process.env.K_SERVICE) {
+      server = app.listen(5003);
+    }
   });
 
   beforeEach(async () => {
@@ -67,7 +70,12 @@ describe("Chore Tests", () => {
   });
 
   afterAll((done) => {
-    server.close(done);
+    // ONLY CLOSE SERVER IF IT WAS STARTED
+    if (server) {
+      server.close(done);
+    } else {
+      done(); // Call done immediately if server was not started
+    }
   });
 
   describe("POST /groups/:group_id/chores", () => {
