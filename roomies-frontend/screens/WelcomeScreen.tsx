@@ -30,7 +30,7 @@ export default function WelcomeScreen({ navigation }: any) {
 
       if (res.ok) {
         console.log('Success', 'You joined the group!');
-        navigation.navigate('Main'); 
+        navigation.navigate('MainTab'); 
       } else {
        setError(`Failed: ${data?.message || 'Could not join group'}`);
       }
