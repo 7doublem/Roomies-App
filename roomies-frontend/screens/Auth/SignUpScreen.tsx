@@ -144,7 +144,10 @@ export default function SignUpScreen({ navigation }: any) {
         groupId: null,
       });
 
-      navigation.navigate('Welcome');
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Welcome' }],
+      });
     } catch (error: any) {
       switch (error.code) {
         case 'auth/email-already-in-use':

@@ -14,6 +14,8 @@ import { useNavigation } from '@react-navigation/native';
 import { styles } from 'components/style';
 import { createGroup } from '../../api/groups';
 import { auth } from '../../firebase/config';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '../../firebase/config';
 
 export default function SetGroupScreen({ navigation }: any) {
   const [groupName, setGroupName] = useState('');
@@ -98,7 +100,9 @@ export default function SetGroupScreen({ navigation }: any) {
 
       if (response && response.group) {
         alert('Group created successfully!');
-        navigation.navigate('Main'); // Change to your main/home screen
+        // Update user's groupId in Firestore
+        await updateDoc(doc(db, 'users', user.uid), { groupId: response.group.id });
+        // No navigation needed! AppNavigator will switch to AppTabs automatically
       } else {
         alert(response.message || 'Failed to create group.');
       }
