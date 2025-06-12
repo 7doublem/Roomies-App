@@ -211,4 +211,68 @@ describe("User Routes", () => {
       expect(res.body.message).toBe("User not found");
     });
   });
+
+  describe("PATCH /users", () => {
+    it("should update a user successfully - add new avatarUrl and rewardPoints", async () => {
+      const resultAlice = await createUserAndGetToken("alice@example.com");
+      const uidAlice = resultAlice.uid;
+      const tokenAlice = resultAlice.idToken;
+      await getFirestore().collection("users").doc(uidAlice).set({
+        username: "Alice",
+        email: "alice@example.com",
+        avatarUrl: "https://www.alice.com",
+        rewardPoints: 100,
+      });
+
+      const updateUser = {
+        avatarUrl: "https://www.NEWalice.com",
+        rewardPoints: 150,
+      };
+
+      const res = await request(app)
+        .patch(`/users/${uidAlice}`)
+        .set("Authorization", `Bearer ${tokenAlice}`)
+        .send(updateUser);
+      expect(res.status).toBe(200);
+      const newUser = res.body;
+      expect(newUser).toMatchObject({
+        uid: newUser.uid,
+        username: "Alice",
+        avatarUrl: "https://www.NEWalice.com",
+        rewardPoints: 150,
+      });
+      await deleteUsersAuth([uidAlice]);
+    });
+
+    it("should update a user successfully - add only rewardPoints", async () => {
+      const resultAlice = await createUserAndGetToken("alice@example.com");
+      const uidAlice = resultAlice.uid;
+      const tokenAlice = resultAlice.idToken;
+      await getFirestore().collection("users").doc(uidAlice).set({
+        username: "Alice",
+        email: "alice@example.com",
+        avatarUrl: "https://www.alice.com",
+        rewardPoints: 100,
+      });
+
+      const updateUser = {
+        rewardPoints: 150,
+      };
+
+      const res = await request(app)
+        .patch(`/users/${uidAlice}`)
+        .set("Authorization", `Bearer ${tokenAlice}`)
+        .send(updateUser);
+      expect(res.status).toBe(200);
+      const newUser = res.body;
+      console.log(newUser, "update user");
+      expect(newUser).toMatchObject({
+        uid: newUser.uid,
+        username: "Alice",
+        avatarUrl: "https://www.alice.com",
+        rewardPoints: 150,
+      });
+      await deleteUsersAuth([uidAlice]);
+    });
+  });
 });

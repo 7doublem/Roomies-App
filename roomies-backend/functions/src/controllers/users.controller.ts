@@ -150,4 +150,45 @@ export class userController {
       next(error);
     }
   }
+
+  //PATCH /users/:user_uid
+  static async updateUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const uid = req.user?.uid; //logged user
+      const userUid = req.params.user_uid;
+      const {avatarUrl, rewardPoints} = req.body;
+
+      if (!uid) {
+        res.status(401).json({message: "Unauthorised"});
+        return;
+      }
+
+      const userRef = await getFirestore().collection("users").doc(userUid);
+      const userDoc = await userRef.get();
+
+      if (!userDoc.exists) {
+        res.status(404).json({message: "User not found"});
+        return;
+      }
+
+      const updateUser: Partial<User> = {
+        // username: userDoc.data()?.username,
+        // email: userDoc.data()?.email,
+        avatarUrl: avatarUrl || userDoc.data()?.avatarUrl,
+        rewardPoints: rewardPoints || userDoc.data()?.rewardPoints,
+      };
+
+      await userRef.update(updateUser);
+
+      //const newUserRef = userRef.collection("users").doc(userUid);
+      const newUsereDoc = await userRef.get();
+      //console.log({uid: userRef.id, ...newUsereDoc.data()}, "resp")
+
+      res.status(200).send({uid: userRef.id, ...newUsereDoc.data()});
+      return;
+    } catch (error) {
+      console.error(error);
+      next(error);
+    }
+  }
 }

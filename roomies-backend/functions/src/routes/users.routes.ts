@@ -15,3 +15,7 @@ userRoutes.get("/users/currentUser", authenticateUser, userController.getCurrent
 
 // GET /users/search?username= - search for user by username
 userRoutes.get("/users/search", authenticateUser, userController.searchUsersByUsername);
+
+// PATCH /users/:user_uid - update user's avatarUrl and reward points
+userRoutes.patch("/users/:user_uid", authenticateUser, userController.updateUser);
+
