@@ -66,6 +66,10 @@ export default function ChoreDetailScreen({ navigation, route }: any) {
               <Text style={styles.assignedTo}>
                 👤 Assigned to: {assignedUserName || chore.assignedTo}
               </Text>
+              {/* Chore description */}
+              <Text style={{ fontSize: 15, color: '#555', marginBottom: 6 }}>
+                {chore.description ? `📝 ${chore.description}` : ''}
+              </Text>
               {/* Optionally add countdown logic here if needed */}
               <Text style={styles.countdown}></Text>
               <Text style={styles.startdate}>

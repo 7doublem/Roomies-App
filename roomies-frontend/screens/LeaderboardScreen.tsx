@@ -6,7 +6,6 @@ import Animated, {
   withSpring,
   withDelay,
   useDerivedValue,
-  runOnJS,
 } from 'react-native-reanimated';
 import GradientContainer from '../components/GradientContainer';
 import { getAuth } from 'firebase/auth';
@@ -110,7 +109,7 @@ export default function LeaderboardScreen() {
         setUsers([]);
       }
       setLoading(false);
-      anim.value = 1;
+      anim.value = 1; // trigger animation after loading
     };
     fetchGroupUsers();
   }, []);
