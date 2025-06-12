@@ -94,6 +94,63 @@ paths:
                     email: middle@example.com
                     avatarUrl: https://www.img.com
 
+  /users/{user_uid}:
+    patch:
+      summary: Update a user
+      description: Update the avatarUrl and/or rewardPoints of a user
+      parameters:
+        - name: user_uid
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The UID of the user to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                avatarUrl:
+                  type: string
+                  format: uri
+                  example: https://www.NEWalice.com
+                rewardPoints:
+                  type: integer
+                  example: 150
+      responses:
+        '200':
+          description: Successfully updated the user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  uid:
+                    type: string
+                    example: f9tWJexyjBpAiNRX5epb9P39Bgdo
+                  username:
+                    type: string
+                    example: Alice
+                  email:
+                    type: string
+                    format: email
+                    example: alice@example.com
+                  avatarUrl:
+                    type: string
+                    format: uri
+                    example: https://www.NEWalice.com
+                  rewardPoints:
+                    type: integer
+                    example: 150
+        '401':
+          description: Unauthorized
+        '404':
+          description: User not found
+        '500':
+          description: Internal server error                 
+
   /groups:
     get:
       summary: List groups

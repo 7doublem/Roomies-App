@@ -68,6 +68,21 @@
       }
     ]
 },
+"PATCH /users/:user_uid": {
+  "description": "update a chore",
+  "params": ["user_uid"],
+  "exampleBody": {
+    "avatarUrl": "https://www.NEWalice.com",
+    "rewardPoints": 150
+  },
+  "exampleResponse": {
+    "uid": "f9tWJexyjBpAiNRX5epb9P39Bgdo",
+    "username": "Alice",
+    "email": "alice@example.com",
+    "avatarUrl": "https://www.NEWalice.com",
+    "rewardPoints": 150
+  }
+},
 "POST /groups": {
   "description": "create a group",
   "exampleBody": {
