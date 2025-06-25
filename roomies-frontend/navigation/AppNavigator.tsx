@@ -4,7 +4,7 @@ import { onAuthStateChanged, getAuth } from 'firebase/auth';
 import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Ionicons from '@expo/vector-icons/Ionicons'
+import { Ionicons } from '@expo/vector-icons';
 
 import { db } from '../firebase/config';
 import SignInScreen from '../screens/Auth/SignInScreen';
@@ -16,7 +16,7 @@ import LeaderboardScreen from '../screens/LeaderboardScreen';
 import MainScreen from '../screens/MainScreen';
 import UserScreen from '../screens/UserScreen';
 import SetGroupScreen from '../screens/Group/SetGroupScreen';
-import UpdateChoreScreen from '../screens/UpdateChoreScreen'
+import UpdateChoreScreen from '../screens/UpdateChoreScreen';
 import ChoreDetailScreen from 'screens/ChoreDetailScreen';
 
 const Tab = createBottomTabNavigator();
@@ -84,8 +84,8 @@ function AppTabs() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarIcon: ({ focused, size, color}) => {
-          let iconName;
+        tabBarIcon: ({ focused, size, color }) => {
+          let iconName: string;
           switch (route.name) {
             case 'MainTab':
               iconName = focused ? 'home' : 'home-outline';
@@ -102,17 +102,22 @@ function AppTabs() {
             case 'UserTab':
               iconName = focused ? 'person' : 'person-outline';
               break;
+            default:
+              iconName = 'ellipse';
           }
-          return <Ionicons name={iconName} size={size} color={color} />;
+          return <Ionicons name={iconName as any} size={size} color={color} />;
         },
         tabBarActiveTintColor: '#ff6f69',
         tabBarInactiveTintColor: 'gray',
-      })}
-    >
+      })}>
       <Tab.Screen name="MainTab" component={MainStack} options={{ title: 'Main' }} />
       <Tab.Screen name="GroupTab" component={GroupStack} options={{ title: 'Group' }} />
       <Tab.Screen name="AddChoreTab" component={AddChoreStack} options={{ title: 'Add Chore' }} />
-      <Tab.Screen name="LeaderboardTab" component={LeaderboardStack} options={{ title: 'Leaderboard' }} />
+      <Tab.Screen
+        name="LeaderboardTab"
+        component={LeaderboardStack}
+        options={{ title: 'Leaderboard' }}
+      />
       <Tab.Screen name="UserTab" component={UserStack} options={{ title: 'User' }} />
     </Tab.Navigator>
   );
@@ -155,4 +160,3 @@ export default function AppNavigator() {
     </NavigationContainer>
   );
 }
-
