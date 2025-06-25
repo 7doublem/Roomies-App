@@ -42,6 +42,18 @@ Built with **TypeScript**, **React Native (Expo)**, **Tailwind CSS (via NativeWi
 
 Frontend (Web): [https://roomies-migration.web.app](https://roomies-migration.web.app)  
 
+🔒 This version is behind authentication.
+
+To fully test the workflow:
+
+1. Create an account and join a group using this group code: JPBVY4.
+   You’ll be able to navigate the full single-page application.
+   However, you won’t be able to create chores, as you’re not the admin of this group.
+   
+2. Sign out, then create a new account and create your own group.
+   Afterward, add the first user you created to your new group.
+   As the admin, you’ll now be able to add chores, assign users, and fully experience the Roomies app.
+
 ---
 
 ## Project Summary
