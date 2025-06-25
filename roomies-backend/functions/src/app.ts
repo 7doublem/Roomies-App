@@ -42,6 +42,7 @@ const allowedOrigins = [
   "http://localhost:19000",
   "http://localhost:19006",
   "http://localhost:3000",
+  "https://roomies-migration.web.app",
 ];
 
 const corsOptions = {
@@ -67,7 +68,6 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-
 app.use(express.json());
 
 app.get("/", (req, res) => {
@@ -77,6 +77,5 @@ app.use(userRoutes);
 app.use(groupRoutes);
 app.use(choreRoutes);
 app.use(commentRoutes);
-
 
 export const roomiesapi = https.onRequest({region: "europe-west2"}, app);

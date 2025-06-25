@@ -151,10 +151,10 @@ export class userController {
     }
   }
 
-  //PATCH /users/:user_uid
+  // PATCH /users/:user_uid
   static async updateUser(req: Request, res: Response, next: NextFunction) {
     try {
-      const uid = req.user?.uid; //logged user
+      const uid = req.user?.uid; // logged user
       const userUid = req.params.user_uid;
       const {avatarUrl, rewardPoints} = req.body;
 
@@ -180,9 +180,9 @@ export class userController {
 
       await userRef.update(updateUser);
 
-      //const newUserRef = userRef.collection("users").doc(userUid);
+      // const newUserRef = userRef.collection("users").doc(userUid);
       const newUsereDoc = await userRef.get();
-      //console.log({uid: userRef.id, ...newUsereDoc.data()}, "resp")
+      // console.log({uid: userRef.id, ...newUsereDoc.data()}, "resp")
 
       res.status(200).send({uid: userRef.id, ...newUsereDoc.data()});
       return;
